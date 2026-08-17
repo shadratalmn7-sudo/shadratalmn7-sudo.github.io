@@ -1,0 +1,11 @@
+.auth-checking body[data-role="owner"]{visibility:hidden}
+@media(max-width:520px){
+  .metric-grid{grid-template-columns:1fr 1fr;gap:9px}.metric{padding:13px}.metric b{font-size:22px}
+  .admin-title{align-items:start;flex-direction:column}.table-card{overflow:visible;background:transparent;border:0;box-shadow:none}
+  .table-head{padding:12px 0;align-items:stretch;flex-direction:column}.table-wrap{overflow:visible}
+  .admin-table,.admin-table tbody,.admin-table tr,.admin-table td{display:block;width:100%}.admin-table{min-width:0}.admin-table thead{display:none}
+  .admin-table tr{margin-bottom:12px;padding:8px 13px;border:1px solid var(--line);border-radius:17px;background:var(--card)}
+  .admin-table td{display:grid;grid-template-columns:minmax(105px,42%) 1fr;gap:9px;padding:9px 0;border-bottom:1px solid var(--line);white-space:normal}
+  .admin-table td:before{content:attr(data-label);color:var(--muted);font-size:11px;font-weight:800}.admin-table td:last-child{border-bottom:0}
+  .admin-table td[colspan]{display:block;text-align:center;padding:24px 10px}.admin-table td[colspan]:before{display:none}
+}
