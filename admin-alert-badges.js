@@ -1,0 +1,10 @@
+import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
+import{collection,getDocs,getFirestore}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+import{firebaseConfig}from'./firebase-config.js';
+const app=getApps().length?getApp():initializeApp(firebaseConfig),db=getFirestore(app);
+const read=async name=>{try{const s=await getDocs(collection(db,name));return s.docs.map(d=>({id:d.id,...d.data()}))}catch(e){console.warn('admin badge',name,e);return[]}};
+const isPendingMessage=x=>x.status==='new'||x.status===undefined||x.status===null;
+const isPendingOrder=x=>x.status==='created'||x.status===undefined||x.status===null;
+const paint=(key,count,title='')=>{document.querySelectorAll(`[data-admin-badge="${key}"]`).forEach(b=>{b.textContent=Number(count||0).toLocaleString('ar');b.hidden=!count;if(title)b.title=title})};
+async function load(){const [messages,orders,reports,experts,posts]=await Promise.all(['messages','orders','communityReports','expertApplications','communityPosts'].map(read));const supportMessages=messages.filter(isPendingMessage),supportOrders=orders.filter(isPendingOrder),openReports=reports.filter(x=>x.status==='open'),pendingExperts=experts.filter(x=>x.status==='pending'),pendingPosts=posts.filter(x=>x.status==='pendingReview');const support=supportMessages.length+supportOrders.length,community=openReports.length+pendingExperts.length+pendingPosts.length,total=support+community;paint('support',support,`${supportMessages.length} رسائل/شكاوى جديدة لم تُعالج + ${supportOrders.length} طلبات جديدة لم تُعالج`);paint('community',community,`${openReports.length} بلاغات مفتوحة + ${pendingExperts.length} طلبات خبراء معلقة + ${pendingPosts.length} منشورات للمراجعة`);paint('overview',total,`${total} عناصر لم تُعالج بعد`)}
+const observer=new MutationObserver(()=>{observer.disconnect();load().finally(()=>observer.observe(document.body,{childList:true,subtree:true}))});observer.observe(document.body,{childList:true,subtree:true});load();setInterval(load,60000);
