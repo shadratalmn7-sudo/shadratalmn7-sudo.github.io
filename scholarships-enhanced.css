@@ -1,0 +1,9 @@
+.scholarship-feature,.live-scholarship{isolation:isolate;min-height:430px;border:1px solid #d9c79f!important;background:radial-gradient(circle at 10% 0%,#f5d79155,transparent 30%),linear-gradient(145deg,#fffdf8,#f7f0df)!important}
+.scholarship-feature:after,.live-scholarship:after{content:"";position:absolute;left:-55px;bottom:-70px;width:190px;height:190px;border:1px solid #176b4b22;border-radius:50%;z-index:-1}
+.scholarship-mark{float:left;display:grid;place-items:center;width:70px;height:70px;border-radius:22px;background:linear-gradient(145deg,#176b4b,#0a3d2c);color:#f0c66e;font-size:22px;font-weight:1000;box-shadow:0 16px 30px #0d493528}
+.scholarship-kicker{color:#9b651a;font-size:12px;font-weight:900;letter-spacing:.03em;margin:18px 0 6px}
+.theme-open-doors{background:radial-gradient(circle at 12% 5%,#c6e8da88,transparent 34%),linear-gradient(145deg,#fffdf8,#edf8f2)!important}
+.theme-education-russia{background:radial-gradient(circle at 12% 5%,#f1d59088,transparent 34%),linear-gradient(145deg,#fffdf8,#fff6df)!important}
+.live-scholarship .scholarship-mark{font-size:26px}
+.live-scholarship .meta-row{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0}.live-scholarship .meta-row span{padding:7px 10px;border-radius:99px;background:#fff9;border:1px solid #e6d8ba;font-size:12px;font-weight:800}
+@media(max-width:720px){.scholarship-feature,.live-scholarship{min-height:0}.scholarship-mark{width:58px;height:58px;border-radius:18px}}
