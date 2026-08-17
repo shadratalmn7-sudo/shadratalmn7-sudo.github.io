@@ -1,0 +1,3 @@
+export const LEVEL_THRESHOLDS=[0,50,120,220,350,500,650,800,900,1000];
+export function levelFromXp(value=0){const xp=Math.max(0,Number(value)||0);let level=1;for(let i=0;i<LEVEL_THRESHOLDS.length;i++)if(xp>=LEVEL_THRESHOLDS[i])level=i+1;return Math.min(10,level)}
+export function nextLevelInfo(value=0){const xp=Math.max(0,Number(value)||0),level=levelFromXp(xp);if(level>=10)return{level:10,current:xp,target:1000,remaining:0,percent:100};const start=LEVEL_THRESHOLDS[level-1],target=LEVEL_THRESHOLDS[level],span=target-start,current=Math.max(0,xp-start);return{level,current,target,remaining:Math.max(0,target-xp),percent:Math.min(100,Math.round(current/span*100))}}
