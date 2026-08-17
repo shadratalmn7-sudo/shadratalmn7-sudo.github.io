@@ -79,3 +79,5 @@ jobs:
             exit 1
           fi
           echo 'Migration audit passed: required files, relative links, AdSense, and old-path dependency checks are clean.'
+      - name: Audit marker
+        run: echo 'final migration audit after homepage activation'
