@@ -1,0 +1,81 @@
+name: Migration Audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/migration-audit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify required migration files
+        run: |
+          test -f index.html
+          test -f ads.txt
+          test -f robots.txt
+          test -f sitemap.xml
+          test -f assets/shazarat-logo.svg
+          test -f firebase-config.js
+          test -f auth.js
+          test -f profile.html
+          test -f student-support.js
+          test -f community.html
+          test -f admin-analytics.html
+          test -f admin-users.html
+          test -f admin-student.html
+          test -f admin-student.js
+          test -f admin-staff.html
+          test -f admin-staff.js
+          test -f admin-orders.html
+          test -f admin-orders.js
+          test -f admin-messages.html
+          test -f admin-messages.js
+          test -f admin-community.html
+          test -f admin-community.js
+          test -f admin-gamification.html
+          test -f admin-gamification.js
+      - name: Check internal HTML references
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          from urllib.parse import urlsplit, unquote
+          bad=[]
+          class P(HTMLParser):
+              def __init__(self, page): super().__init__(); self.page=page
+              def handle_starttag(self, tag, attrs):
+                  d=dict(attrs)
+                  for key in ('href','src'):
+                      u=d.get(key)
+                      if not u or u.startswith(('#','http://','https://','mailto:','tel:','data:','javascript:')): continue
+                      path=unquote(urlsplit(u).path)
+                      if not path: continue
+                      target=(self.page.parent/path)
+                      if path.endswith('/'):
+                          target=target/'index.html'
+                      if not target.exists(): bad.append((str(self.page),u))
+          for page in Path('.').glob('*.html'):
+              try: P(page).feed(page.read_text(encoding='utf-8'))
+              except Exception as e: bad.append((str(page),f'parse-error:{e}'))
+          if bad:
+              print('Broken internal references:')
+              for a,b in bad: print(a,'->',b)
+              raise SystemExit(1)
+          print('All checked relative HTML references exist.')
+          PY
+      - name: Check AdSense and old repository dependencies
+        run: |
+          grep -q 'ca-pub-9420608712266016' ads.txt
+          grep -q 'google-adsense-account' index.html
+          grep -q 'pagead2.googlesyndication.com/pagead/js/adsbygoogle.js' index.html
+          if grep -R --exclude-dir=.git --exclude-dir=.github -n 'shadratalmn7-sudo.github.io/shazarat-platform\|shazarat-platform/' .; then
+            echo 'Found dependency on old deployed path.'
+            exit 1
+          fi
+          echo 'No dependency on old deployed path found outside workflow files.'
