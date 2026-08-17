@@ -1,0 +1,32 @@
+name: Copy Shazarat Assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/copy-shazarat-assets.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  copy-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+      - name: Copy logo asset from source repository
+        run: |
+          mkdir -p assets
+          curl -fL "https://raw.githubusercontent.com/shadratalmn7-sudo/shazarat-platform/main/assets/shazarat-logo.svg" -o assets/shazarat-logo.svg
+      - name: Commit copied asset
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/shazarat-logo.svg
+          if git diff --cached --quiet; then
+            echo "No asset changes"
+          else
+            git commit -m "Copy Shazarat logo asset [skip ci]"
+            git push
+          fi
