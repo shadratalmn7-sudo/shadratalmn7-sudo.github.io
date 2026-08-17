@@ -1,0 +1,32 @@
+.brand {
+  flex: 0 0 auto;
+  line-height: 1;
+}
+
+.brand-logo {
+  content: url("assets/shazarat-logo.svg");
+  display: block;
+  width: clamp(190px, 20vw, 260px);
+  height: auto;
+  max-height: 58px;
+  object-fit: contain;
+  object-position: right center;
+}
+
+.drawer-top .brand-logo,
+.menu-top .brand-logo {
+  width: 205px;
+  max-height: 52px;
+}
+
+@media (max-width: 560px) {
+  .brand-logo {
+    width: 178px;
+    max-height: 48px;
+  }
+
+  .drawer-top .brand-logo,
+  .menu-top .brand-logo {
+    width: 190px;
+  }
+}
