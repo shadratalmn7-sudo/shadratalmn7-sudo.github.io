@@ -1,0 +1,6 @@
+const css=document.createElement('link');css.rel='stylesheet';css.href='admin-navigation.css?v=3';document.head.appendChild(css);
+const sections=[['admin-analytics.html','الرئيسية','overview'],['admin-homepage.html','إدارة المحتوى','content'],['admin-users.html','الطلاب','students'],['admin-staff.html','الموظفون','staff'],['admin-orders.html','الطلبات والدعم','support'],['admin-community.html','المجتمع','community'],['admin-gamification.html','XP والإشعارات','gamification'],['admin-security.html','النظام والدخل','system']];
+const current=location.pathname.split('/').pop();const aliases={
+'admin-scholarships.html':'admin-homepage.html','admin-services.html':'admin-homepage.html','admin-offers.html':'admin-homepage.html','admin-videos.html':'admin-homepage.html',
+'admin-messages.html':'admin-orders.html','admin-announcements.html':'admin-gamification.html','admin-revenue.html':'admin-security.html'};
+const active=aliases[current]||current;document.querySelectorAll('.admin-nav').forEach(nav=>{nav.innerHTML=sections.map(([href,label,key])=>`<a href="${href}" data-admin-section="${key}" class="${active===href?'active':''}"><span>${label}</span><b class="admin-count-badge" data-admin-badge="${key}" hidden>0</b></a>`).join('')});
