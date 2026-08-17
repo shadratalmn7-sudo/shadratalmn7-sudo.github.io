@@ -1,6 +1,24 @@
 (() => {
   const currentPage=location.pathname.split('/').pop()||'index.html';
   const isAdminPage=currentPage.startsWith('admin-');
+  const seo={
+    'index.html':['شذرات للمنح | منح دراسية وفرص للطلاب','شذرات للمنح منصة عربية تساعد الطلاب على اكتشاف المنح الدراسية والفرص، متابعة المواعيد، تجهيز المستندات والوصول إلى المصادر الرسمية.'],
+    'scholarships.html':['المنح الدراسية | شذرات للمنح','اكتشف المنح الدراسية للطلاب الدوليين، المنح الممولة بالكامل وفرص الدراسة في روسيا وتركيا ودول أخرى مع شذرات للمنح.'],
+    'open-doors.html':['منحة Open Doors الروسية | شذرات للمنح','دليل منحة Open Doors الروسية: المواعيد، الشروط، المراحل، المستندات المطلوبة ورابط المصدر الرسمي.'],
+    'education-in-russia.html':['منحة الحكومة الروسية | شذرات للمنح','دليل منحة الحكومة الروسية للطلاب الدوليين: الشروط والمواعيد وخطوات التقديم والمصدر الرسمي.'],
+    'turkiye-scholarships.html':['المنحة التركية | شذرات للمنح','معلومات المنحة التركية للطلاب الدوليين: التمويل والشروط والمواعيد وخطوات التقديم.'],
+    'services.html':['خدمات الطلاب | شذرات للمنح','خدمات واستشارات لمساعدة الطلاب في تجهيز طلبات المنح والوثائق والترجمة.'],
+    'offers.html':['عروض الطلاب | شذرات للمنح','عروض وخدمات مختارة للطلاب من منصة شذرات للمنح.'],
+    'community.html':['مجتمع الطلاب | شذرات للمنح','مجتمع شذرات للطلاب لتبادل الخبرات والمعلومات حول المنح والدراسة والتقديم.'],
+    'contact.html':['تواصل معنا | شذرات للمنح','تواصل مع فريق شذرات للمنح للاستفسارات والمساعدة.']
+  };
+  if(!isAdminPage){
+    const info=seo[currentPage]||['شذرات للمنح','منصة عربية للمنح الدراسية والفرص والخدمات المخصصة للطلاب.'];
+    if(!document.title||currentPage==='index.html')document.title=info[0];
+    let d=document.querySelector('meta[name="description"]');if(!d){d=document.createElement('meta');d.name='description';document.head.appendChild(d)}d.content=info[1];
+    let c=document.querySelector('link[rel="canonical"]');if(!c){c=document.createElement('link');c.rel='canonical';document.head.appendChild(c)}c.href='https://shadratalmn7-sudo.github.io/'+(currentPage==='index.html'?'':currentPage);
+    document.documentElement.lang='ar';document.documentElement.dir='rtl';
+  }
   if(!isAdminPage&&!document.querySelector('script[data-shazarat-adsense]')){const ads=document.createElement('script');ads.async=true;ads.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9420608712266016';ads.crossOrigin='anonymous';ads.dataset.shazaratAdsense='true';document.head.appendChild(ads)}
   let nav=document.querySelector('header .nav');if(!nav){const header=document.createElement('header');header.className='site-header global-site-header';header.innerHTML=`<div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div>`;document.body.prepend(header);nav=header.querySelector('.nav')}
   if(document.querySelector('.global-hamburger'))return;const button=document.createElement('button');button.className='global-hamburger';button.type='button';button.setAttribute('aria-label','فتح القائمة');button.setAttribute('aria-expanded','false');button.innerHTML='<span aria-hidden="true">☰</span>';nav.appendChild(button);
