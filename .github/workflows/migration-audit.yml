@@ -78,4 +78,4 @@ jobs:
             echo 'Found dependency on old deployed path.'
             exit 1
           fi
-          echo 'No dependency on old deployed path found outside workflow files.'
+          echo 'Migration audit passed: required files, relative links, AdSense, and old-path dependency checks are clean.'
