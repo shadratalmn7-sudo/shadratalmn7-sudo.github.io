@@ -2,22 +2,11 @@ import { getApp, getApps, initializeApp } from 'https://www.gstatic.com/firebase
 import { collection, getDocs, getFirestore, query, where } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 import { mergeScholarships } from './scholarship-catalog.js';
-
 if(location.pathname.endsWith('/scholarships.html')){
   const css=document.createElement('link');css.rel='stylesheet';css.href='scholarships-enhanced.css?v=4';document.head.appendChild(css);
   const app=getApps().length?getApp():initializeApp(firebaseConfig),db=getFirestore(app),cards=document.querySelector('.cards');
   const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  let remote=[];
-  try{
-    const snap=await getDocs(query(collection(db,'scholarships'),where('publishStatus','==','published')));
-    remote=snap.docs.map(d=>({id:d.id,...d.data()}));
-  }catch(e){console.warn('Using verified local scholarship catalog',e)}
-
+  let remote=[];try{const snap=await getDocs(query(collection(db,'scholarships'),where('publishStatus','==','published')));remote=snap.docs.map(d=>({id:d.id,...d.data()}))}catch(e){console.warn('Using verified local scholarship catalog',e)}
   const items=mergeScholarships(remote).filter(x=>x.publishStatus==='published').sort((a,b)=>(a.sortOrder??999)-(b.sortOrder??999));
-
-  if(cards)cards.innerHTML=items.length?items.map((s,i)=>{
-    const facts=(s.facts||[[s.openDate?'فتح التقديم':'الموعد','بانتظار الإعلان'],['الموعد النهائي',s.deadline||'حسب الجهة'],['التمويل',s.funding||'حسب البرنامج'],['المراحل',(s.studyLevels||[]).slice(0,2).join('، ')||'متعددة']]).slice(0,4);
-    const href=s.legacyUrl||`scholarship.html?slug=${encodeURIComponent(s.slug||s.id)}`;
-    return `<article class="card live-scholarship ${i===0?'theme-open-doors':''} ${i===1?'theme-education-russia':''}" data-scholarship-slug="${esc(s.slug||s.id)}"><div class="scholarship-mark">${esc((s.country||'✦').slice(0,2))}</div><div class="scholarship-kicker">${esc(s.provider||'فرصة موثقة')}</div><span class="tag">${esc(s.statusLabel||'راجع الحالة')}</span><h2>${esc(s.title)}</h2><p class="muted">${esc(s.shortDescription||'')}</p><div class="facts">${facts.map(f=>`<div class="fact"><b>${esc(f[0])}</b><span class="date">${esc(f[1])}</span></div>`).join('')}</div><div class="meta-row"><span>${esc(s.country||'دولي')}</span><span>${esc(s.funding||'تمويل متنوع')}</span>${(s.studyLevels||[]).slice(0,2).map(x=>`<span>${esc(x)}</span>`).join('')}</div><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="${esc(href)}">الدليل والمراحل بالتفصيل</a>${s.officialUrl?`<a class="btn outline" href="${esc(s.officialUrl)}" target="_blank" rel="noopener noreferrer">الموقع الرسمي ↗</a>`:''}</div></article>`;
-  }).join(''):'<div class="card" style="padding:22px">لا توجد منح منشورة حاليًا.</div>';
+  if(cards)cards.innerHTML=items.length?items.map((s,i)=>{const facts=(s.facts||[[s.openDate?'فتح التقديم':'الموعد','بانتظار الإعلان'],['الموعد النهائي',s.deadline||'حسب الجهة'],['التمويل',s.funding||'حسب البرنامج'],['المراحل',(s.studyLevels||[]).slice(0,2).join('، ')||'متعددة']]).slice(0,4);const slug=s.slug||s.id,href=`scholarship.html?slug=${encodeURIComponent(slug)}`;return `<article class="card live-scholarship ${i===0?'theme-open-doors':''} ${i===1?'theme-education-russia':''}" data-scholarship-slug="${esc(slug)}"><div class="scholarship-mark">${esc((s.country||'✦').slice(0,2))}</div><div class="scholarship-kicker">${esc(s.provider||'فرصة موثقة')}</div><span class="tag">${esc(s.statusLabel||'راجع الحالة')}</span><h2>${esc(s.title)}</h2><p class="muted">${esc(s.shortDescription||'')}</p><div class="facts">${facts.map(f=>`<div class="fact"><b>${esc(f[0])}</b><span class="date">${esc(f[1])}</span></div>`).join('')}</div><div class="meta-row"><span>${esc(s.country||'دولي')}</span><span>${esc(s.funding||'تمويل متنوع')}</span>${(s.studyLevels||[]).slice(0,2).map(x=>`<span>${esc(x)}</span>`).join('')}</div><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href="${href}">الدليل والمراحل بالتفصيل</a>${s.officialUrl?`<a class="btn outline" href="${esc(s.officialUrl)}" target="_blank" rel="noopener noreferrer">الموقع الرسمي ↗</a>`:''}</div></article>`}).join(''):'<div class="card" style="padding:22px">لا توجد منح منشورة حاليًا.</div>';
 }
