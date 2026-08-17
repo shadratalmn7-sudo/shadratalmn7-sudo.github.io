@@ -71,7 +71,7 @@ jobs:
           PY
       - name: Check AdSense and old repository dependencies
         run: |
-          grep -q 'ca-pub-9420608712266016' ads.txt
+          grep -q 'pub-9420608712266016' ads.txt
           grep -q 'google-adsense-account' index.html
           grep -q 'pagead2.googlesyndication.com/pagead/js/adsbygoogle.js' index.html
           if grep -R --exclude-dir=.git --exclude-dir=.github -n 'shadratalmn7-sudo.github.io/shazarat-platform\|shazarat-platform/' .; then
