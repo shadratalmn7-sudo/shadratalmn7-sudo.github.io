@@ -1,0 +1,7 @@
+name = "shadrat-support-bot"
+main = "worker.js"
+compatibility_date = "2026-08-18"
+
+# Secrets are configured in Cloudflare and must NOT be committed:
+# BOT_TOKEN
+# ADMIN_CHAT_ID (optional)
