@@ -15,6 +15,7 @@ const MENUS = {
       inline_keyboard: [
         [{ text: '🎓 المنح الدراسية', callback_data: 'ar:scholarships' }],
         [{ text: '📝 الخدمات والأسعار', callback_data: 'ar:services' }],
+        [{ text: '🌐 فتح موقع شذرات', url: siteUrl('') }],
         [{ text: '🛠 مشكلة في الموقع', callback_data: 'ar:site_issue' }],
         [{ text: '👤 التواصل مع الدعم', callback_data: 'ar:human_support' }],
         [{ text: '🌐 تغيير اللغة', callback_data: 'language' }]
@@ -47,6 +48,7 @@ const MENUS = {
       inline_keyboard: [
         [{ text: '🎓 Scholarships', callback_data: 'en:scholarships' }],
         [{ text: '📝 Services & Prices', callback_data: 'en:services' }],
+        [{ text: '🌐 Open Shadrat Website', url: siteUrl('') }],
         [{ text: '🛠 Website Issue', callback_data: 'en:site_issue' }],
         [{ text: '👤 Contact Support', callback_data: 'en:human_support' }],
         [{ text: '🌐 Change Language', callback_data: 'language' }]
@@ -84,9 +86,25 @@ const SERVICES = {
   apply_open_doors: { ar: 'التقديم على Open Doors — Stage 1', en: 'Open Doors Application — Stage 1', priceAr: '70$ بدل 100$', priceEn: '$70 instead of $100' }
 };
 
+const BOT_COMMANDS = [
+  { command:'menu', description:'فتح قائمة شذرات' },
+  { command:'scholarships', description:'عرض المنح الدراسية' },
+  { command:'services', description:'الخدمات والأسعار' },
+  { command:'website', description:'فتح موقع شذرات' },
+  { command:'help', description:'المساعدة' }
+];
+
 export default {
   async fetch(request, env) {
-    if (request.method === 'GET') return new Response('Shadrat Support Bot is running ✅', { status: 200 });
+    const url=new URL(request.url);
+    if (request.method === 'GET') {
+      if (url.pathname.endsWith('/setup') || url.searchParams.get('setup')==='1') {
+        if (!env.BOT_TOKEN) return new Response('BOT_TOKEN is missing', { status: 500 });
+        try { await setupBot(env); return new Response('Shadrat bot commands configured ✅', { status: 200 }); }
+        catch(error){ return new Response(`Setup failed: ${error.message}`, { status: 500 }); }
+      }
+      return new Response('Shadrat Support Bot is running ✅', { status: 200 });
+    }
     if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
     if (!env.BOT_TOKEN) return new Response('BOT_TOKEN is missing', { status: 500 });
 
@@ -103,9 +121,18 @@ export default {
   }
 };
 
+async function setupBot(env){
+  await telegram(env,'setMyCommands',{commands:BOT_COMMANDS});
+  await telegram(env,'setMyCommands',{commands:BOT_COMMANDS,scope:{type:'all_group_chats'}});
+  await telegram(env,'setMyCommands',{commands:BOT_COMMANDS,scope:{type:'all_private_chats'}});
+  await telegram(env,'setChatMenuButton',{menu_button:{type:'commands'}});
+}
+
 async function handleMessage(message, env) {
   const chatId = message.chat.id;
   const text = (message.text || '').trim();
+  const command=(text.split(/\s+/)[0]||'').split('@')[0].toLowerCase();
+  const isGroup=['group','supergroup'].includes(message.chat.type);
 
   if (isAdmin(message, env) && message.reply_to_message && text) {
     const targetId = extractUserId(message.reply_to_message.text || '');
@@ -115,11 +142,13 @@ async function handleMessage(message, env) {
     }
   }
 
-  if (text === '/start' || text === '/help') {
-    return sendMessage(env, chatId, '🌐 اختر لغتك / Choose your language:', LANGUAGE_MENU);
+  if (['/start','/help','/menu'].includes(command)) {
+    return sendMessage(env, chatId, '🎓 شذرات للمنح — اختر ما تحتاجه:', MENUS.ar.main);
   }
-
-  if (text === '/id') return sendMessage(env, chatId, `معرّف المحادثة الخاص بك / Your Chat ID:\n${chatId}`);
+  if (command==='/scholarships') return sendMessage(env,chatId,'🎓 اختر المنحة:',MENUS.ar.scholarships);
+  if (command==='/services') return sendMessage(env,chatId,'📝 الخدمات والأسعار\n\nاختر الخدمة المطلوبة:',MENUS.ar.services);
+  if (command==='/website') return sendMessage(env,chatId,'🌐 موقع شذرات للمنح:',{inline_keyboard:[[{text:'فتح الموقع',url:siteUrl('')}]]});
+  if (command==='/id') return sendMessage(env, chatId, `معرّف المحادثة الخاص بك / Your Chat ID:\n${chatId}`);
 
   const replyText = message.reply_to_message?.text || '';
   if (text && replyText.includes('[SUPPORT_REQUEST_AR]')) return receiveSupportMessage(env, message, 'ar', 'support');
@@ -127,6 +156,7 @@ async function handleMessage(message, env) {
   if (text && replyText.includes('[SUPPORT_REQUEST_EN]')) return receiveSupportMessage(env, message, 'en', 'support');
   if (text && replyText.includes('[SITE_ISSUE_EN]')) return receiveSupportMessage(env, message, 'en', 'issue');
 
+  if (isGroup) return;
   return sendMessage(env, chatId, '🌐 اختر لغتك / Choose your language:', LANGUAGE_MENU);
 }
 
@@ -151,106 +181,45 @@ async function handleCallback(query, env) {
   }
 
   switch (action) {
-    case 'home':
-      return editOrSend(env, query,
-        lang === 'ar' ? '🎓 أهلًا بك في شذرات للمنح. اختر القسم الذي تحتاجه:' : '🎓 Welcome to Shadrat Scholarships. Choose a section:',
-        MENUS[lang].main
-      );
-    case 'scholarships':
-      return editOrSend(env, query,
-        lang === 'ar' ? '🎓 اختر المنحة:' : '🎓 Choose a scholarship:',
-        MENUS[lang].scholarships
-      );
-    case 'services':
-      return editOrSend(env, query,
-        lang === 'ar' ? '📝 الخدمات والأسعار\n\nاختر الخدمة المطلوبة:' : '📝 Services & Prices\n\nChoose the service you need:',
-        MENUS[lang].services
-      );
-    case 'site_issue':
-      return askForIssue(env, chatId, lang);
-    case 'human_support':
-      return askForSupport(env, chatId, lang);
-    default:
-      return editOrSend(env, query, '🌐 اختر لغتك / Choose your language:', LANGUAGE_MENU);
+    case 'home': return editOrSend(env, query, lang === 'ar' ? '🎓 أهلًا بك في شذرات للمنح. اختر القسم الذي تحتاجه:' : '🎓 Welcome to Shadrat Scholarships. Choose a section:', MENUS[lang].main);
+    case 'scholarships': return editOrSend(env, query, lang === 'ar' ? '🎓 اختر المنحة:' : '🎓 Choose a scholarship:', MENUS[lang].scholarships);
+    case 'services': return editOrSend(env, query, lang === 'ar' ? '📝 الخدمات والأسعار\n\nاختر الخدمة المطلوبة:' : '📝 Services & Prices\n\nChoose the service you need:', MENUS[lang].services);
+    case 'site_issue': return askForIssue(env, chatId, lang);
+    case 'human_support': return askForSupport(env, chatId, lang);
+    default: return editOrSend(env, query, '🌐 اختر لغتك / Choose your language:', LANGUAGE_MENU);
   }
 }
 
 function sendServices(env, chatId, lang) {
-  return sendMessage(env, chatId,
-    lang === 'ar' ? '📝 الخدمات والأسعار\n\nاختر الخدمة المطلوبة:' : '📝 Services & Prices\n\nChoose the service you need:',
-    MENUS[lang].services
-  );
+  return sendMessage(env, chatId, lang === 'ar' ? '📝 الخدمات والأسعار\n\nاختر الخدمة المطلوبة:' : '📝 Services & Prices\n\nChoose the service you need:', MENUS[lang].services);
 }
 
 async function requestService(env, query, service, lang) {
   const chatId = query.message.chat.id;
   const title = lang === 'ar' ? service.ar : service.en;
   const price = lang === 'ar' ? service.priceAr : service.priceEn;
-
-  await sendAdminNotification(env, {
-    title: '🛎 طلب خدمة جديد / New Service Request',
-    user: query.from || {},
-    chatId,
-    details: [`الخدمة / Service: ${title}`, `السعر / Price: ${price}`]
-  });
-
-  return sendMessage(env, chatId,
-    lang === 'ar'
-      ? `✅ تم استلام طلبك.\n\nالخدمة: ${title}\nالسعر: ${price}\n\nسيتم التواصل معك من فريق شذرات عند استلام الطلب.`
-      : `✅ Your request has been received.\n\nService: ${title}\nPrice: ${price}\n\nThe Shadrat team will contact you after reviewing your request.`,
-    MENUS[lang].back
-  );
+  await sendAdminNotification(env, {title: '🛎 طلب خدمة جديد / New Service Request',user: query.from || {},chatId,details: [`الخدمة / Service: ${title}`, `السعر / Price: ${price}`]});
+  return sendMessage(env, chatId, lang === 'ar' ? `✅ تم استلام طلبك.\n\nالخدمة: ${title}\nالسعر: ${price}\n\nسيتم التواصل معك من فريق شذرات عند استلام الطلب.` : `✅ Your request has been received.\n\nService: ${title}\nPrice: ${price}\n\nThe Shadrat team will contact you after reviewing your request.`, MENUS[lang].back);
 }
 
 function askForSupport(env, chatId, lang) {
-  return sendMessage(env, chatId,
-    lang === 'ar'
-      ? '👤 اكتب رسالتك للدعم الآن في ردك على هذه الرسالة.\n\n[SUPPORT_REQUEST_AR]'
-      : '👤 Write your support message by replying to this message.\n\n[SUPPORT_REQUEST_EN]',
-    { force_reply: true, selective: true, input_field_placeholder: lang === 'ar' ? 'اكتب رسالتك للدعم هنا…' : 'Write your support message here…' }
-  );
+  return sendMessage(env, chatId,lang === 'ar' ? '👤 اكتب رسالتك للدعم الآن في ردك على هذه الرسالة.\n\n[SUPPORT_REQUEST_AR]' : '👤 Write your support message by replying to this message.\n\n[SUPPORT_REQUEST_EN]',{ force_reply: true, selective: true, input_field_placeholder: lang === 'ar' ? 'اكتب رسالتك للدعم هنا…' : 'Write your support message here…' });
 }
 
 function askForIssue(env, chatId, lang) {
-  return sendMessage(env, chatId,
-    lang === 'ar'
-      ? '🛠 اشرح مشكلة الموقع باختصار في ردك على هذه الرسالة.\n\n[SITE_ISSUE_AR]'
-      : '🛠 Briefly describe the website issue by replying to this message.\n\n[SITE_ISSUE_EN]',
-    { force_reply: true, selective: true, input_field_placeholder: lang === 'ar' ? 'اكتب المشكلة هنا…' : 'Describe the issue here…' }
-  );
+  return sendMessage(env, chatId,lang === 'ar' ? '🛠 اشرح مشكلة الموقع باختصار في ردك على هذه الرسالة.\n\n[SITE_ISSUE_AR]' : '🛠 Briefly describe the website issue by replying to this message.\n\n[SITE_ISSUE_EN]',{ force_reply: true, selective: true, input_field_placeholder: lang === 'ar' ? 'اكتب المشكلة هنا…' : 'Describe the issue here…' });
 }
 
 async function receiveSupportMessage(env, message, lang, type) {
   const chatId = message.chat.id;
-  await sendAdminNotification(env, {
-    title: type === 'issue' ? '🛠 بلاغ مشكلة في الموقع / Website Issue' : '📩 رسالة دعم جديدة / Support Message',
-    user: message.from || {},
-    chatId,
-    details: [message.text || '[رسالة غير نصية / Non-text message]']
-  });
-
-  return sendMessage(env, chatId,
-    lang === 'ar'
-      ? '✅ تم استلام رسالتك. سيتم الرد عليك من فريق شذرات عند استلامها من أحد المسؤولين.'
-      : '✅ Your message has been received. The Shadrat team will reply once a team member reviews it.',
-    MENUS[lang].back
-  );
+  await sendAdminNotification(env, {title: type === 'issue' ? '🛠 بلاغ مشكلة في الموقع / Website Issue' : '📩 رسالة دعم جديدة / Support Message',user: message.from || {},chatId,details: [message.text || '[رسالة غير نصية / Non-text message]']});
+  return sendMessage(env, chatId,lang === 'ar' ? '✅ تم استلام رسالتك. سيتم الرد عليك من فريق شذرات عند استلامها من أحد المسؤولين.' : '✅ Your message has been received. The Shadrat team will reply once a team member reviews it.',MENUS[lang].back);
 }
 
 async function sendAdminNotification(env, { title, user, chatId, details }) {
   const username = user.username ? `@${user.username}` : 'بدون اسم مستخدم';
   const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'مستخدم';
-  const body = [
-    title,
-    `الاسم / Name: ${name}`,
-    `المستخدم / Username: ${username}`,
-    `Chat ID: ${chatId}`,
-    `[USER_ID:${chatId}]`,
-    '',
-    ...details,
-    '',
-    '↩️ للرد على الطالب: استخدم Reply على هذه الرسالة واكتب ردك.'
-  ].join('\n');
+  const body = [title,`الاسم / Name: ${name}`,`المستخدم / Username: ${username}`,`Chat ID: ${chatId}`,`[USER_ID:${chatId}]`,'',...details,'','↩️ للرد على الطالب: استخدم Reply على هذه الرسالة واكتب ردك.'].join('\n');
   return sendMessage(env, getAdminChatId(env), body);
 }
 
@@ -259,11 +228,7 @@ function isAdmin(message, env) { return String(message.chat.id) === getAdminChat
 function extractUserId(text) { const m = text.match(/\[USER_ID:(-?\d+)\]/); return m ? m[1] : null; }
 
 async function telegram(env, method, payload) {
-  const response = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
+  const response = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, {method: 'POST',headers: { 'content-type': 'application/json' },body: JSON.stringify(payload)});
   const data = await response.json();
   if (!response.ok || !data.ok) throw new Error(`Telegram ${method} failed: ${JSON.stringify(data)}`);
   return data;
@@ -278,14 +243,6 @@ function sendMessage(env, chatId, text, replyMarkup) {
 function answerCallback(env, callbackQueryId) { return telegram(env, 'answerCallbackQuery', { callback_query_id: callbackQueryId }); }
 
 async function editOrSend(env, query, text, replyMarkup) {
-  try {
-    return await telegram(env, 'editMessageText', {
-      chat_id: query.message.chat.id,
-      message_id: query.message.message_id,
-      text,
-      reply_markup: replyMarkup
-    });
-  } catch {
-    return sendMessage(env, query.message.chat.id, text, replyMarkup);
-  }
+  try { return await telegram(env, 'editMessageText', {chat_id: query.message.chat.id,message_id: query.message.message_id,text,reply_markup: replyMarkup}); }
+  catch { return sendMessage(env, query.message.chat.id, text, replyMarkup); }
 }
