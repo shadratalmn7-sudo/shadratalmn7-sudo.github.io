@@ -13,6 +13,7 @@ document.querySelectorAll('span.btn,span.dark').forEach(el=>{if(/إنشاء|حس
 onAuthStateChanged(auth,async user=>{
   document.querySelectorAll('a[href="login.html"],a[href="register.html"]').forEach(a=>{a.hidden=!!user;if(user)a.style.setProperty('display','none','important');else a.style.removeProperty('display')});
   document.querySelectorAll('[data-auth-logout]').forEach(b=>b.remove());
+  document.querySelectorAll('[data-desktop-admin-link]').forEach(a=>a.remove());
   if(!user){document.body.dataset.role='student';return;}
   let role=user.email===OWNER_EMAIL?'owner':'student';
   if(role!=='owner')try{const snap=await getDoc(doc(db,'users',user.uid));role=snap.data()?.role||'student'}catch{}
@@ -20,6 +21,7 @@ onAuthStateChanged(auth,async user=>{
   if(['owner','admin','support','editor','communityModerator'].includes(role)){
     const links=document.querySelector('.global-menu-links');
     if(links&&!links.querySelector('[data-owner-link]'))links.insertAdjacentHTML('beforeend',ownerLinks);
+    const slot=document.querySelector('.desktop-admin-slot');if(slot&&!slot.querySelector('[data-desktop-admin-link]'))slot.innerHTML=`<a data-desktop-admin-link href="admin-analytics.html"><span class="desktop-nav-icon" aria-hidden="true">⚙</span><span>لوحة الإدارة</span></a>`;
     markCurrentAdminLink();
   }
   document.querySelectorAll('.global-menu-actions,.actions,.nav-actions,.menu-cta').forEach(area=>{
