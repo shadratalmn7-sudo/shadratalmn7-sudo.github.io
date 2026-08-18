@@ -1,5 +1,6 @@
 const SITE_BASE = 'https://shadratalmn7-sudo.github.io';
 const FALLBACK_ADMIN_CHAT_ID = '8679324666';
+const siteUrl=(path='')=>`${SITE_BASE}/${path}${path.includes('?')?'&':'?'}utm_source=telegram_bot&utm_medium=bot`;
 
 const LANGUAGE_MENU = {
   inline_keyboard: [
@@ -22,10 +23,10 @@ const MENUS = {
     back: { inline_keyboard: [[{ text: '⬅️ العودة للقائمة الرئيسية', callback_data: 'ar:home' }]] },
     scholarships: {
       inline_keyboard: [
-        [{ text: '🇷🇺 Open Doors', url: `${SITE_BASE}/scholarship.html?slug=open-doors` }],
-        [{ text: '🇷🇺 منحة الحكومة الروسية', url: `${SITE_BASE}/scholarship.html?slug=education-in-russia` }],
-        [{ text: '🇹🇷 المنحة التركية', url: `${SITE_BASE}/scholarship.html?slug=turkiye-scholarships` }],
-        [{ text: '🌐 جميع المنح', url: `${SITE_BASE}/scholarships.html` }],
+        [{ text: '🇷🇺 Open Doors', url: siteUrl('scholarship.html?slug=open-doors') }],
+        [{ text: '🇷🇺 منحة الحكومة الروسية', url: siteUrl('scholarship.html?slug=education-in-russia') }],
+        [{ text: '🇹🇷 المنحة التركية', url: siteUrl('scholarship.html?slug=turkiye-scholarships') }],
+        [{ text: '🌐 جميع المنح', url: siteUrl('scholarships.html') }],
         [{ text: '⬅️ رجوع', callback_data: 'ar:home' }]
       ]
     },
@@ -36,7 +37,7 @@ const MENUS = {
         [{ text: '📄 ترجمة الجواز والشهادة — نوتاريوس — 60$', callback_data: 'ar:svc:notarized_translation' }],
         [{ text: '🇷🇺 التقديم Education in Russia — 50$', callback_data: 'ar:svc:apply_education' }],
         [{ text: '🏆 Open Doors Stage 1 — 70$', callback_data: 'ar:svc:apply_open_doors' }],
-        [{ text: '🌐 صفحة الخدمات بالموقع', url: `${SITE_BASE}/services.html` }],
+        [{ text: '🌐 صفحة الخدمات بالموقع', url: siteUrl('services.html') }],
         [{ text: '⬅️ رجوع', callback_data: 'ar:home' }]
       ]
     }
@@ -54,10 +55,10 @@ const MENUS = {
     back: { inline_keyboard: [[{ text: '⬅️ Back to Main Menu', callback_data: 'en:home' }]] },
     scholarships: {
       inline_keyboard: [
-        [{ text: '🇷🇺 Open Doors', url: `${SITE_BASE}/scholarship.html?slug=open-doors` }],
-        [{ text: '🇷🇺 Russian Government Scholarship', url: `${SITE_BASE}/scholarship.html?slug=education-in-russia` }],
-        [{ text: '🇹🇷 Türkiye Scholarships', url: `${SITE_BASE}/scholarship.html?slug=turkiye-scholarships` }],
-        [{ text: '🌐 All Scholarships', url: `${SITE_BASE}/scholarships.html` }],
+        [{ text: '🇷🇺 Open Doors', url: siteUrl('scholarship.html?slug=open-doors') }],
+        [{ text: '🇷🇺 Russian Government Scholarship', url: siteUrl('scholarship.html?slug=education-in-russia') }],
+        [{ text: '🇹🇷 Türkiye Scholarships', url: siteUrl('scholarship.html?slug=turkiye-scholarships') }],
+        [{ text: '🌐 All Scholarships', url: siteUrl('scholarships.html') }],
         [{ text: '⬅️ Back', callback_data: 'en:home' }]
       ]
     },
@@ -68,7 +69,7 @@ const MENUS = {
         [{ text: '📄 Notarized Passport & Certificate Translation — $60', callback_data: 'en:svc:notarized_translation' }],
         [{ text: '🇷🇺 Education in Russia Application — $50', callback_data: 'en:svc:apply_education' }],
         [{ text: '🏆 Open Doors Stage 1 — $70', callback_data: 'en:svc:apply_open_doors' }],
-        [{ text: '🌐 Services Page', url: `${SITE_BASE}/services.html` }],
+        [{ text: '🌐 Services Page', url: siteUrl('services.html') }],
         [{ text: '⬅️ Back', callback_data: 'en:home' }]
       ]
     }
