@@ -6,7 +6,6 @@ service cloud.firestore {
     function userDoc() { return get(/databases/$(database)/documents/users/$(request.auth.uid)); }
     function activeUser() { return signedIn() && userDoc().data.accountStatus == 'active'; }
     function roleIs(role) { return activeUser() && userDoc().data.role == role; }
-    // The owner account is controlled by Firebase Authentication. It must not depend on a Firestore role record.
     function fixedOwner() { return signedIn() && request.auth.token.email == 'shadrat.almn7@gmail.com'; }
     function ownerOnly() { return fixedOwner() || roleIs('owner'); }
     function adminRole() { return ownerOnly() || roleIs('admin'); }
@@ -16,6 +15,10 @@ service cloud.firestore {
     function moderator() { return supportStaff() || communityStaff(); }
     function safeText(value, minimum, maximum) { return value is string && value.size() >= minimum && value.size() <= maximum; }
     function validPostType(value) { return value in ['question','experience','info','guide','update','warning','accepted']; }
+    function weeklyProfileEditAllowed() {
+      return !('lastProfileEditAt' in resource.data)
+        || request.time >= resource.data.lastProfileEditAt + duration.value(7, 'd');
+    }
 
     match /users/{uid} {
       allow create: if own(uid) && request.resource.data.role == 'student'
@@ -23,8 +26,17 @@ service cloud.firestore {
         && request.resource.data.publicProfile == false;
       allow read: if own(uid) || supportStaff();
       allow update: if own(uid)
+        && weeklyProfileEditAllowed()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'fullName','username','location','studyLevel','publicProfile','avatarKey','updatedAt'
+          'fullName','username','location','studyLevel','lastProfileEditAt','updatedAt'
+        ])
+        && safeText(request.resource.data.fullName, 3, 80)
+        && request.resource.data.username.matches('^[a-z0-9_]{3,24}$')
+        && !request.resource.data.username.matches('.*(owner|admin|support|staff|shazarat).*')
+        && request.resource.data.lastProfileEditAt == request.time;
+      allow update: if own(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'publicProfile','avatarKey','updatedAt'
         ]);
       allow update: if ownerOnly();
       allow delete: if ownerOnly();
