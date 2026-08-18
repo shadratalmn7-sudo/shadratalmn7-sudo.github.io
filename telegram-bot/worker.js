@@ -1,70 +1,103 @@
 const SITE_BASE = 'https://shadratalmn7-sudo.github.io';
 const FALLBACK_ADMIN_CHAT_ID = '8679324666';
 
-const MAIN_MENU = {
+const LANGUAGE_MENU = {
   inline_keyboard: [
-    [{ text: '🎓 المنح الدراسية', callback_data: 'scholarships' }],
-    [{ text: '📝 الخدمات والأسعار', callback_data: 'services' }],
-    [{ text: '🛠 مشكلة في الموقع', callback_data: 'site_issue' }],
-    [{ text: '👤 التواصل مع الدعم', callback_data: 'human_support' }]
+    [{ text: '🇸🇦 العربية', callback_data: 'lang:ar' }],
+    [{ text: '🇬🇧 English', callback_data: 'lang:en' }]
   ]
 };
 
-const BACK_MENU = {
-  inline_keyboard: [[{ text: '⬅️ العودة للقائمة الرئيسية', callback_data: 'home' }]]
-};
-
-const SCHOLARSHIPS_MENU = {
-  inline_keyboard: [
-    [{ text: '🇷🇺 Open Doors', url: `${SITE_BASE}/scholarship.html?slug=open-doors` }],
-    [{ text: '🇷🇺 منحة الحكومة الروسية', url: `${SITE_BASE}/scholarship.html?slug=education-in-russia` }],
-    [{ text: '🇹🇷 المنحة التركية', url: `${SITE_BASE}/scholarship.html?slug=turkiye-scholarships` }],
-    [{ text: '🌐 جميع المنح', url: `${SITE_BASE}/scholarships.html` }],
-    [{ text: '⬅️ رجوع', callback_data: 'home' }]
-  ]
+const MENUS = {
+  ar: {
+    main: {
+      inline_keyboard: [
+        [{ text: '🎓 المنح الدراسية', callback_data: 'ar:scholarships' }],
+        [{ text: '📝 الخدمات والأسعار', callback_data: 'ar:services' }],
+        [{ text: '🛠 مشكلة في الموقع', callback_data: 'ar:site_issue' }],
+        [{ text: '👤 التواصل مع الدعم', callback_data: 'ar:human_support' }],
+        [{ text: '🌐 تغيير اللغة', callback_data: 'language' }]
+      ]
+    },
+    back: { inline_keyboard: [[{ text: '⬅️ العودة للقائمة الرئيسية', callback_data: 'ar:home' }]] },
+    scholarships: {
+      inline_keyboard: [
+        [{ text: '🇷🇺 Open Doors', url: `${SITE_BASE}/scholarship.html?slug=open-doors` }],
+        [{ text: '🇷🇺 منحة الحكومة الروسية', url: `${SITE_BASE}/scholarship.html?slug=education-in-russia` }],
+        [{ text: '🇹🇷 المنحة التركية', url: `${SITE_BASE}/scholarship.html?slug=turkiye-scholarships` }],
+        [{ text: '🌐 جميع المنح', url: `${SITE_BASE}/scholarships.html` }],
+        [{ text: '⬅️ رجوع', callback_data: 'ar:home' }]
+      ]
+    },
+    services: {
+      inline_keyboard: [
+        [{ text: '💬 استشارة Open Doors — مجانية', callback_data: 'ar:svc:consult_open_doors' }],
+        [{ text: '💬 استشارة Education in Russia — مجانية', callback_data: 'ar:svc:consult_education' }],
+        [{ text: '📄 ترجمة الجواز والشهادة — نوتاريوس — 60$', callback_data: 'ar:svc:notarized_translation' }],
+        [{ text: '🇷🇺 التقديم Education in Russia — 50$', callback_data: 'ar:svc:apply_education' }],
+        [{ text: '🏆 Open Doors Stage 1 — 70$', callback_data: 'ar:svc:apply_open_doors' }],
+        [{ text: '🌐 صفحة الخدمات بالموقع', url: `${SITE_BASE}/services.html` }],
+        [{ text: '⬅️ رجوع', callback_data: 'ar:home' }]
+      ]
+    }
+  },
+  en: {
+    main: {
+      inline_keyboard: [
+        [{ text: '🎓 Scholarships', callback_data: 'en:scholarships' }],
+        [{ text: '📝 Services & Prices', callback_data: 'en:services' }],
+        [{ text: '🛠 Website Issue', callback_data: 'en:site_issue' }],
+        [{ text: '👤 Contact Support', callback_data: 'en:human_support' }],
+        [{ text: '🌐 Change Language', callback_data: 'language' }]
+      ]
+    },
+    back: { inline_keyboard: [[{ text: '⬅️ Back to Main Menu', callback_data: 'en:home' }]] },
+    scholarships: {
+      inline_keyboard: [
+        [{ text: '🇷🇺 Open Doors', url: `${SITE_BASE}/scholarship.html?slug=open-doors` }],
+        [{ text: '🇷🇺 Russian Government Scholarship', url: `${SITE_BASE}/scholarship.html?slug=education-in-russia` }],
+        [{ text: '🇹🇷 Türkiye Scholarships', url: `${SITE_BASE}/scholarship.html?slug=turkiye-scholarships` }],
+        [{ text: '🌐 All Scholarships', url: `${SITE_BASE}/scholarships.html` }],
+        [{ text: '⬅️ Back', callback_data: 'en:home' }]
+      ]
+    },
+    services: {
+      inline_keyboard: [
+        [{ text: '💬 Open Doors Consultation — Free', callback_data: 'en:svc:consult_open_doors' }],
+        [{ text: '💬 Education in Russia Consultation — Free', callback_data: 'en:svc:consult_education' }],
+        [{ text: '📄 Notarized Passport & Certificate Translation — $60', callback_data: 'en:svc:notarized_translation' }],
+        [{ text: '🇷🇺 Education in Russia Application — $50', callback_data: 'en:svc:apply_education' }],
+        [{ text: '🏆 Open Doors Stage 1 — $70', callback_data: 'en:svc:apply_open_doors' }],
+        [{ text: '🌐 Services Page', url: `${SITE_BASE}/services.html` }],
+        [{ text: '⬅️ Back', callback_data: 'en:home' }]
+      ]
+    }
+  }
 };
 
 const SERVICES = {
-  consult_open_doors: { title: 'استشارة Open Doors', price: 'مجانية' },
-  consult_education: { title: 'استشارة Education in Russia', price: 'مجانية' },
-  notarized_translation: { title: 'ترجمة الجواز والشهادة — نوتاريوس', price: '60$' },
-  apply_education: { title: 'التقديم على Education in Russia', price: '50$' },
-  apply_open_doors: { title: 'التقديم على Open Doors — Stage 1', price: '70$ بدل 100$' }
-};
-
-const SERVICES_MENU = {
-  inline_keyboard: [
-    [{ text: '💬 استشارة Open Doors — مجانية', callback_data: 'svc:consult_open_doors' }],
-    [{ text: '💬 استشارة Education in Russia — مجانية', callback_data: 'svc:consult_education' }],
-    [{ text: '📄 ترجمة الجواز والشهادة — نوتاريوس — 60$', callback_data: 'svc:notarized_translation' }],
-    [{ text: '🇷🇺 التقديم Education in Russia — 50$', callback_data: 'svc:apply_education' }],
-    [{ text: '🏆 Open Doors Stage 1 — 70$', callback_data: 'svc:apply_open_doors' }],
-    [{ text: '🌐 صفحة الخدمات بالموقع', url: `${SITE_BASE}/services.html` }],
-    [{ text: '⬅️ رجوع', callback_data: 'home' }]
-  ]
+  consult_open_doors: { ar: 'استشارة Open Doors', en: 'Open Doors Consultation', priceAr: 'مجانية', priceEn: 'Free' },
+  consult_education: { ar: 'استشارة Education in Russia', en: 'Education in Russia Consultation', priceAr: 'مجانية', priceEn: 'Free' },
+  notarized_translation: { ar: 'ترجمة الجواز والشهادة — نوتاريوس', en: 'Notarized Passport & Certificate Translation', priceAr: '60$', priceEn: '$60' },
+  apply_education: { ar: 'التقديم على Education in Russia', en: 'Education in Russia Application', priceAr: '50$', priceEn: '$50' },
+  apply_open_doors: { ar: 'التقديم على Open Doors — Stage 1', en: 'Open Doors Application — Stage 1', priceAr: '70$ بدل 100$', priceEn: '$70 instead of $100' }
 };
 
 export default {
   async fetch(request, env) {
-    if (request.method === 'GET') {
-      return new Response('Shadrat Support Bot is running ✅', { status: 200 });
-    }
+    if (request.method === 'GET') return new Response('Shadrat Support Bot is running ✅', { status: 200 });
     if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 });
     if (!env.BOT_TOKEN) return new Response('BOT_TOKEN is missing', { status: 500 });
 
     let update;
-    try {
-      update = await request.json();
-    } catch {
-      return new Response('Bad request', { status: 400 });
-    }
+    try { update = await request.json(); }
+    catch { return new Response('Bad request', { status: 400 }); }
 
     try {
       if (update.callback_query) await handleCallback(update.callback_query, env);
       else if (update.message) await handleMessage(update.message, env);
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) { console.error(error); }
+
     return new Response('OK', { status: 200 });
   }
 };
@@ -76,35 +109,24 @@ async function handleMessage(message, env) {
   if (isAdmin(message, env) && message.reply_to_message && text) {
     const targetId = extractUserId(message.reply_to_message.text || '');
     if (targetId) {
-      await sendMessage(env, targetId, `💬 رد فريق شذرات:\n\n${text}`, MAIN_MENU);
+      await sendMessage(env, targetId, `💬 رد فريق شذرات / Shadrat Support:\n\n${text}`, LANGUAGE_MENU);
       return sendMessage(env, chatId, '✅ تم إرسال ردك للطالب.');
     }
   }
 
   if (text === '/start' || text === '/help') {
-    return sendMessage(env, chatId,
-      '🎓 أهلًا بك في شذرات للمنح. اختر القسم الذي تحتاجه:',
-      MAIN_MENU
-    );
+    return sendMessage(env, chatId, '🌐 اختر لغتك / Choose your language:', LANGUAGE_MENU);
   }
 
-  if (text === '/id') return sendMessage(env, chatId, `معرّف المحادثة الخاص بك:\n${chatId}`);
-  if (text === '/services') return sendServices(env, chatId);
-  if (text === '/scholarships') return sendMessage(env, chatId, '🎓 اختر المنحة:', SCHOLARSHIPS_MENU);
-  if (text === '/contact') return askForSupport(env, chatId);
+  if (text === '/id') return sendMessage(env, chatId, `معرّف المحادثة الخاص بك / Your Chat ID:\n${chatId}`);
 
   const replyText = message.reply_to_message?.text || '';
-  if (text && replyText.includes('[SUPPORT_REQUEST]')) {
-    return receiveSupportMessage(env, message, 'رسالة دعم');
-  }
-  if (text && replyText.includes('[SITE_ISSUE]')) {
-    return receiveSupportMessage(env, message, 'مشكلة في الموقع');
-  }
+  if (text && replyText.includes('[SUPPORT_REQUEST_AR]')) return receiveSupportMessage(env, message, 'ar', 'support');
+  if (text && replyText.includes('[SITE_ISSUE_AR]')) return receiveSupportMessage(env, message, 'ar', 'issue');
+  if (text && replyText.includes('[SUPPORT_REQUEST_EN]')) return receiveSupportMessage(env, message, 'en', 'support');
+  if (text && replyText.includes('[SITE_ISSUE_EN]')) return receiveSupportMessage(env, message, 'en', 'issue');
 
-  return sendMessage(env, chatId,
-    'هذا البوت مخصص للمنح والدراسة وخدمات شذرات فقط. اختر من القائمة:',
-    MAIN_MENU
-  );
+  return sendMessage(env, chatId, '🌐 اختر لغتك / Choose your language:', LANGUAGE_MENU);
 }
 
 async function handleCallback(query, env) {
@@ -112,97 +134,115 @@ async function handleCallback(query, env) {
   const data = query.data || '';
   await answerCallback(env, query.id);
 
-  if (data.startsWith('svc:')) {
-    const key = data.slice(4);
+  if (data === 'language') return editOrSend(env, query, '🌐 اختر لغتك / Choose your language:', LANGUAGE_MENU);
+  if (data === 'lang:ar') return editOrSend(env, query, '🎓 أهلًا بك في شذرات للمنح. اختر القسم الذي تحتاجه:', MENUS.ar.main);
+  if (data === 'lang:en') return editOrSend(env, query, '🎓 Welcome to Shadrat Scholarships. Choose a section:', MENUS.en.main);
+
+  const parts = data.split(':');
+  const lang = parts[0] === 'en' ? 'en' : 'ar';
+  const action = parts[1] || '';
+
+  if (action === 'svc') {
+    const key = parts.slice(2).join(':');
     const service = SERVICES[key];
-    if (!service) return sendServices(env, chatId);
-    return requestService(env, query, service);
+    if (!service) return sendServices(env, chatId, lang);
+    return requestService(env, query, service, lang);
   }
 
-  switch (data) {
+  switch (action) {
     case 'home':
-      return editOrSend(env, query, '🎓 أهلًا بك في شذرات للمنح. اختر القسم الذي تحتاجه:', MAIN_MENU);
-    case 'scholarships':
-      return editOrSend(env, query, '🎓 اختر المنحة. الروابط أدناه تفتح أحدث دليل مباشر:', SCHOLARSHIPS_MENU);
-    case 'services':
-    case 'apply_services':
-    case 'prices':
       return editOrSend(env, query,
-        '📝 الخدمات والأسعار\n\nاختر الخدمة المطلوبة. الأسعار أدناه مطابقة لصفحة خدمات شذرات الحالية:',
-        SERVICES_MENU
+        lang === 'ar' ? '🎓 أهلًا بك في شذرات للمنح. اختر القسم الذي تحتاجه:' : '🎓 Welcome to Shadrat Scholarships. Choose a section:',
+        MENUS[lang].main
+      );
+    case 'scholarships':
+      return editOrSend(env, query,
+        lang === 'ar' ? '🎓 اختر المنحة:' : '🎓 Choose a scholarship:',
+        MENUS[lang].scholarships
+      );
+    case 'services':
+      return editOrSend(env, query,
+        lang === 'ar' ? '📝 الخدمات والأسعار\n\nاختر الخدمة المطلوبة:' : '📝 Services & Prices\n\nChoose the service you need:',
+        MENUS[lang].services
       );
     case 'site_issue':
-      return askForIssue(env, chatId);
+      return askForIssue(env, chatId, lang);
     case 'human_support':
-      return askForSupport(env, chatId);
+      return askForSupport(env, chatId, lang);
     default:
-      return editOrSend(env, query, 'اختر أحد الخيارات من القائمة:', MAIN_MENU);
+      return editOrSend(env, query, '🌐 اختر لغتك / Choose your language:', LANGUAGE_MENU);
   }
 }
 
-function sendServices(env, chatId) {
+function sendServices(env, chatId, lang) {
   return sendMessage(env, chatId,
-    '📝 الخدمات والأسعار\n\nاختر الخدمة المطلوبة:',
-    SERVICES_MENU
+    lang === 'ar' ? '📝 الخدمات والأسعار\n\nاختر الخدمة المطلوبة:' : '📝 Services & Prices\n\nChoose the service you need:',
+    MENUS[lang].services
   );
 }
 
-async function requestService(env, query, service) {
+async function requestService(env, query, service, lang) {
   const chatId = query.message.chat.id;
-  const adminChatId = getAdminChatId(env);
+  const title = lang === 'ar' ? service.ar : service.en;
+  const price = lang === 'ar' ? service.priceAr : service.priceEn;
 
-  const user = query.from || {};
   await sendAdminNotification(env, {
-    title: '🛎 طلب خدمة جديد',
-    user,
+    title: '🛎 طلب خدمة جديد / New Service Request',
+    user: query.from || {},
     chatId,
-    details: [`الخدمة: ${service.title}`, `السعر: ${service.price}`]
+    details: [`الخدمة / Service: ${title}`, `السعر / Price: ${price}`]
   });
 
   return sendMessage(env, chatId,
-    `✅ تم استلام طلبك.\n\nالخدمة: ${service.title}\nالسعر: ${service.price}\n\nسيتم التواصل معك من فريق شذرات عند استلام الطلب.`,
-    BACK_MENU
+    lang === 'ar'
+      ? `✅ تم استلام طلبك.\n\nالخدمة: ${title}\nالسعر: ${price}\n\nسيتم التواصل معك من فريق شذرات عند استلام الطلب.`
+      : `✅ Your request has been received.\n\nService: ${title}\nPrice: ${price}\n\nThe Shadrat team will contact you after reviewing your request.`,
+    MENUS[lang].back
   );
 }
 
-function askForSupport(env, chatId) {
+function askForSupport(env, chatId, lang) {
   return sendMessage(env, chatId,
-    '👤 اكتب رسالتك للدعم الآن في ردك على هذه الرسالة.\n\n[SUPPORT_REQUEST]',
-    { force_reply: true, selective: true, input_field_placeholder: 'اكتب رسالتك للدعم هنا…' }
+    lang === 'ar'
+      ? '👤 اكتب رسالتك للدعم الآن في ردك على هذه الرسالة.\n\n[SUPPORT_REQUEST_AR]'
+      : '👤 Write your support message by replying to this message.\n\n[SUPPORT_REQUEST_EN]',
+    { force_reply: true, selective: true, input_field_placeholder: lang === 'ar' ? 'اكتب رسالتك للدعم هنا…' : 'Write your support message here…' }
   );
 }
 
-function askForIssue(env, chatId) {
+function askForIssue(env, chatId, lang) {
   return sendMessage(env, chatId,
-    '🛠 اشرح مشكلة الموقع باختصار في ردك على هذه الرسالة.\n\n[SITE_ISSUE]',
-    { force_reply: true, selective: true, input_field_placeholder: 'اكتب المشكلة هنا…' }
+    lang === 'ar'
+      ? '🛠 اشرح مشكلة الموقع باختصار في ردك على هذه الرسالة.\n\n[SITE_ISSUE_AR]'
+      : '🛠 Briefly describe the website issue by replying to this message.\n\n[SITE_ISSUE_EN]',
+    { force_reply: true, selective: true, input_field_placeholder: lang === 'ar' ? 'اكتب المشكلة هنا…' : 'Describe the issue here…' }
   );
 }
 
-async function receiveSupportMessage(env, message, type) {
+async function receiveSupportMessage(env, message, lang, type) {
   const chatId = message.chat.id;
-
   await sendAdminNotification(env, {
-    title: type === 'مشكلة في الموقع' ? '🛠 بلاغ مشكلة في الموقع' : '📩 رسالة دعم جديدة',
+    title: type === 'issue' ? '🛠 بلاغ مشكلة في الموقع / Website Issue' : '📩 رسالة دعم جديدة / Support Message',
     user: message.from || {},
     chatId,
-    details: [message.text || '[رسالة غير نصية]']
+    details: [message.text || '[رسالة غير نصية / Non-text message]']
   });
 
   return sendMessage(env, chatId,
-    '✅ تم استلام رسالتك. سيتم الرد عليك من فريق شذرات عند استلامها من أحد المسؤولين.',
-    BACK_MENU
+    lang === 'ar'
+      ? '✅ تم استلام رسالتك. سيتم الرد عليك من فريق شذرات عند استلامها من أحد المسؤولين.'
+      : '✅ Your message has been received. The Shadrat team will reply once a team member reviews it.',
+    MENUS[lang].back
   );
 }
 
 async function sendAdminNotification(env, { title, user, chatId, details }) {
-  const adminChatId = getAdminChatId(env);
   const username = user.username ? `@${user.username}` : 'بدون اسم مستخدم';
   const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'مستخدم';
   const body = [
     title,
-    `الاسم: ${name}`,
-    `المستخدم: ${username}`,
+    `الاسم / Name: ${name}`,
+    `المستخدم / Username: ${username}`,
     `Chat ID: ${chatId}`,
     `[USER_ID:${chatId}]`,
     '',
@@ -210,21 +250,12 @@ async function sendAdminNotification(env, { title, user, chatId, details }) {
     '',
     '↩️ للرد على الطالب: استخدم Reply على هذه الرسالة واكتب ردك.'
   ].join('\n');
-  return sendMessage(env, adminChatId, body);
+  return sendMessage(env, getAdminChatId(env), body);
 }
 
-function getAdminChatId(env) {
-  return String(env.ADMIN_CHAT_ID || FALLBACK_ADMIN_CHAT_ID);
-}
-
-function isAdmin(message, env) {
-  return String(message.chat.id) === getAdminChatId(env);
-}
-
-function extractUserId(text) {
-  const match = text.match(/\[USER_ID:(-?\d+)\]/);
-  return match ? match[1] : null;
-}
+function getAdminChatId(env) { return String(env.ADMIN_CHAT_ID || FALLBACK_ADMIN_CHAT_ID); }
+function isAdmin(message, env) { return String(message.chat.id) === getAdminChatId(env); }
+function extractUserId(text) { const m = text.match(/\[USER_ID:(-?\d+)\]/); return m ? m[1] : null; }
 
 async function telegram(env, method, payload) {
   const response = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, {
@@ -243,9 +274,7 @@ function sendMessage(env, chatId, text, replyMarkup) {
   return telegram(env, 'sendMessage', payload);
 }
 
-function answerCallback(env, callbackQueryId) {
-  return telegram(env, 'answerCallbackQuery', { callback_query_id: callbackQueryId });
-}
+function answerCallback(env, callbackQueryId) { return telegram(env, 'answerCallbackQuery', { callback_query_id: callbackQueryId }); }
 
 async function editOrSend(env, query, text, replyMarkup) {
   try {
