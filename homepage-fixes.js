@@ -1,3 +1,4 @@
+import './brand-badge.js?v=1';
 import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
 import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import{firebaseConfig}from'./firebase-config.js';
