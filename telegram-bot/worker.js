@@ -1,4 +1,5 @@
 const SITE_BASE = 'https://shadratalmn7-sudo.github.io';
+const FALLBACK_ADMIN_CHAT_ID = '8679324666';
 
 const MAIN_MENU = {
   inline_keyboard: [
@@ -148,12 +149,7 @@ function sendServices(env, chatId) {
 
 async function requestService(env, query, service) {
   const chatId = query.message.chat.id;
-  if (!env.ADMIN_CHAT_ID) {
-    return sendMessage(env, chatId,
-      '⏳ طلب الخدمات عبر البوت قيد التجهيز حاليًا. جرّب مرة أخرى لاحقًا أو استخدم صفحة الخدمات بالموقع.',
-      { inline_keyboard: [[{ text: '🌐 صفحة الخدمات', url: `${SITE_BASE}/services.html` }], ...BACK_MENU.inline_keyboard] }
-    );
-  }
+  const adminChatId = getAdminChatId(env);
 
   const user = query.from || {};
   await sendAdminNotification(env, {
@@ -185,12 +181,6 @@ function askForIssue(env, chatId) {
 
 async function receiveSupportMessage(env, message, type) {
   const chatId = message.chat.id;
-  if (!env.ADMIN_CHAT_ID) {
-    return sendMessage(env, chatId,
-      '⏳ استقبال رسائل الدعم عبر البوت قيد التجهيز حاليًا. جرّب مرة أخرى لاحقًا.',
-      BACK_MENU
-    );
-  }
 
   await sendAdminNotification(env, {
     title: type === 'مشكلة في الموقع' ? '🛠 بلاغ مشكلة في الموقع' : '📩 رسالة دعم جديدة',
@@ -206,6 +196,7 @@ async function receiveSupportMessage(env, message, type) {
 }
 
 async function sendAdminNotification(env, { title, user, chatId, details }) {
+  const adminChatId = getAdminChatId(env);
   const username = user.username ? `@${user.username}` : 'بدون اسم مستخدم';
   const name = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'مستخدم';
   const body = [
@@ -219,11 +210,15 @@ async function sendAdminNotification(env, { title, user, chatId, details }) {
     '',
     '↩️ للرد على الطالب: استخدم Reply على هذه الرسالة واكتب ردك.'
   ].join('\n');
-  return sendMessage(env, env.ADMIN_CHAT_ID, body);
+  return sendMessage(env, adminChatId, body);
+}
+
+function getAdminChatId(env) {
+  return String(env.ADMIN_CHAT_ID || FALLBACK_ADMIN_CHAT_ID);
 }
 
 function isAdmin(message, env) {
-  return Boolean(env.ADMIN_CHAT_ID) && String(message.chat.id) === String(env.ADMIN_CHAT_ID);
+  return String(message.chat.id) === getAdminChatId(env);
 }
 
 function extractUserId(text) {
