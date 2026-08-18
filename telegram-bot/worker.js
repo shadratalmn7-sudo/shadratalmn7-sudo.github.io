@@ -1,3 +1,4 @@
+// Trigger Cloudflare build for shadrat-support-bot
 const MAIN_MENU = {
   inline_keyboard: [
     [{ text: '🎓 المنح الدراسية', callback_data: 'scholarships' }],
@@ -89,7 +90,6 @@ async function handleMessage(message, env) {
     return sendMessage(env, chatId, '🎓 اختر المنحة التي تريد معرفة المزيد عنها:', SCHOLARSHIPS_MENU);
   }
 
-  // إذا كان المستخدم قد بدأ طلب دعم، حوّل رسالته للدعم إن وُجد ADMIN_CHAT_ID.
   if (env.ADMIN_CHAT_ID && text) {
     await forwardSupportMessage(env, message);
     return sendMessage(env, chatId,
