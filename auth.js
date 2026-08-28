@@ -1,22 +1,257 @@
 import { getApp, getApps, initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
-import { browserLocalPersistence, createUserWithEmailAndPassword, deleteUser, getAuth, GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail, setPersistence, signInWithEmailAndPassword, signInWithPopup, signOut, updateProfile } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
+import {
+  browserLocalPersistence,
+  createUserWithEmailAndPassword,
+  deleteUser,
+  getAuth,
+  GoogleAuthProvider,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  setPersistence,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  updateProfile
+} from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import { doc, getDoc, getFirestore, serverTimestamp, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
-const OWNER_EMAIL='shadrat.almn7@gmail.com';
-const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);await setPersistence(auth,browserLocalPersistence).catch(()=>{});
-const clean=(v='')=>String(v).trim().toLowerCase(),isOwner=(v='')=>clean(v)===OWNER_EMAIL,normalizeUsername=(value='')=>clean(value).replace(/^@/,'');
-const reservedUsername=(value='')=>/(^|_)(owner|admin|support|staff|shazarat|شذرات|مالك|ادارة|إدارة)(_|$)/i.test(value);
-const normalizePhone=(value='')=>{let p=String(value).replace(/[^\d+]/g,'');if(p.startsWith('00'))p=`+${p.slice(2)}`;if(/^05\d{8}$/.test(p))p=`+966${p.slice(1)}`;if(/^9665\d{8}$/.test(p))p=`+${p}`;return /^\+[1-9]\d{7,14}$/.test(p)?p:null};
-const digest=async value=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value)))).map(x=>x.toString(16).padStart(2,'0')).join('');
-const errorText=(e)=>{const known={'auth/invalid-credential':'البريد الإلكتروني أو كلمة المرور غير صحيحة.','auth/email-already-in-use':'هذا البريد مستخدم في حساب آخر.','auth/weak-password':'اختر كلمة مرور أقوى لا تقل عن 10 أحرف.','auth/popup-closed-by-user':'أُغلقت نافذة Google قبل إكمال الدخول.','auth/cancelled-popup-request':'تم إلغاء نافذة Google السابقة. حاول مرة أخرى.','auth/unauthorized-domain':'نطاق الموقع غير مصرح به في Firebase. أضف shadratalmn7-sudo.github.io إلى Authorized domains.','auth/operation-not-allowed':'تسجيل Google غير مفعّل في Firebase. فعّل Google من Authentication > Sign-in method.','auth/network-request-failed':'تعذر الاتصال. تحقق من الإنترنت وحاول مجددًا.','permission-denied':'رفضت قاعدة البيانات العملية. تحقق من صلاحيات Firestore.'};return e?.message?.includes('phone-already-used')?'رقم الجوال مستخدم في حساب آخر.':known[e?.code]||'تعذر إكمال العملية الآن. حاول مرة أخرى.'};
-async function roleFor(user){if(!user)return null;if(isOwner(user.email))return'owner';try{const s=await getDoc(doc(db,'users',user.uid));return s.exists()?s.data().role:'student'}catch{return'student'}}
-const show=(form,text,type='error')=>{const n=form?.querySelector('[data-auth-message]')||document.querySelector('[data-auth-message]');if(n){n.textContent=text;n.className=`auth-message ${type}`}};
-const safeNext=()=>{const n=new URLSearchParams(location.search).get('next');if(!n)return null;try{const u=new URL(n,location.origin);return u.origin===location.origin?`${u.pathname.split('/').pop()||'index.html'}${u.search}${u.hash}`:null}catch{return null}};
-const destination=async user=>safeNext()||(['owner','admin','support','editor','communityModerator'].includes(await roleFor(user))?'admin-analytics.html':'profile.html');
-async function ensureGoogleProfile(user){if(isOwner(user.email))return;const ref=doc(db,'users',user.uid),snap=await getDoc(ref);if(snap.exists())return;const base=(user.displayName||user.email?.split('@')[0]||'student').toLowerCase().replace(/[^a-z0-9_]/g,'').slice(0,16)||'student',username=`${base}_${user.uid.slice(0,5)}`.slice(0,24);await setDoc(ref,{uid:user.uid,fullName:user.displayName||'طالب شذرات',username,email:user.email||'',role:'student',accountStatus:'active',publicProfile:false,avatarKey:null,location:'',studyLevel:'',xp:0,level:1,createdAt:serverTimestamp(),updatedAt:serverTimestamp(),authProvider:'google'});}
-async function googleFlow(button){button.disabled=true;try{const provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});const result=await signInWithPopup(auth,provider);await ensureGoogleProfile(result.user);location.href=await destination(result.user)}catch(e){show(document.querySelector('#login-form')||document.querySelector('#register-form'),errorText(e))}finally{button.disabled=false}}
-document.querySelectorAll('[data-google-auth]').forEach(button=>button.addEventListener('click',()=>googleFlow(button)));
-const loginForm=document.querySelector('#login-form');loginForm?.addEventListener('submit',async(e)=>{e.preventDefault();if(!loginForm.reportValidity())return;const button=loginForm.querySelector('[type=submit]');button.disabled=true;try{const c=await signInWithEmailAndPassword(auth,clean(loginForm.email.value),loginForm.password.value);location.href=await destination(c.user)}catch(x){show(loginForm,errorText(x))}finally{button.disabled=false}});
-document.querySelector('#reset-password')?.addEventListener('click',async(e)=>{e.preventDefault();const email=clean(loginForm?.email.value);if(!email)return show(loginForm,'اكتب بريدك الإلكتروني أولًا.');try{await sendPasswordResetEmail(auth,email);show(loginForm,'أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك.','success')}catch(x){show(loginForm,errorText(x))}});
-const registerForm=document.querySelector('#register-form');registerForm?.addEventListener('submit',async e=>{e.preventDefault();if(!registerForm.reportValidity())return;const full=registerForm.querySelector('#full').value.trim(),username=normalizeUsername(registerForm.querySelector('#username').value),email=clean(registerForm.querySelector('#mail').value),phone=normalizePhone(registerForm.querySelector('#phone').value),pass=registerForm.querySelector('#pass').value,confirm=registerForm.querySelector('#confirm').value,button=registerForm.querySelector('[type=submit]');if(!/^[a-z0-9_]{3,24}$/.test(username)||reservedUsername(username))return show(registerForm,'اسم المستخدم يجب أن يكون 3–24 حرفًا إنجليزيًا/رقمًا/شرطة سفلية وغير محجوز.');if(!phone)return show(registerForm,'اكتب رقم جوال صحيحًا بصيغة دولية.');if(pass!==confirm)return show(registerForm,'كلمتا المرور غير متطابقتين.');button.disabled=true;let created=null;try{const phoneHash=await digest(phone),cred=await createUserWithEmailAndPassword(auth,email,pass);created=cred.user;await updateProfile(created,{displayName:full});const batch=writeBatch(db),userRef=doc(db,'users',created.uid),phoneRef=doc(db,'phoneReservations',phoneHash),userNameRef=doc(db,'usernameReservations',username);batch.set(userRef,{uid:created.uid,fullName:full,username,email,phoneE164:phone,phoneLast4:phone.slice(-4),role:'student',accountStatus:'active',publicProfile:false,avatarKey:null,location:'',studyLevel:'',xp:0,level:1,createdAt:serverTimestamp(),updatedAt:serverTimestamp(),authProvider:'password'});batch.set(phoneRef,{uid:created.uid,createdAt:serverTimestamp()});batch.set(userNameRef,{uid:created.uid,createdAt:serverTimestamp()});await batch.commit();sendEmailVerification(created).catch(()=>{});location.href=await destination(created)}catch(x){console.error(x);if(created){try{await deleteUser(created)}catch{}}show(registerForm,errorText(x))}finally{button.disabled=false}});
-document.querySelectorAll('[data-sign-out]').forEach(b=>b.addEventListener('click',async()=>{await signOut(auth);location.replace('login.html')}));export{auth,db,roleFor,normalizePhone,digest};
+
+const OWNER_EMAIL = 'shadrat.almn7@gmail.com';
+const STAFF_ROLES = new Set(['owner', 'admin', 'support', 'editor', 'communityModerator']);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+await setPersistence(auth, browserLocalPersistence).catch(error => console.warn('[Shadrat] local session unavailable', error));
+
+const clean = (value = '') => String(value).trim().toLowerCase();
+const isOwner = email => clean(email) === OWNER_EMAIL;
+const normalizeUsername = value => clean(value).replace(/^@/, '');
+const reservedUsername = value => /(^|_)(owner|admin|support|staff|shazarat|شذرات|مالك|ادارة|إدارة)(_|$)/i.test(value);
+
+function normalizePhone(value = '') {
+  let phone = String(value).replace(/[^\d+]/g, '');
+  if (phone.startsWith('00')) phone = `+${phone.slice(2)}`;
+  if (/^05\d{8}$/.test(phone)) phone = `+966${phone.slice(1)}`;
+  if (/^9665\d{8}$/.test(phone)) phone = `+${phone}`;
+  return /^\+[1-9]\d{7,14}$/.test(phone) ? phone : null;
+}
+
+async function digest(value) {
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2, '0')).join('');
+}
+
+function withTimeout(promise, milliseconds = 15000) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(Object.assign(new Error('request-timeout'), { code: 'request-timeout' })), milliseconds);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+function errorText(error) {
+  if (error?.message?.includes('phone-already-used')) return 'رقم الجوال مستخدم في حساب آخر.';
+  const known = {
+    'auth/invalid-credential': 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+    'auth/email-already-in-use': 'هذا البريد مستخدم في حساب آخر. جرّب تسجيل الدخول.',
+    'auth/weak-password': 'اختر كلمة مرور أقوى لا تقل عن 10 أحرف.',
+    'auth/popup-closed-by-user': 'أُغلقت نافذة Google قبل إكمال العملية.',
+    'auth/cancelled-popup-request': 'أُلغيت نافذة Google السابقة. حاول مجددًا.',
+    'auth/unauthorized-domain': 'تعذر التسجيل من هذا النطاق. تواصل مع إدارة شذرات.',
+    'auth/operation-not-allowed': 'طريقة التسجيل هذه غير مفعلة حاليًا.',
+    'auth/network-request-failed': 'الاتصال بطيء أو منقطع. تحقق من الإنترنت وحاول مجددًا.',
+    'permission-denied': 'اسم المستخدم أو رقم الجوال مستخدم مسبقًا، أو تعذر حفظ الملف.',
+    'firestore/permission-denied': 'اسم المستخدم أو رقم الجوال مستخدم مسبقًا، أو تعذر حفظ الملف.',
+    'firestore/unavailable': 'خدمة الحسابات غير متاحة مؤقتًا. حاول بعد قليل.',
+    'request-timeout': 'استغرق الاتصال وقتًا طويلًا. لم تكتمل العملية؛ حاول مجددًا.'
+  };
+  return known[error?.code] || 'تعذر إكمال العملية الآن. حاول مجددًا.';
+}
+
+function show(form, text, type = 'error') {
+  const node = form?.querySelector('[data-auth-message]') || document.querySelector('[data-auth-message]');
+  if (!node) return;
+  node.textContent = text;
+  node.className = `auth-message ${type}`;
+}
+
+function setBusy(form, busy, label) {
+  const button = form?.querySelector('[type="submit"]');
+  if (!button) return;
+  if (!button.dataset.idleLabel) button.dataset.idleLabel = button.textContent.trim();
+  button.disabled = busy;
+  button.setAttribute('aria-busy', String(busy));
+  button.textContent = busy ? label : button.dataset.idleLabel;
+}
+
+async function roleFor(user) {
+  if (!user) return null;
+  if (isOwner(user.email)) return 'owner';
+  try {
+    const snapshot = await withTimeout(getDoc(doc(db, 'users', user.uid)), 10000);
+    return snapshot.exists() ? snapshot.data().role || 'student' : 'student';
+  } catch {
+    return 'student';
+  }
+}
+
+function safeNext() {
+  const next = new URLSearchParams(location.search).get('next');
+  if (!next) return null;
+  try {
+    const url = new URL(next, location.origin);
+    return url.origin === location.origin ? `${url.pathname.split('/').pop() || 'index.html'}${url.search}${url.hash}` : null;
+  } catch {
+    return null;
+  }
+}
+
+async function destination(user) {
+  const next = safeNext();
+  const role = await roleFor(user);
+  if (next?.startsWith('admin-') && !STAFF_ROLES.has(role)) return 'profile.html';
+  return next || (STAFF_ROLES.has(role) ? 'admin-analytics.html' : 'profile.html');
+}
+
+async function ensureGoogleProfile(user) {
+  if (isOwner(user.email)) return;
+  const reference = doc(db, 'users', user.uid);
+  const snapshot = await withTimeout(getDoc(reference), 10000);
+  if (snapshot.exists()) return;
+  const base = (user.displayName || user.email?.split('@')[0] || 'student').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 16) || 'student';
+  const username = `${base}_${user.uid.slice(0, 5)}`.slice(0, 24);
+  await withTimeout(setDoc(reference, {
+    uid: user.uid,
+    fullName: user.displayName || 'طالب شذرات',
+    username,
+    email: user.email || '',
+    role: 'student',
+    accountStatus: 'active',
+    publicProfile: false,
+    avatarKey: null,
+    location: '',
+    studyLevel: '',
+    xp: 0,
+    level: 1,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    authProvider: 'google'
+  }), 15000);
+}
+
+document.querySelectorAll('[data-google-auth]').forEach(button => button.addEventListener('click', async () => {
+  const form = document.querySelector('#login-form') || document.querySelector('#register-form');
+  button.disabled = true;
+  button.setAttribute('aria-busy', 'true');
+  show(form, 'جارٍ فتح تسجيل Google…', 'progress');
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    const result = await withTimeout(signInWithPopup(auth, provider), 45000);
+    show(form, 'جارٍ تجهيز حسابك…', 'progress');
+    await ensureGoogleProfile(result.user);
+    location.href = await destination(result.user);
+  } catch (error) {
+    show(form, errorText(error));
+  } finally {
+    button.disabled = false;
+    button.setAttribute('aria-busy', 'false');
+  }
+}));
+
+const loginForm = document.querySelector('#login-form');
+loginForm?.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!loginForm.reportValidity()) return;
+  setBusy(loginForm, true, 'جارٍ تسجيل الدخول…');
+  show(loginForm, 'نتحقق من بياناتك…', 'progress');
+  try {
+    const credential = await withTimeout(signInWithEmailAndPassword(auth, clean(loginForm.email.value), loginForm.password.value));
+    location.href = await destination(credential.user);
+  } catch (error) {
+    show(loginForm, errorText(error));
+  } finally {
+    setBusy(loginForm, false);
+  }
+});
+
+document.querySelector('#reset-password')?.addEventListener('click', async event => {
+  event.preventDefault();
+  const email = clean(loginForm?.email.value);
+  if (!email) return show(loginForm, 'اكتب بريدك الإلكتروني أولًا.');
+  show(loginForm, 'جارٍ إرسال رابط الاستعادة…', 'progress');
+  try {
+    await withTimeout(sendPasswordResetEmail(auth, email));
+    show(loginForm, 'أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك.', 'success');
+  } catch (error) {
+    show(loginForm, errorText(error));
+  }
+});
+
+const registerForm = document.querySelector('#register-form');
+registerForm?.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!registerForm.reportValidity()) return;
+  const fullName = registerForm.querySelector('#full').value.trim();
+  const username = normalizeUsername(registerForm.querySelector('#username').value);
+  const email = clean(registerForm.querySelector('#mail').value);
+  const phone = normalizePhone(registerForm.querySelector('#phone').value);
+  const password = registerForm.querySelector('#pass').value;
+  const confirmation = registerForm.querySelector('#confirm').value;
+  if (!/^[a-z0-9_]{3,24}$/.test(username) || reservedUsername(username)) return show(registerForm, 'اسم المستخدم يجب أن يكون 3–24 حرفًا إنجليزيًا أو رقمًا أو شرطة سفلية، وألا يكون اسمًا محجوزًا.');
+  if (!phone) return show(registerForm, 'اكتب رقم جوال صحيحًا بصيغة دولية، مثل +9665xxxxxxxx.');
+  if (password !== confirmation) return show(registerForm, 'كلمتا المرور غير متطابقتين.');
+
+  setBusy(registerForm, true, 'جارٍ إنشاء الحساب…');
+  show(registerForm, 'الخطوة 1 من 2: إنشاء حساب الدخول…', 'progress');
+  let createdUser = null;
+  try {
+    const phoneHash = await digest(phone);
+    const credential = await withTimeout(createUserWithEmailAndPassword(auth, email, password));
+    createdUser = credential.user;
+    await withTimeout(updateProfile(createdUser, { displayName: fullName }), 10000);
+    show(registerForm, 'الخطوة 2 من 2: حفظ ملف الطالب…', 'progress');
+    const batch = writeBatch(db);
+    batch.set(doc(db, 'users', createdUser.uid), {
+      uid: createdUser.uid,
+      fullName,
+      username,
+      email,
+      phoneE164: phone,
+      phoneLast4: phone.slice(-4),
+      role: 'student',
+      accountStatus: 'active',
+      publicProfile: false,
+      avatarKey: null,
+      location: '',
+      studyLevel: '',
+      xp: 0,
+      level: 1,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      authProvider: 'password'
+    });
+    batch.set(doc(db, 'phoneReservations', phoneHash), { uid: createdUser.uid, createdAt: serverTimestamp() });
+    batch.set(doc(db, 'usernameReservations', username), { uid: createdUser.uid, createdAt: serverTimestamp() });
+    await withTimeout(batch.commit(), 18000);
+    sendEmailVerification(createdUser).catch(() => {});
+    show(registerForm, 'تم إنشاء الحساب بنجاح. جارٍ فتح ملفك…', 'success');
+    location.href = await destination(createdUser);
+  } catch (error) {
+    console.error('[Shadrat] registration failed', error);
+    if (createdUser) {
+      try { await withTimeout(deleteUser(createdUser), 8000); } catch (cleanupError) { console.warn('[Shadrat] account cleanup incomplete', cleanupError); }
+    }
+    show(registerForm, errorText(error));
+  } finally {
+    setBusy(registerForm, false);
+  }
+});
+
+document.querySelectorAll('[data-sign-out]').forEach(button => button.addEventListener('click', async () => {
+  await signOut(auth);
+  location.replace('login.html');
+}));
+
+export { auth, db, roleFor, normalizePhone, digest };

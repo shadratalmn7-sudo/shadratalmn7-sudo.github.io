@@ -8,10 +8,19 @@ if(!form) throw new Error('contact form not found');
 const params=new URLSearchParams(location.search),type=params.get('type')||'',service=params.get('service')||'',serviceId=params.get('serviceId')||'';
 if(type&&form.querySelector('#type')) form.querySelector('#type').value=type;
 if(service&&form.querySelector('#service-name')){form.querySelector('#service-name').value=service;form.querySelector('[data-service-field]')?.removeAttribute('hidden')}
+function syncFields(){
+  const selected=form.querySelector('#type')?.value;
+  const serviceField=form.querySelector('[data-service-field]');
+  const achievementFields=[...form.querySelectorAll('[data-achievement-field]')];
+  if(serviceField) serviceField.hidden=selected!=='service';
+  achievementFields.forEach(field=>{field.hidden=selected!=='achievement'});
+}
+form.querySelector('#type')?.addEventListener('change',syncFields);
+syncFields();
 const result=form.querySelector('.success'),button=form.querySelector('[type="submit"]');
 if(result){result.textContent='';result.classList.remove('show')}
 function show(text,ok=true){if(!result)return;result.textContent=text;result.classList.add('show');result.style.color=ok?'':'#b42318'}
-onAuthStateChanged(auth,user=>{if(user){const email=form.querySelector('#email');if(email&&!email.value)email.value=user.email||''}});
+onAuthStateChanged(auth,async user=>{if(!user)return;const email=form.querySelector('#email');if(email&&!email.value)email.value=user.email||'';try{const profile=await getDoc(doc(db,'users',user.uid));const name=form.querySelector('#name');if(name&&!name.value)name.value=profile.data()?.fullName||user.displayName||''}catch{}});
 form.addEventListener('submit',async event=>{
   event.preventDefault();event.stopImmediatePropagation();
   if(!form.reportValidity())return;
