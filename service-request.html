@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>طلب خدمة | شذرات للمنح</title>
+  <meta name="description" content="نموذج طلب خدمة من شذرات للمنح يحتوي على بيانات الطالب ووسيلة التواصل والجنسية ومعلومات الطلب.">
+  <link rel="stylesheet" href="site.css?v=21">
+  <link rel="stylesheet" href="site-polish.css?v=1">
+  <link rel="stylesheet" href="logo.css?v=11">
+  <link rel="stylesheet" href="nav-universal.css?v=40">
+  <link rel="stylesheet" href="section-pages.css?v=1">
+  <style>
+    .request-wrap{max-width:900px;margin:auto}.request-card{border:1px solid var(--line);border-radius:28px;background:var(--card);padding:24px;box-shadow:0 16px 42px #17352b0b}.selected-service{display:grid;gap:6px;margin-bottom:18px;padding:16px;border-radius:20px;background:#eef6f1;border:1px solid #c7dacd}.selected-service b{color:#176b4b}.request-form{display:grid;gap:15px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:grid;gap:7px}.field span{font-weight:900;font-size:13px}.field input,.field select,.field textarea{width:100%;border:1px solid #d8cebe;border-radius:15px;background:#fff;padding:13px;font:inherit;color:var(--ink)}.field textarea{min-height:130px;resize:vertical}.full{grid-column:1/-1}.request-note{padding:14px;border-radius:16px;background:#fff8e7;border:1px solid #d9c99d;color:#5f4b24;font-size:13px}.success-box{display:none;margin-top:14px;padding:14px;border-radius:16px;background:#eef6f1;color:#176b4b;font-weight:900}.success-box.show{display:block}@media(max-width:700px){.form-grid{grid-template-columns:1fr}.request-card{padding:18px;border-radius:22px}}
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div></header>
+  <main>
+    <section class="page-hero compact-hero"><div class="container request-wrap"><span class="eyebrow">طلب خدمة</span><h1>عبّي بياناتك عشان نتواصل معك</h1><p class="lead">اكتب اسمك وعمرك وجنسيتك ووسيلة التواصل، ثم اشرح طلبك. بعد الإرسال سيفتح بريد جاهز لإرساله للإدارة.</p></div></section>
+    <section class="section"><div class="container request-wrap"><article class="request-card">
+      <div class="selected-service"><span>الخدمة المختارة</span><b id="service-name">خدمة من شذرات</b><small id="service-price" class="muted"></small></div>
+      <form class="request-form" id="request-form">
+        <div class="form-grid">
+          <label class="field"><span>الاسم الكامل</span><input id="student-name" required placeholder="اكتب اسمك"></label>
+          <label class="field"><span>العمر</span><input id="student-age" type="number" min="12" max="80" required placeholder="مثال: 18"></label>
+          <label class="field"><span>الجنسية</span><select id="nationality" required><option value="">اختر الجنسية</option><option>يمني</option><option>مصري</option><option>سعودي</option><option>أخرى</option></select></label>
+          <label class="field"><span>وسيلة التواصل</span><select id="contact-method" required><option>واتساب</option><option>تليجرام</option><option>رقم جوال</option><option>بريد إلكتروني</option></select></label>
+          <label class="field"><span>رقم الجوال أو التليجرام أو البريد</span><input id="contact-value" required placeholder="مثال: @username أو رقمك"></label>
+          <label class="field"><span>الدولة الحالية</span><input id="current-country" placeholder="مثال: السعودية"></label>
+          <label class="field full"><span>معلومات الطلب</span><textarea id="request-details" placeholder="اكتب تفاصيل طلبك، التخصص، الدولة، المرحلة الدراسية، والموعد إذا عندك"></textarea></label>
+        </div>
+        <div class="request-note">لا ترسل صور جواز أو شهادة من هنا. بعد مراجعة الطلب سنخبرك بطريقة آمنة لإرسال المستندات إذا احتجناها.</div>
+        <button class="btn primary" type="submit">تجهيز الطلب وإرساله</button>
+        <div class="success-box" id="success-box">تم تجهيز الرسالة. إذا لم يفتح البريد تلقائيًا، انسخ البيانات وأرسلها للإدارة.</div>
+      </form>
+    </article></div></section>
+  </main>
+  <footer class="site-footer"><div class="container footer-grid"><div><b>شذرات للمنح</b><p>نموذج طلب خدمة واضح وسهل.</p></div><div><b>المنصة</b><a href="services.html">الخدمات</a><a href="offers.html">العروض</a></div><div><b>المعلومات</b><a href="about.html">من نحن</a><a href="privacy.html">الخصوصية</a></div></div></footer>
+  <script src="nav-universal.js?v=40"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const service = params.get('service') || 'خدمة من شذرات';
+    const price = params.get('price') || '';
+    document.querySelector('#service-name').textContent = service;
+    document.querySelector('#service-price').textContent = price ? `السعر / الحالة: ${price}` : '';
+    document.querySelector('#request-form').addEventListener('submit', event => {
+      event.preventDefault();
+      const data = {
+        الخدمة: service,
+        السعر: price,
+        الاسم: document.querySelector('#student-name').value,
+        العمر: document.querySelector('#student-age').value,
+        الجنسية: document.querySelector('#nationality').value,
+        وسيلة_التواصل: document.querySelector('#contact-method').value,
+        بيانات_التواصل: document.querySelector('#contact-value').value,
+        الدولة_الحالية: document.querySelector('#current-country').value,
+        تفاصيل_الطلب: document.querySelector('#request-details').value
+      };
+      const body = Object.entries(data).map(([k,v]) => `${k}: ${v || '-'}`).join('\n');
+      localStorage.setItem('shadrat_last_service_request', body);
+      document.querySelector('#success-box').classList.add('show');
+      location.href = `mailto:7ruahmed@mail.ru,7ruafarat@mail.ru?subject=${encodeURIComponent('طلب خدمة من شذرات - ' + service)}&body=${encodeURIComponent(body)}`;
+    });
+  </script>
+</body>
+</html>
