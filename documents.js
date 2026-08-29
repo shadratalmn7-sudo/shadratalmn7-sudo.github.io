@@ -9,23 +9,16 @@ if (!window.__shadratDocsUnifiedReady) {
   const formats = [
     { value: 'image', label: 'صورة' },
     { value: 'pdf', label: 'PDF' },
+    { value: 'txt', label: 'نص TXT' },
     { value: 'word', label: 'Word' },
     { value: 'excel', label: 'Excel' },
     { value: 'powerpoint', label: 'PowerPoint' }
   ];
   const labels = Object.fromEntries(formats.map(item => [item.value, item.label]));
 
-  const fillFormats = () => {
-    const html = formats.map(item => `<option value="${item.value}">${item.label}</option>`).join('');
-    fromEl.innerHTML = html;
-    toEl.innerHTML = html;
-    fromEl.value = 'image';
-    toEl.value = 'pdf';
-  };
-
   const readBytes = file => file.arrayBuffer();
   const revokeOld = () => { if (currentUrl) URL.revokeObjectURL(currentUrl); currentUrl = ''; };
-  const setStatus = text => { const status = area.querySelector('[data-status]'); if (status) status.textContent = text; };
+  const setStatus = text => { const status = area?.querySelector('[data-status]'); if (status) status.textContent = text; };
   const makeDownload = (blob, name) => {
     revokeOld();
     const link = area.querySelector('[data-download]');
@@ -36,6 +29,7 @@ if (!window.__shadratDocsUnifiedReady) {
     link.textContent = 'تحميل الملف الجاهز';
   };
   const downloadPdf = (bytes, name) => makeDownload(new Blob([bytes], { type: 'application/pdf' }), name);
+  const textDownload = (text, name) => makeDownload(new Blob([text], { type: 'text/plain;charset=utf-8' }), name);
 
   const loadPdfLib = async () => import('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm');
   const loadZip = async () => (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm')).default;
@@ -43,6 +37,14 @@ if (!window.__shadratDocsUnifiedReady) {
     const pdfjs = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/+esm');
     pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.mjs';
     return pdfjs;
+  };
+
+  const fillFormats = () => {
+    const html = formats.map(item => `<option value="${item.value}">${item.label}</option>`).join('');
+    fromEl.innerHTML = html;
+    toEl.innerHTML = html;
+    fromEl.value = 'image';
+    toEl.value = 'pdf';
   };
 
   const loadImage = file => new Promise((resolve, reject) => {
@@ -75,6 +77,8 @@ if (!window.__shadratDocsUnifiedReady) {
     });
     return [...pages];
   };
+
+  const getFiles = () => [...(area.querySelector('input[type="file"]')?.files || [])];
 
   const imagesToPdf = async files => {
     if (!files.length) throw new Error('اختر صورة واحدة على الأقل.');
@@ -118,6 +122,21 @@ if (!window.__shadratDocsUnifiedReady) {
       zip.file(`page-${String(i).padStart(2, '0')}.png`, await canvasBlob(canvas, 'image/png'));
     }
     makeDownload(await zip.generateAsync({ type: 'blob' }), 'shadrat-pdf-images.zip');
+  };
+
+  const pdfToText = async files => {
+    const file = files[0];
+    if (!file) throw new Error('اختر ملف PDF أولًا.');
+    const pdfjs = await loadPdfJs();
+    const pdf = await pdfjs.getDocument({ data: await readBytes(file) }).promise;
+    const pages = [];
+    for (let i = 1; i <= pdf.numPages; i += 1) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const text = content.items.map(item => item.str).join(' ');
+      pages.push(`صفحة ${i}\n${text}`);
+    }
+    textDownload(pages.join('\n\n--------------------\n\n'), 'shadrat-pdf-text.txt');
   };
 
   const mergePdf = async files => {
@@ -184,8 +203,10 @@ if (!window.__shadratDocsUnifiedReady) {
     const to = toEl.value;
     if (from === 'image' && to === 'pdf') return { kind: 'image-pdf', title: 'صورة إلى PDF', hint: 'شغال الآن: حوّل صورة أو عدة صور إلى PDF واحد.', badge: 'PDF' };
     if (from === 'pdf' && to === 'image') return { kind: 'pdf-image', title: 'PDF إلى صور', hint: 'شغال الآن: حوّل صفحات PDF إلى صور PNG داخل ملف ZIP.', badge: 'PNG' };
+    if (from === 'pdf' && to === 'txt') return { kind: 'pdf-text', title: 'PDF إلى نص TXT', hint: 'شغال الآن: استخراج النص من PDF قابل للنسخ.', badge: 'TXT' };
     if (from === 'pdf' && to === 'pdf') return { kind: 'pdf-tools', title: 'أدوات PDF', hint: 'شغال الآن: دمج، استخراج، حذف، أو تدوير صفحات PDF.', badge: 'PDF' };
     if (from === 'image' && to === 'image') return { kind: 'image-tools', title: 'أدوات الصور', hint: 'شغال الآن: تحويل JPG / PNG / WebP أو ضغط الصورة.', badge: 'IMG' };
+    if (from === 'txt' && to === 'txt') return { kind: 'soon', title: 'نص TXT', hint: 'هذا ليس تحويلًا. اختر نوعًا مختلفًا في خانة إلى.', badge: '—' };
     return { kind: 'soon', title: `${labels[from]} إلى ${labels[to]}`, hint: 'قريبًا: هذا التحويل يحتاج خادم معالجة آمن.', badge: 'قريبًا' };
   };
 
@@ -196,7 +217,7 @@ if (!window.__shadratDocsUnifiedReady) {
     const imageAction = area.querySelector('[data-image-action]')?.value || 'image-to-jpg';
     const isPdfTool = tool.kind === 'pdf-tools';
     const isImageTool = tool.kind === 'image-tools';
-    const accept = isPdfTool || tool.kind === 'pdf-image' ? 'application/pdf' : 'image/jpeg,image/png,image/webp';
+    const accept = isPdfTool || tool.kind === 'pdf-image' || tool.kind === 'pdf-text' ? 'application/pdf' : 'image/jpeg,image/png,image/webp';
     const multiple = tool.kind === 'image-pdf' || (isPdfTool && pdfAction === 'merge-pdf');
     inputs.innerHTML = `
       <label class="drop-zone">
@@ -255,22 +276,20 @@ if (!window.__shadratDocsUnifiedReady) {
     drawInputs(tool);
 
     area.querySelector('[data-run]')?.addEventListener('click', async () => {
-      const files = [...(area.querySelector('input[type="file"]')?.files || [])];
-      const link = area.querySelector('[data-download]');
-      if (link) link.hidden = true;
+      area.querySelector('[data-download]').hidden = true;
       try {
         setStatus('جاري التحويل داخل جهازك…');
+        const files = getFiles();
+        const pdfAction = area.querySelector('[data-pdf-action]')?.value || '';
+        const imageAction = area.querySelector('[data-image-action]')?.value || '';
         if (tool.kind === 'image-pdf') await imagesToPdf(files);
         else if (tool.kind === 'pdf-image') await pdfToImages(files);
-        else if (tool.kind === 'pdf-tools') {
-          const action = area.querySelector('[data-pdf-action]')?.value || 'merge-pdf';
-          if (action === 'merge-pdf') await mergePdf(files);
-          if (action === 'split-pdf') await splitPdf(files, area.querySelector('[data-ranges]')?.value || '');
-          if (action === 'remove-pages') await removePages(files, area.querySelector('[data-ranges]')?.value || '');
-          if (action === 'rotate-pdf') await rotatePdf(files, area.querySelector('[data-angle]')?.value || 90);
-        } else if (tool.kind === 'image-tools') {
-          await convertImage(files, area.querySelector('[data-image-action]')?.value || 'image-to-jpg');
-        }
+        else if (tool.kind === 'pdf-text') await pdfToText(files);
+        else if (tool.kind === 'pdf-tools' && pdfAction === 'merge-pdf') await mergePdf(files);
+        else if (tool.kind === 'pdf-tools' && pdfAction === 'split-pdf') await splitPdf(files, area.querySelector('[data-ranges]')?.value || '');
+        else if (tool.kind === 'pdf-tools' && pdfAction === 'remove-pages') await removePages(files, area.querySelector('[data-ranges]')?.value || '');
+        else if (tool.kind === 'pdf-tools' && pdfAction === 'rotate-pdf') await rotatePdf(files, area.querySelector('[data-angle]')?.value || 90);
+        else if (tool.kind === 'image-tools') await convertImage(files, imageAction);
         setStatus('تم التجهيز. اضغط تحميل الملف الجاهز.');
       } catch (error) {
         console.error(error);
@@ -279,17 +298,14 @@ if (!window.__shadratDocsUnifiedReady) {
     });
   };
 
+  fillFormats();
+  fromEl.addEventListener('change', render);
+  toEl.addEventListener('change', render);
   document.querySelector('#swap-conversion')?.addEventListener('click', () => {
     const oldFrom = fromEl.value;
     fromEl.value = toEl.value;
     toEl.value = oldFrom;
     render();
   });
-  fromEl?.addEventListener('change', render);
-  toEl?.addEventListener('change', render);
-
-  if (fromEl && toEl && area) {
-    fillFormats();
-    render();
-  }
+  render();
 }
