@@ -1,13 +1,14 @@
-if (!window.__shadratDocsToolsReady) {
-  window.__shadratDocsToolsReady = true;
+if (!window.__shadratDocsToolsReadyV50) {
+  window.__shadratDocsToolsReadyV50 = true;
 
   const fromEl = document.querySelector('#convert-from');
   const toEl = document.querySelector('#convert-to');
   const serviceEl = document.querySelector('#service-select');
   const area = document.querySelector('#active-tool-area');
   let currentUrl = '';
-  const revokeOld = () => { if (currentUrl) URL.revokeObjectURL(currentUrl); currentUrl = ''; };
   const readBytes = file => file.arrayBuffer();
+  const revokeOld = () => { if (currentUrl) URL.revokeObjectURL(currentUrl); currentUrl = ''; };
+  const setStatus = text => { const s = area.querySelector('[data-status]'); if (s) s.textContent = text; };
   const makeDownload = (blob, name) => {
     revokeOld();
     const link = area.querySelector('[data-download]');
@@ -18,8 +19,6 @@ if (!window.__shadratDocsToolsReady) {
     link.textContent = 'تحميل الملف الجاهز';
   };
   const downloadPdf = (bytes, name) => makeDownload(new Blob([bytes], { type:'application/pdf' }), name);
-  const setStatus = text => { const s = area.querySelector('[data-status]'); if (s) s.textContent = text; };
-
   const loadPdfLib = async () => import('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm');
   const loadZip = async () => (await import('https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm')).default;
   const loadPdfJs = async () => {
@@ -28,13 +27,9 @@ if (!window.__shadratDocsToolsReady) {
     return pdfjs;
   };
 
-  const tools = {
-    'image-pdf': [
-      { id:'image-to-pdf', label:'صورة إلى PDF', hint:'حوّل صورة أو عدة صور إلى ملف PDF واحد', accept:'image/jpeg,image/png,image/webp', multiple:true, badge:'PDF' }
-    ],
-    'pdf-image': [
-      { id:'pdf-to-image', label:'PDF إلى صور PNG', hint:'حوّل صفحات PDF إلى صور داخل ملف ZIP', accept:'application/pdf', badge:'PNG' }
-    ],
+  const liveTools = {
+    'image-pdf': [{ id:'image-to-pdf', label:'صورة إلى PDF', hint:'حوّل صورة أو عدة صور إلى ملف PDF واحد', accept:'image/jpeg,image/png,image/webp', multiple:true, badge:'PDF' }],
+    'pdf-image': [{ id:'pdf-to-image', label:'PDF إلى صور PNG', hint:'حوّل صفحات PDF إلى صور داخل ملف ZIP', accept:'application/pdf', badge:'PNG' }],
     'pdf-pdf': [
       { id:'merge-pdf', label:'دمج ملفات PDF', hint:'ادمج أكثر من ملف PDF في ملف واحد', accept:'application/pdf', multiple:true, badge:'دمج' },
       { id:'split-pdf', label:'استخراج صفحات PDF', hint:'استخرج صفحات محددة مثل 1-3, 5', accept:'application/pdf', ranges:true, rangeLabel:'الصفحات المطلوبة', badge:'قص' },
@@ -49,6 +44,10 @@ if (!window.__shadratDocsToolsReady) {
     ]
   };
 
+  const typeNames = { image:'صورة', pdf:'PDF', word:'Word', excel:'Excel', powerpoint:'PowerPoint' };
+  const soonTool = (from, to) => ({ id:'soon', label:`${typeNames[from]} إلى ${typeNames[to]}`, hint:'هذه الخدمة تحتاج خادم معالجة وسيتم إضافتها قريبًا.', badge:'قريبًا', soon:true });
+  const getTools = () => liveTools[`${fromEl.value}-${toEl.value}`] || [soonTool(fromEl.value, toEl.value)];
+
   const parseRanges = (value, total) => {
     const pages = new Set();
     String(value || '').split(',').map(p => p.trim()).filter(Boolean).forEach(part => {
@@ -61,7 +60,6 @@ if (!window.__shadratDocsToolsReady) {
     });
     return [...pages];
   };
-
   const loadImage = file => new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
@@ -161,15 +159,12 @@ if (!window.__shadratDocsToolsReady) {
     makeDownload(await canvasBlob(canvas, type, quality), `shadrat-image.${ext}`);
   };
 
-  const renderTool = () => {
-    const key = `${fromEl.value}-${toEl.value}`;
-    const list = tools[key] || tools['image-pdf'];
-    serviceEl.innerHTML = list.map(t => `<option value="${t.id}">${t.label}</option>`).join('');
-    renderActive();
-  };
   const renderActive = () => {
-    const key = `${fromEl.value}-${toEl.value}`;
-    const tool = (tools[key] || []).find(t => t.id === serviceEl.value) || (tools[key] || tools['image-pdf'])[0];
+    const tool = getTools().find(t => t.id === serviceEl.value) || getTools()[0];
+    if (tool.soon) {
+      area.innerHTML = `<div class="tool-title"><div><h3>${tool.label}</h3><p>${tool.hint}</p></div><span class="tool-badge">${tool.badge}</span></div><div class="soon-box"><b>قريبًا</b><p>التحويلات المكتبية مثل Word و Excel و PowerPoint تحتاج معالجة خاصة، لذلك ستُضاف لاحقًا بدون وضع زر وهمي.</p><div class="soon-row"><span>PDF ↔ Word</span><span>PDF ↔ Excel</span><span>PDF ↔ PowerPoint</span></div></div>`;
+      return;
+    }
     area.innerHTML = `<div class="tool-title"><div><h3>${tool.label}</h3><p>${tool.hint}</p></div><span class="tool-badge">${tool.badge}</span></div>
       <label class="drop-zone"><input type="file" accept="${tool.accept}" ${tool.multiple ? 'multiple' : ''}><b>ادخل الملف هنا</b><small>${tool.multiple ? 'يمكن اختيار أكثر من ملف' : 'اختر ملف واحد من جهازك'}</small></label>
       ${tool.ranges ? `<label class="field"><span>${tool.rangeLabel}</span><input data-ranges type="text" placeholder="مثال: 1-3, 5"></label>` : ''}
@@ -203,11 +198,19 @@ if (!window.__shadratDocsToolsReady) {
     });
   };
 
-  fromEl?.addEventListener('change', renderTool);
-  toEl?.addEventListener('change', renderTool);
+  const updateServices = () => {
+    const list = getTools();
+    serviceEl.innerHTML = list.map(t => `<option value="${t.id}">${t.label}</option>`).join('');
+    renderActive();
+  };
+  fromEl?.addEventListener('change', updateServices);
+  toEl?.addEventListener('change', updateServices);
   serviceEl?.addEventListener('change', renderActive);
   document.querySelector('#swap-conversion')?.addEventListener('click', () => {
-    const old = fromEl.value; fromEl.value = toEl.value; toEl.value = old; renderTool();
+    const old = fromEl.value;
+    fromEl.value = toEl.value;
+    toEl.value = old;
+    updateServices();
   });
-  renderTool();
+  updateServices();
 }
