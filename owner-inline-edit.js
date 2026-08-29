@@ -8,86 +8,26 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const editableSelector = '[data-edit-key]';
+let editMode = false;
+let active = null;
+let original = '';
+
 const style = document.createElement('style');
 style.textContent = `
-  .owner-inline-ready ${editableSelector}{outline:1px dashed transparent;transition:.15s ease;position:relative}.owner-inline-ready ${editableSelector}:hover{outline-color:#dcae5a;background:#fff8df55}.owner-edit-btn{position:absolute;z-index:80;min-width:34px;height:30px;border:1px solid #d0b36b;border-radius:999px;background:#fff8df;color:#6b4e12;font-size:12px;font-weight:900;box-shadow:0 8px 22px #17352b18;cursor:pointer}.owner-edit-btn:hover{background:#dcae5a;color:#2d250f}.owner-edit-modal{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;background:#09251bcc;padding:18px}.owner-edit-box{width:min(560px,100%);border-radius:24px;background:#fffdf8;border:1px solid #e1d6c4;box-shadow:0 30px 80px #0004;padding:18px;direction:rtl}.owner-edit-box h2{margin:0 0 8px;font-size:22px}.owner-edit-box p{margin:0 0 12px;color:#68766f;font-size:13px}.owner-edit-box textarea{width:100%;min-height:150px;border:1px solid #d8cebe;border-radius:18px;padding:14px;font:inherit;line-height:1.8;resize:vertical}.owner-edit-actions{display:flex;gap:10px;justify-content:flex-start;flex-wrap:wrap;margin-top:12px}.owner-edit-actions button{border:0;border-radius:14px;padding:11px 16px;font:inherit;font-weight:900;cursor:pointer}.owner-edit-save{background:#176b4b;color:#fff}.owner-edit-cancel{background:#efe7da;color:#17352b}.owner-edit-status{margin-top:9px;color:#176b4b;font-size:13px;font-weight:900}.owner-edit-disabled{position:fixed;left:12px;bottom:12px;z-index:1200;max-width:320px;border:1px solid #edd2a0;background:#fff8df;color:#604714;border-radius:16px;padding:12px;font-size:12px;box-shadow:0 12px 30px #17352b18}`;
+.owner-edit-toggle{position:fixed;left:14px;bottom:14px;z-index:1300;border:0;border-radius:15px;padding:11px 15px;background:#176b4b;color:#fff;font:inherit;font-size:12px;font-weight:900;box-shadow:0 14px 34px #17352b25;cursor:pointer}.owner-edit-toggle.active{background:#8a641f}.owner-edit-mode ${editableSelector}{outline:1px dashed #c7a758;outline-offset:3px;cursor:text}.owner-edit-mode a${editableSelector}{cursor:text}.owner-inline-active{outline:2px solid #176b4b!important;outline-offset:4px!important;background:#fff8df66!important;border-radius:6px}.owner-inline-actions{position:absolute;z-index:1400;display:flex;gap:6px;padding:6px;border:1px solid #d8cebe;border-radius:13px;background:#fffdf8;box-shadow:0 10px 28px #17352b24}.owner-inline-actions button{border:0;border-radius:9px;padding:7px 10px;font:inherit;font-size:11px;font-weight:900;cursor:pointer}.owner-inline-save{background:#176b4b;color:#fff}.owner-inline-cancel{background:#eee5d6;color:#17352b}.owner-inline-status{position:fixed;left:14px;bottom:66px;z-index:1350;padding:9px 12px;border-radius:12px;background:#17352b;color:#fff;font-size:11px;font-weight:800;box-shadow:0 10px 28px #17352b25}.owner-inline-status.error{background:#9f2f2f}@media(max-width:620px){.owner-edit-toggle{left:10px;bottom:10px}.owner-inline-status{left:10px;bottom:60px}}
+`;
 document.head.appendChild(style);
 
-const textOf = element => element.textContent.trim();
-const setText = (key, value) => {
-  document.querySelectorAll(`[data-edit-key="${CSS.escape(key)}"]`).forEach(element => {
-    element.textContent = value;
-  });
-};
+const setText = (key, value) => document.querySelectorAll(`[data-edit-key="${CSS.escape(key)}"]`).forEach(el => el.textContent = value);
+async function applySavedText(){try{const snap=await getDocs(collection(db,'siteText'));snap.forEach(item=>{const data=item.data()||{};if(typeof data.value==='string')setText(item.id,data.value);});}catch(error){console.warn('[Shadrat] saved text unavailable',error);}}
 
-async function applySavedText() {
-  try {
-    const snap = await getDocs(collection(db, 'siteText'));
-    snap.forEach(item => {
-      const data = item.data() || {};
-      if (typeof data.value === 'string') setText(item.id, data.value);
-    });
-  } catch (error) {
-    console.warn('[Shadrat] saved text unavailable', error);
-  }
-}
-
-function openEditor(element) {
-  const key = element.dataset.editKey;
-  const current = textOf(element);
-  const modal = document.createElement('div');
-  modal.className = 'owner-edit-modal';
-  modal.innerHTML = `<div class="owner-edit-box" role="dialog" aria-modal="true"><h2>تعديل سريع</h2><p>التعديل هنا يحفظ النص في نفس الصفحة ويظهر للزوار بعد التحديث.</p><textarea>${current.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</textarea><div class="owner-edit-actions"><button class="owner-edit-save" type="button">حفظ</button><button class="owner-edit-cancel" type="button">إلغاء</button></div><div class="owner-edit-status" aria-live="polite"></div></div>`;
-  document.body.appendChild(modal);
-  const textarea = modal.querySelector('textarea');
-  const status = modal.querySelector('.owner-edit-status');
-  textarea.focus();
-  modal.querySelector('.owner-edit-cancel').addEventListener('click', () => modal.remove());
-  modal.addEventListener('click', event => { if (event.target === modal) modal.remove(); });
-  modal.querySelector('.owner-edit-save').addEventListener('click', async () => {
-    const value = textarea.value.trim();
-    if (!value) { status.textContent = 'النص لا يكون فاضي.'; return; }
-    status.textContent = 'جاري الحفظ…';
-    try {
-      await setDoc(doc(db, 'siteText', key), { value, page: location.pathname.split('/').pop() || 'index.html', updatedAt: serverTimestamp() }, { merge: true });
-      setText(key, value);
-      status.textContent = 'تم الحفظ.';
-      setTimeout(() => modal.remove(), 500);
-    } catch (error) {
-      console.error(error);
-      status.textContent = 'تعذر الحفظ. تأكد أن حسابك مالك وأن صلاحيات Firestore تسمح بالتعديل.';
-    }
-  });
-}
-
-function placeButton(button, target) {
-  const rect = target.getBoundingClientRect();
-  button.style.top = `${Math.max(8, rect.top + window.scrollY - 12)}px`;
-  button.style.left = `${Math.max(8, rect.left + window.scrollX + 4)}px`;
-}
-
-function enableOwnerEdit() {
-  document.documentElement.classList.add('owner-inline-ready');
-  document.querySelectorAll(editableSelector).forEach(element => {
-    element.addEventListener('mouseenter', () => {
-      if (document.querySelector('.owner-edit-modal')) return;
-      let button = document.querySelector('.owner-edit-btn');
-      if (!button) {
-        button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'owner-edit-btn';
-        button.textContent = 'تعديل';
-        document.body.appendChild(button);
-      }
-      button.onclick = event => { event.preventDefault(); event.stopPropagation(); openEditor(element); };
-      placeButton(button, element);
-      button.hidden = false;
-    });
-  });
-  window.addEventListener('scroll', () => { const button = document.querySelector('.owner-edit-btn'); if (button) button.hidden = true; }, { passive: true });
-}
+function status(message,error=false){let el=document.querySelector('.owner-inline-status');if(!el){el=document.createElement('div');el.className='owner-inline-status';document.body.appendChild(el);}el.textContent=message;el.classList.toggle('error',error);clearTimeout(status.t);status.t=setTimeout(()=>el.remove(),1800);}
+function closeActions(){document.querySelector('.owner-inline-actions')?.remove();}
+function stopEditing(restore=false){if(!active)return;if(restore)active.textContent=original;active.removeAttribute('contenteditable');active.classList.remove('owner-inline-active');active=null;original='';closeActions();}
+function placeActions(target){closeActions();const box=document.createElement('div');box.className='owner-inline-actions';box.innerHTML='<button type="button" class="owner-inline-save">حفظ</button><button type="button" class="owner-inline-cancel">إلغاء</button>';document.body.appendChild(box);const rect=target.getBoundingClientRect();box.style.top=`${rect.bottom+window.scrollY+7}px`;box.style.left=`${Math.max(8,rect.left+window.scrollX)}px`;box.querySelector('.owner-inline-cancel').addEventListener('click',()=>stopEditing(true));box.querySelector('.owner-inline-save').addEventListener('click',saveActive);}
+async function saveActive(){if(!active)return;const value=active.textContent.trim();if(!value){status('النص ما يقدر يكون فاضي',true);return;}const key=active.dataset.editKey;status('جاري الحفظ…');try{await setDoc(doc(db,'siteText',key),{value,page:location.pathname.split('/').pop()||'index.html',updatedAt:serverTimestamp()},{merge:true});setText(key,value);stopEditing(false);status('تم الحفظ مباشرة');}catch(error){console.error(error);status('تعذر الحفظ بسبب صلاحيات قاعدة البيانات',true);}}
+function startEditing(element,event){if(!editMode)return;event.preventDefault();event.stopPropagation();if(active&&active!==element)stopEditing(false);active=element;original=element.textContent;element.setAttribute('contenteditable','true');element.classList.add('owner-inline-active');element.focus();const range=document.createRange();range.selectNodeContents(element);const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);placeActions(element);}
+function enableOwner(){if(document.querySelector('.owner-edit-toggle'))return;const toggle=document.createElement('button');toggle.type='button';toggle.className='owner-edit-toggle';toggle.textContent='تفعيل التعديل';document.body.appendChild(toggle);toggle.addEventListener('click',()=>{editMode=!editMode;document.documentElement.classList.toggle('owner-edit-mode',editMode);toggle.classList.toggle('active',editMode);toggle.textContent=editMode?'إنهاء التعديل':'تفعيل التعديل';if(!editMode)stopEditing(false);status(editMode?'اضغط على أي نص محدد وعدله في مكانه':'تم إيقاف وضع التعديل');});document.addEventListener('click',event=>{const el=event.target.closest?.(editableSelector);if(el)startEditing(el,event);},true);document.addEventListener('keydown',event=>{if(!active)return;if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();saveActive();}if(event.key==='Escape'){event.preventDefault();stopEditing(true);}});window.addEventListener('scroll',()=>{if(active)placeActions(active);},{passive:true});}
 
 applySavedText();
-onAuthStateChanged(auth, user => {
-  if (user?.email === OWNER_EMAIL) enableOwnerEdit();
-});
+onAuthStateChanged(auth,user=>{if(user?.email===OWNER_EMAIL)enableOwner();});
