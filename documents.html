@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>مستنداتي | أدوات PDF للطلاب | شذرات للمنح</title>
+  <meta name="description" content="أدوات مجانية للطلاب لتحويل الصور إلى PDF، دمج ملفات PDF، واستخراج صفحات محددة من ملف PDF داخل المتصفح.">
+  <link rel="stylesheet" href="site.css?v=21">
+  <link rel="stylesheet" href="site-polish.css?v=1">
+  <link rel="stylesheet" href="logo.css?v=10">
+  <link rel="stylesheet" href="nav-universal.css?v=22">
+  <link rel="stylesheet" href="section-pages.css?v=1">
+  <link rel="stylesheet" href="documents.css?v=1">
+</head>
+<body>
+  <header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div></header>
+  <main>
+    <section class="page-hero compact-hero docs-hero">
+      <div class="container">
+        <span class="eyebrow">أدوات تجهيز الملف</span>
+        <h1>مستنداتي</h1>
+        <p class="lead">حوّل صور الجواز والشهادة إلى PDF، ادمج ملفاتك في ملف واحد، أو استخرج صفحات محددة قبل رفعها في بوابات المنح.</p>
+        <div class="docs-privacy"><b>خصوصية مهمة:</b><span>الملفات تُعالج داخل متصفحك ولا يتم حفظها في شذرات. تجنب استخدام جهاز عام مع مستنداتك الشخصية.</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container docs-layout">
+        <article class="card doc-tool" data-tool="images">
+          <div class="doc-tool-head"><span>01</span><div><h2>صور إلى PDF</h2><p>اجمع صور JPG أو PNG في ملف PDF واحد مرتب.</p></div></div>
+          <label class="drop-zone"><input type="file" id="image-files" accept="image/jpeg,image/png" multiple><b>اختر صور الجواز أو الشهادة</b><small>يمكن اختيار أكثر من صورة مرة واحدة</small></label>
+          <button class="btn primary" id="images-to-pdf">إنشاء PDF</button>
+        </article>
+
+        <article class="card doc-tool" data-tool="merge">
+          <div class="doc-tool-head"><span>02</span><div><h2>دمج PDF</h2><p>ادمج أكثر من ملف PDF في ملف واحد للتقديم.</p></div></div>
+          <label class="drop-zone"><input type="file" id="merge-files" accept="application/pdf" multiple><b>اختر ملفات PDF</b><small>سيتم دمجها بنفس ترتيب اختيارك</small></label>
+          <button class="btn primary" id="merge-pdf">دمج الملفات</button>
+        </article>
+
+        <article class="card doc-tool" data-tool="split">
+          <div class="doc-tool-head"><span>03</span><div><h2>استخراج صفحات</h2><p>اكتب الصفحات المطلوبة مثل: 1-3, 5, 8.</p></div></div>
+          <label class="drop-zone"><input type="file" id="split-file" accept="application/pdf"><b>اختر ملف PDF واحد</b><small>ثم اكتب الصفحات التي تريدها</small></label>
+          <label class="field"><span>الصفحات المطلوبة</span><input id="page-ranges" type="text" inputmode="text" placeholder="مثال: 1-3, 5"></label>
+          <button class="btn primary" id="split-pdf">استخراج الصفحات</button>
+        </article>
+
+        <aside class="card docs-result" aria-live="polite">
+          <span class="eyebrow">النتيجة</span>
+          <h2>جاهز للتجهيز</h2>
+          <p id="docs-status">اختر الأداة والملفات، ثم اضغط الزر المناسب.</p>
+          <a class="btn outline" id="download-result" hidden download>تحميل الملف</a>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="container footer-grid"><div><img class="footer-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><p>أدوات ومعلومات تساعد الطالب على تجهيز ملفه الدراسي دون ضمان القبول.</p></div><div><b>الأدوات</b><a href="documents.html">مستنداتي</a><a href="scholarships.html">المنح</a></div><div><b>المعلومات</b><a href="privacy.html">الخصوصية</a><a href="terms.html">الشروط</a></div></div></footer>
+  <script src="nav-universal.js?v=22"></script>
+  <script type="module" src="documents.js?v=1"></script>
+</body>
+</html>
