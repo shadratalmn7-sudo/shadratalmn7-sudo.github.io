@@ -15,6 +15,7 @@
     'services.html': ['خدمات الطلاب | شذرات للمنح', 'استشارات وخدمات واضحة لمساعدة الطلاب في تجهيز طلبات المنح والوثائق.'],
     'offers.html': ['عروض الطلاب | شذرات للمنح', 'عروض محددة المدة والنطاق لخدمات الطلاب والمنح.'],
     'videos.html': ['الفيديوهات والقنوات | شذرات للمنح', 'فيديوهات وقنوات مختارة تشرح المنح وخطوات التقديم.'],
+    'about.html': ['من نحن | شذرات للمنح', 'تعرف على إدارة شذرات للمنح وقنوات التواصل المباشر مع الإدارة.'],
     'contact.html': ['تواصل معنا | شذرات للمنح', 'تواصل مع فريق شذرات للاستفسارات والخدمات والبلاغات.'],
     'login.html': ['تسجيل الدخول | شذرات للمنح', 'سجّل الدخول إلى حسابك في شذرات للمنح.'],
     'register.html': ['إنشاء حساب | شذرات للمنح', 'أنشئ حساب طالب في شذرات واحفظ منحك وتابع خطواتك.']
@@ -44,12 +45,12 @@
     home: icon('M4 11.2 12 4l8 7.2v8.3H14.5v-5.5h-5V19.5H4v-8.3Z'),
     scholarship: icon('m3.5 8.2 8.5-4 8.5 4-8.5 4-8.5-4Zm3 2.1v4.2c0 1.7 2.5 3.5 5.5 3.5s5.5-1.8 5.5-3.5v-4.2M20.5 8.5v5'),
     documents: icon('M7 3.5h7l3 3v13H7v-16Zm7 0v4h4M9.5 11h5M9.5 14h5M9.5 17H13'),
-    community: icon('M5 5.5h9a3 3 0 0 1 3 3v3a3 3 0 0 1-3 3H9l-4 3v-3a3 3 0 0 1-3-3v-3a3 3 0 0 1 3-3Zm12 3h1a3 3 0 0 1 3 3v3'),
     services: icon('M7 6.5h10l1 3.5-2 8H8l-2-8 1-3.5Zm2-2h6v2H9v-2ZM9.5 12h5M12 9.5v5'),
     offers: icon('M4.5 8 9 3.5h8.5l2 2V14L15 18.5 4.5 8Zm10-1.2h.01M9 13l6-6'),
     videos: icon('M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 17V7A1.5 1.5 0 0 1 5 5.5Zm5 4 5 2.5-5 2.5v-5Z'),
     contact: icon('M4 6h16v12H4V6Zm0 1 8 6 8-6'),
     profile: icon('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20c.7-3.6 3-5.5 7-5.5s6.3 1.9 7 5.5'),
+    about: icon('M12 4a8 8 0 0 0-8 8v6l2.5-1.5A8 8 0 1 0 12 4Zm-3 7h.01M12 11h.01M15 11h.01M8.5 14.5c2.2 1.6 4.8 1.6 7 0'),
     grid: icon('M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h5v5h-5v-5Z')
   };
 
@@ -85,7 +86,7 @@
     const desktop = document.createElement('nav');
     desktop.className = 'desktop-student-nav';
     desktop.setAttribute('aria-label', 'أقسام شذرات');
-    desktop.innerHTML = `${item('scholarships.html', 'scholarship', 'المنح')}${item('documents.html', 'documents', 'مستنداتي')}${item('services.html', 'services', 'الخدمات')}${item('offers.html', 'offers', 'العروض')}<div class="desktop-more"><button type="button" class="desktop-more-button" aria-expanded="false"><span class="desktop-nav-icon">${icons.grid}</span><span>المزيد</span><i>⌄</i></button><div class="desktop-more-menu" aria-hidden="true">${item('index.html', 'home', 'الرئيسية')}${item('videos.html', 'videos', 'الفيديوهات')}${item('profile.html', 'profile', 'حساب الطالب')}${item('contact.html', 'contact', 'تواصل معنا')}<div class="desktop-admin-slot"></div></div></div>`;
+    desktop.innerHTML = `${item('profile.html', 'profile', 'حسابي', 'class="student-profile-link"')}${item('scholarships.html', 'scholarship', 'المنح')}${item('documents.html', 'documents', 'مستنداتي')}${item('services.html', 'services', 'الخدمات')}${item('offers.html', 'offers', 'العروض')}<div class="desktop-more"><button type="button" class="desktop-more-button" aria-expanded="false"><span class="desktop-nav-icon">${icons.grid}</span><span>المزيد</span><i>⌄</i></button><div class="desktop-more-menu" aria-hidden="true">${item('index.html', 'home', 'الرئيسية')}${item('videos.html', 'videos', 'الفيديوهات')}${item('contact.html', 'contact', 'تواصل معنا')}${item('about.html', 'about', 'من نحن')}<div class="desktop-admin-slot"></div></div></div>`;
     brand.insertAdjacentElement('afterend', desktop);
     const more = desktop.querySelector('.desktop-more');
     const button = desktop.querySelector('.desktop-more-button');
@@ -113,7 +114,7 @@
     const menu = document.createElement('div');
     menu.className = 'global-menu';
     menu.setAttribute('aria-hidden', 'true');
-    menu.innerHTML = `<div class="global-menu-backdrop" data-menu-close></div><aside class="global-menu-panel"><div class="global-menu-head"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><button class="global-menu-close" type="button" data-menu-close aria-label="إغلاق القائمة">×</button></div><div class="student-menu-card"><span class="student-avatar">${icons.profile}</span><div><b>مساحة الطالب</b><small>منحك وخطواتك في مكان واحد</small></div></div><nav class="global-menu-links">${item('index.html','home','الرئيسية')}${item('scholarships.html','scholarship','المنح')}${item('documents.html','documents','مستنداتي')}${item('services.html','services','الخدمات')}${item('offers.html','offers','العروض')}${item('videos.html','videos','الفيديوهات')}${item('contact.html','contact','تواصل معنا')}${item('profile.html','profile','حساب الطالب','class="student-profile-link"')}</nav><div class="global-menu-actions"><a href="login.html">تسجيل الدخول</a><a class="primary" href="register.html">إنشاء حساب</a></div></aside>`;
+    menu.innerHTML = `<div class="global-menu-backdrop" data-menu-close></div><aside class="global-menu-panel"><div class="global-menu-head"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><button class="global-menu-close" type="button" data-menu-close aria-label="إغلاق القائمة">×</button></div><div class="student-menu-card"><span class="student-avatar">${icons.profile}</span><div><b>مساحة الطالب</b><small>منحك وخطواتك في مكان واحد</small></div></div><nav class="global-menu-links">${item('profile.html','profile','حسابي','class="student-profile-link"')}${item('index.html','home','الرئيسية')}${item('scholarships.html','scholarship','المنح')}${item('documents.html','documents','مستنداتي')}${item('services.html','services','الخدمات')}${item('offers.html','offers','العروض')}${item('videos.html','videos','الفيديوهات')}${item('contact.html','contact','تواصل معنا')}${item('about.html','about','من نحن')}</nav><div class="global-menu-actions"><a href="login.html">تسجيل الدخول</a><a class="primary" href="register.html">إنشاء حساب</a></div></aside>`;
     document.body.appendChild(menu);
     const setOpen = open => {
       menu.classList.toggle('is-open', open);
@@ -141,7 +142,7 @@
     const routes = {
       'index.html': async () => { await load('./homepage-fixes.js?v=10', 'homepage setup'); await load('./homepage-live.js?v=11', 'homepage data'); },
       'scholarships.html': () => Promise.all([load('./scholarships-live.js?v=22', 'scholarships'), load('./scholarship-favorites.js?v=10', 'favorites')]),
-      'documents.html': () => load('./documents.js?v=1', 'documents tools'),
+      'documents.html': () => load('./documents.js?v=4', 'documents tools'),
       'services.html': () => load('./public-commerce-live.js?v=21', 'services'),
       'offers.html': () => load('./public-commerce-live.js?v=21', 'offers'),
       'contact.html': () => load('./contact-live.js?v=10', 'contact'),
