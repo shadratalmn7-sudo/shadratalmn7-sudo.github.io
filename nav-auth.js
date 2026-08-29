@@ -57,28 +57,60 @@ const logout = async () => { await signOut(auth); location.replace('index.html')
 
 function addContextBackButton() {
   const page = location.pathname.split('/').pop() || 'index.html';
-  const parents = {
-    'scholarship.html': ['scholarships.html', 'العودة إلى قائمة المنح'],
-    'university-shukhov.html': ['services.html', 'العودة إلى الخدمات'],
-    'service-request.html': ['services.html', 'العودة إلى الخدمات']
-  };
-  const config = parents[page];
-  if (!config || document.querySelector('[data-context-back]')) return;
+  if (page === 'index.html' || page.startsWith('admin-') || document.querySelector('[data-context-back]')) return;
 
-  const [href, label] = config;
+  const scholarshipDetails = new Set([
+    'scholarship.html', 'open-doors.html', 'education-in-russia.html', 'hse-scholarship.html',
+    'nsu-scholarship.html', 'rudn-scholarship.html', 'stipendium-hungaricum.html',
+    'turkiye-scholarships.html', 'scholarship-new.html'
+  ]);
+
+  let href = 'index.html';
+  let label = 'العودة إلى الرئيسية';
+  if (scholarshipDetails.has(page)) {
+    href = 'scholarships.html';
+    label = 'العودة إلى قائمة المنح';
+  } else if (page === 'university-shukhov.html' || page === 'service-request.html') {
+    href = 'services.html';
+    label = 'العودة إلى الخدمات';
+  } else if (page === 'student-profile.html') {
+    href = 'profile.html';
+    label = 'العودة إلى حسابي';
+  }
+
+  const nav = document.querySelector('.site-header .nav');
+  if (!nav) return;
+
+  if (!document.getElementById('shadrat-back-style')) {
+    const style = document.createElement('style');
+    style.id = 'shadrat-back-style';
+    style.textContent = `
+      .site-back-button{
+        width:40px;height:40px;flex:0 0 40px;display:inline-grid;place-items:center;
+        border-radius:11px;border:1px solid rgba(180,35,24,.22);
+        background:rgba(180,35,24,.07);color:#b42318;text-decoration:none;
+        transition:background .16s ease,border-color .16s ease,transform .16s ease;
+        -webkit-tap-highlight-color:transparent;
+      }
+      .site-back-button:hover{background:rgba(180,35,24,.12);border-color:rgba(180,35,24,.32)}
+      .site-back-button:active{transform:scale(.96)}
+      .site-back-button svg{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+      @media(max-width:720px){.site-back-button{width:38px;height:38px;flex-basis:38px;border-radius:10px}}
+    `;
+    document.head.appendChild(style);
+  }
+
   const a = document.createElement('a');
   a.href = href;
+  a.className = 'site-back-button';
   a.dataset.contextBack = '';
   a.setAttribute('aria-label', label);
   a.title = label;
-  a.innerHTML = '<span aria-hidden="true">←</span>';
-  a.style.cssText = 'position:fixed;z-index:1190;left:14px;top:86px;width:46px;height:46px;display:grid;place-items:center;border-radius:12px;background:#b42318;color:#fff;text-decoration:none;font-size:25px;line-height:1;font-weight:900;box-shadow:0 8px 24px rgba(80,20,14,.22);border:1px solid rgba(255,255,255,.22);-webkit-tap-highlight-color:transparent';
-  a.addEventListener('pointerdown', () => { a.style.transform = 'scale(.96)'; });
-  const reset = () => { a.style.transform = ''; };
-  a.addEventListener('pointerup', reset);
-  a.addEventListener('pointercancel', reset);
-  a.addEventListener('pointerleave', reset);
-  document.body.appendChild(a);
+  a.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/><path d="M8 12h11"/></svg>';
+
+  const hamburger = nav.querySelector('.global-hamburger');
+  if (hamburger) nav.insertBefore(a, hamburger);
+  else nav.appendChild(a);
 }
 
 function addHamburgerLogout() {
