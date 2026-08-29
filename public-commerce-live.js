@@ -9,28 +9,6 @@ const russianGovernmentService = item => /Education in Russia|منحة الحك�
 const displayPrice = item => russianGovernmentService(item) ? 30 : Number(item.price || 0);
 const displayTerms = item => russianGovernmentService(item) ? 'عرض شخصين: 50$ بدل 60$.' : item.terms;
 
-async function renderServices() {
-  const sections = [...document.querySelectorAll('[data-section]')];
-  if (!sections.length) return;
-  try {
-    const snapshot = await getDocs(query(collection(db, 'services'), where('publishStatus', '==', 'published')));
-    if (snapshot.empty) return;
-    sections.forEach(section => section.querySelector('.grid')?.replaceChildren());
-    snapshot.docs.forEach(document => {
-      const item = document.data();
-      const category = item.category === 'free' ? 'free' : 'paid';
-      const grid = document.querySelector(`[data-section="${category}"] .grid`);
-      if (!grid) return;
-      const title = russianGovernmentService(item) ? 'التقديم على منحة الحكومة الروسية' : item.title;
-      const terms = displayTerms(item);
-      grid.insertAdjacentHTML('beforeend', `<article class="card service-card ${category === 'paid' ? 'paid' : ''}" data-live-service="${document.id}"><span class="tag">${category === 'free' ? 'مجانية' : russianGovernmentService(item) ? 'تخفيض' : 'مدفوعة'}</span><h3>${esc(title)}</h3><p class="muted">${esc(item.description || '')}</p>${category === 'paid' ? `<p class="price">${displayPrice(item)}$</p>` : ''}${terms ? `<div class="scope-note">${esc(terms)}</div>` : ''}<a class="btn ${category === 'free' ? 'outline' : 'primary'}" href="contact.html?type=service&service=${encodeURIComponent(title)}&serviceId=${encodeURIComponent(document.id)}">${category === 'free' ? 'احجز استشارة' : 'اطلب الخدمة'}</a></article>`);
-    });
-    sections.forEach(section => { section.hidden = !section.querySelector('.grid')?.children.length; });
-  } catch (error) {
-    console.warn('[Shadrat] live services unavailable; using verified fallback', error);
-  }
-}
-
 function activeOffer(item) {
   const now = Date.now();
   const start = item.startDate?.toDate?.()?.getTime?.() ?? (item.startDate ? new Date(item.startDate).getTime() : null);
@@ -56,5 +34,5 @@ async function renderOffers() {
   }
 }
 
-if (location.pathname.endsWith('/services.html')) renderServices();
+// الخدمات الجديدة تُدار من services.html مباشرة حتى لا يعيد الكود القديم بناء الصفحة أو يغيّر تصميمها.
 if (location.pathname.endsWith('/offers.html')) renderOffers();
