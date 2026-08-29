@@ -3,18 +3,18 @@
   const run = () => {
     const gallery = document.querySelector('#dorm .dorm-gallery');
     if (!gallery || gallery.dataset.galleryFixed === '1') return;
-    const source = gallery.querySelector('img')?.getAttribute('src') || 'assets/shukhov-dorm-4/gallery.svg?v=1';
+    const source = 'assets/shukhov-dorm-4/gallery.svg?v=3';
     gallery.dataset.galleryFixed = '1';
     gallery.classList.add('dorm-gallery-fixed');
     gallery.innerHTML = '';
 
     const shots = [
       ['صالة رياضية', 0, 0],
-      ['غرفة دراسة مشتركة', -102.5, 0],
-      ['صالة جلوس مشتركة', 0, -103.34],
-      ['المطبخ', -102.5, -103.34],
-      ['غرفة سكن بسريرين', 0, -206.68],
-      ['مبنى السكن من الخارج', -102.5, -206.68]
+      ['غرفة دراسة مشتركة', -100, 0],
+      ['صالة جلوس مشتركة', 0, -100],
+      ['المطبخ', -100, -100],
+      ['غرفة سكن بسريرين', 0, -200],
+      ['مبنى السكن من الخارج', -100, -200]
     ];
 
     const grid = document.createElement('div');
@@ -22,7 +22,7 @@
     shots.forEach(([label, left, top], index) => {
       const figure = document.createElement('figure');
       figure.className = 'dorm-photo-card';
-      figure.innerHTML = `<button type="button" class="dorm-photo-button" aria-label="فتح صورة ${label}"><span class="dorm-photo-crop"><img src="${source}" alt="${label} — السكن رقم 4" loading="lazy" style="left:${left}%;top:${top}%"></span><span class="dorm-photo-label">${label}</span></button>`;
+      figure.innerHTML = `<button type="button" class="dorm-photo-button" aria-label="فتح صورة ${label}"><span class="dorm-photo-crop"><img src="${source}" alt="${label} — السكن رقم 4" loading="eager" decoding="async" style="left:${left}%;top:${top}%"></span><span class="dorm-photo-label">${label}</span></button>`;
       grid.appendChild(figure);
     });
     gallery.appendChild(grid);
@@ -59,7 +59,7 @@
         .dorm-photo-card{margin:0;min-width:0}
         .dorm-photo-button{display:block;width:100%;padding:0;border:1px solid #e4dac8;border-radius:16px;background:#fffdf9;overflow:hidden;cursor:pointer;text-align:right;box-shadow:0 8px 22px rgba(23,53,43,.07)}
         .dorm-photo-crop,.dorm-lightbox-crop{position:relative;display:block;width:100%;aspect-ratio:4/3;overflow:hidden;background:#eee8dd}
-        .dorm-photo-crop img,.dorm-lightbox-crop img{position:absolute!important;width:202.5%!important;max-width:none!important;height:auto!important;display:block!important}
+        .dorm-photo-crop img,.dorm-lightbox-crop img{position:absolute!important;width:200%!important;max-width:none!important;height:auto!important;display:block!important}
         .dorm-photo-label{display:block;padding:10px 12px;color:#234c3e;font-size:12px;font-weight:900}
         .dorm-lightbox{position:fixed;inset:0;z-index:5000}
         .dorm-lightbox[hidden]{display:none!important}
