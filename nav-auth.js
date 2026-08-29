@@ -55,6 +55,18 @@ function markCurrentAdminLink() {
 
 const logout = async () => { await signOut(auth); location.replace('index.html'); };
 
+function addHamburgerLogout() {
+  const hamburger = document.querySelector('.hamburger-auth-mini') || document.querySelector('.hamburger-sections') || document.querySelector('.global-menu-links');
+  if (!hamburger || hamburger.querySelector('[data-auth-logout]')) return;
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.dataset.authLogout = '';
+  b.textContent = 'تسجيل الخروج';
+  b.style.cssText = 'width:100%;margin-top:10px;border:0;border-radius:14px;padding:12px 18px;background:#b42318;color:#fff;font:inherit;font-weight:900;cursor:pointer';
+  b.addEventListener('click', logout);
+  hamburger.appendChild(b);
+}
+
 document.querySelectorAll('span.btn,span.dark').forEach(el => {
   if (/إنشاء|حساب/.test(el.textContent)) {
     el.setAttribute('role', 'link');
@@ -104,16 +116,8 @@ onAuthStateChanged(auth, async user => {
   }
 
   if (role === 'owner') {
-    import('./owner-inline-tools.js?v=1').catch(error => console.warn('[Shadrat] owner tools', error));
+    import('./owner-inline-tools.js?v=2').catch(error => console.warn('[Shadrat] owner tools', error));
   }
 
-  document.querySelectorAll('.global-menu-actions,.actions,.nav-actions,.menu-cta,.hamburger-auth-mini').forEach(area => {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.dataset.authLogout = '';
-    b.textContent = 'تسجيل الخروج';
-    b.style.cssText = 'border:0;border-radius:14px;padding:12px 18px;background:#b42318;color:#fff;font:inherit;font-weight:900;cursor:pointer';
-    b.addEventListener('click', logout);
-    area.appendChild(b);
-  });
+  addHamburgerLogout();
 });
