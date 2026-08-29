@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>مستنداتي | تحويل الملفات مجانًا | شذرات للمنح</title>
-  <meta name="description" content="أدوات مجانية لتحويل الصور إلى PDF، تحويل PDF إلى صور، دمج ملفات PDF، استخراج وحذف الصفحات، وتحويل الصور بين JPG وPNG وWebP داخل المتصفح.">
+  <meta name="description" content="أدوات مجانية ومباشرة لتحويل الصور إلى PDF، تحويل PDF إلى صور، دمج ملفات PDF، استخراج وحذف الصفحات، وتحويل الصور داخل المتصفح.">
   <link rel="stylesheet" href="site.css?v=21">
   <link rel="stylesheet" href="site-polish.css?v=1">
   <link rel="stylesheet" href="logo.css?v=11">
   <link rel="stylesheet" href="nav-universal.css?v=22">
   <link rel="stylesheet" href="section-pages.css?v=1">
-  <link rel="stylesheet" href="documents.css?v=3">
+  <link rel="stylesheet" href="documents.css?v=4">
 </head>
 <body>
   <header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div></header>
@@ -19,62 +19,28 @@
       <div class="container">
         <span class="eyebrow">أدوات تجهيز الملف</span>
         <h1>مستنداتي</h1>
-        <p class="lead">اختر نوع التحويل أولًا، ثم تظهر لك الخدمة المناسبة فقط. التحويلات الأساسية مجانية ومبسطة بدل عرض كل الأدوات ككروت طويلة.</p>
+        <p class="lead">اختر الخدمة من المربع، وبعدها يظهر رفع الملف وزر التحويل والتحميل مباشرة تحت الخدمة المختارة.</p>
         <div class="docs-privacy"><b>خصوصية مهمة:</b><span>الملفات تُعالج داخل متصفحك ولا تُحفظ في شذرات. حتى الإدارة لا تستطيع الوصول إلى الملفات المرفقة أو الناتجة.</span></div>
       </div>
     </section>
 
     <section class="section docs-section">
-      <div class="container docs-panel">
-        <aside class="free-tools">
-          <b>التحويلات المجانية</b>
-          <button type="button" data-preset="image-to-pdf">صورة → PDF</button>
-          <button type="button" data-preset="pdf-to-image">PDF → صور PNG</button>
-          <button type="button" data-preset="merge-pdf">دمج ملفات PDF</button>
-          <button type="button" data-preset="split-pdf">استخراج صفحات PDF</button>
-          <button type="button" data-preset="remove-pages">حذف صفحات من PDF</button>
-          <button type="button" data-preset="rotate-pdf">تدوير صفحات PDF</button>
-          <button type="button" data-preset="image-to-jpg">صورة → JPG</button>
-          <button type="button" data-preset="image-to-png">صورة → PNG</button>
-          <button type="button" data-preset="image-to-webp">صورة → WebP</button>
-          <button type="button" data-preset="resize-image">تصغير / ضغط صورة</button>
-          <div class="coming-tools">
-            <span>تحويلات تحتاج خادم قريبًا</span>
-            <small>PDF ↔ Word</small><small>PDF ↔ Excel</small><small>PDF ↔ PowerPoint</small>
+      <div class="container">
+        <div class="docs-box">
+          <div class="docs-box-head">
+            <div><span class="eyebrow">خدمات مباشرة</span><h2>اختر التحويل المطلوب</h2></div>
+            <p>كل خدمة تفتح رفع الملف والزر تحتها مباشرة.</p>
           </div>
-        </aside>
-
-        <div class="converter-card">
-          <div class="converter-steps" aria-label="خطوات التحويل">
-            <span class="active">1 اختر التحويل</span>
-            <span>2 اختر الخدمة</span>
-            <span>3 ارفع وحمّل</span>
+          <div class="tools-grid" id="tools-grid" aria-label="خدمات تحويل المستندات"></div>
+          <div class="coming-conversions">
+            <b>قريبًا</b>
+            <span>PDF ↔ Word</span><span>PDF ↔ Excel</span><span>PDF ↔ PowerPoint</span>
           </div>
-
-          <div class="conversion-selectors">
-            <label class="field"><span>من</span><select id="convert-from"><option value="image">صورة JPG / PNG / WebP</option><option value="pdf">PDF</option></select></label>
-            <button class="swap-btn" type="button" id="swap-conversion" aria-label="عكس التحويل">↔</button>
-            <label class="field"><span>إلى</span><select id="convert-to"><option value="pdf">PDF</option><option value="image">صورة</option></select></label>
-          </div>
-
-          <label class="field service-field"><span>الخدمة المتاحة حسب اختيارك</span><select id="service-select"></select></label>
-
-          <div class="dynamic-area" id="dynamic-area"></div>
-
-          <button class="btn primary convert-button" id="run-conversion">تحويل الآن</button>
         </div>
-
-        <aside class="docs-result" aria-live="polite">
-          <span class="eyebrow">النتيجة</span>
-          <h2>جاهز للتجهيز</h2>
-          <p id="docs-status">اختر نوع التحويل والخدمة، ثم ارفع الملف.</p>
-          <a class="btn outline" id="download-result" hidden download>تحميل الملف الجاهز</a>
-        </aside>
       </div>
     </section>
   </main>
   <footer class="site-footer"><div class="container footer-grid"><div><img class="footer-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><p>أدوات ومعلومات تساعد الطالب على تجهيز ملفه الدراسي دون ضمان القبول.</p></div><div><b>الأدوات</b><a href="documents.html">مستنداتي</a><a href="scholarships.html">المنح</a><a href="about.html">من نحن</a></div><div><b>المعلومات</b><a href="privacy.html">الخصوصية</a><a href="terms.html">الشروط</a></div></div></footer>
   <script src="nav-universal.js?v=22"></script>
-  <script type="module" src="documents.js?v=3"></script>
 </body>
 </html>
