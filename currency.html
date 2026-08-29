@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>محول العملات | شذرات للمنح</title>
+  <meta name="description" content="محول عملات للطلاب لتحويل الروبل الروسي والريال السعودي مع تحديث تلقائي لسعر الصرف.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://shadratalmn7-sudo.github.io/currency.html">
+  <link rel="icon" href="favicon-shadrat.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="site.css?v=21">
+  <link rel="stylesheet" href="site-polish.css?v=1">
+  <link rel="stylesheet" href="logo.css?v=11">
+  <link rel="stylesheet" href="nav-universal.css?v=131">
+  <style>
+    .currency-wrap{max-width:760px;margin:48px auto;padding:0 16px}.currency-card{background:#fff;border:1px solid #e8e2d8;border-radius:24px;padding:24px;box-shadow:0 12px 34px rgba(0,0,0,.06)}.currency-card h1{margin:0 0 8px}.currency-sub{color:#6a665f;margin:0 0 22px}.converter-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:8px}.field label{font-weight:700}.field input,.field select{width:100%;box-sizing:border-box;padding:14px 16px;border:1px solid #d9d3c8;border-radius:14px;font:inherit;background:#fff}.rate-box{margin-top:18px;padding:16px;border-radius:16px;background:#f6f2ea;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.rate-main{font-weight:800}.rate-meta{font-size:.9rem;color:#716b61}.currency-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.wise-note{margin-top:16px;font-size:.9rem;color:#716b61;line-height:1.8}.back-inline{display:inline-flex;margin-bottom:14px;text-decoration:none}.status{font-size:.88rem;color:#716b61;margin-top:10px}@media(max-width:640px){.converter-grid{grid-template-columns:1fr}.currency-card{padding:18px}.currency-wrap{margin:28px auto}}
+  </style>
+</head>
+<body>
+  <header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div></header>
+  <main class="currency-wrap">
+    <a class="back-inline" href="index.html">← العودة للرئيسية</a>
+    <section class="currency-card">
+      <span class="eyebrow">أداة للطلاب</span>
+      <h1>محول العملات</h1>
+      <p class="currency-sub">حوّل بين الروبل الروسي والريال السعودي بسرعة. السعر يتحدث تلقائيًا عند فتح الصفحة.</p>
+      <div class="converter-grid">
+        <div class="field"><label for="amount">المبلغ</label><input id="amount" type="number" min="0" step="any" value="1000" inputmode="decimal"></div>
+        <div class="field"><label for="direction">التحويل</label><select id="direction"><option value="RUB_SAR">روبل روسي → ريال سعودي</option><option value="SAR_RUB">ريال سعودي → روبل روسي</option></select></div>
+      </div>
+      <div class="rate-box"><div><div class="rate-main" id="result">جاري تحديث السعر…</div><div class="rate-meta" id="rateText"></div></div><div class="rate-meta" id="updated"></div></div>
+      <div class="status" id="status">يتم جلب سعر صرف مباشر تلقائيًا.</div>
+      <div class="currency-actions"><a class="btn primary" href="https://wise.com/ar/currency-converter/rub-to-sar-rate" target="_blank" rel="noopener noreferrer">فتح السعر في Wise</a></div>
+      <p class="wise-note">ملاحظة: Wise يستخدم سعره المتوسط في السوق. الأداة داخل شذرات تتحدث من مزود سعر صرف مباشر وقد يظهر فرق بسيط جدًا عن Wise في بعض اللحظات. زر Wise موجود للمقارنة المباشرة.</p>
+    </section>
+  </main>
+  <script src="nav-universal.js?v=131"></script>
+  <script>
+    (()=>{
+      const amount=document.getElementById('amount'),direction=document.getElementById('direction'),result=document.getElementById('result'),rateText=document.getElementById('rateText'),updated=document.getElementById('updated'),status=document.getElementById('status');
+      let rubToSar=null,lastUpdate=null;
+      const nf=new Intl.NumberFormat('ar-SA',{maximumFractionDigits:2});
+      const rf=new Intl.NumberFormat('ar-SA',{maximumFractionDigits:5});
+      function render(){
+        const n=Number(amount.value||0); if(!rubToSar){result.textContent='تعذر حساب المبلغ حاليًا';return;}
+        if(direction.value==='RUB_SAR'){
+          result.textContent=`${nf.format(n)} روبل ≈ ${nf.format(n*rubToSar)} ريال`;
+          rateText.textContent=`1 RUB ≈ ${rf.format(rubToSar)} SAR`;
+        }else{
+          const sarToRub=1/rubToSar;
+          result.textContent=`${nf.format(n)} ريال ≈ ${nf.format(n*sarToRub)} روبل`;
+          rateText.textContent=`1 SAR ≈ ${rf.format(sarToRub)} RUB`;
+        }
+        if(lastUpdate) updated.textContent=`آخر تحديث: ${lastUpdate.toLocaleString('ar-SA')}`;
+      }
+      async function loadRate(){
+        try{
+          status.textContent='جاري تحديث سعر الصرف…';
+          const res=await fetch('https://open.er-api.com/v6/latest/RUB',{cache:'no-store'});
+          if(!res.ok) throw new Error('rate');
+          const data=await res.json();
+          const r=Number(data?.rates?.SAR);
+          if(!Number.isFinite(r)||r<=0) throw new Error('rate');
+          rubToSar=r; lastUpdate=new Date(); status.textContent='تم تحديث السعر تلقائيًا.'; render();
+        }catch(e){status.textContent='تعذر جلب السعر الآن. استخدم زر Wise للمقارنة المباشرة.'; result.textContent='السعر غير متاح مؤقتًا';}
+      }
+      amount.addEventListener('input',render); direction.addEventListener('change',render); loadRate(); setInterval(loadRate,30*60*1000);
+    })();
+  </script>
+</body>
+</html>
