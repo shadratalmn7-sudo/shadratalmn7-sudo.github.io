@@ -87,15 +87,24 @@ function addContextBackButton() {
     style.textContent = `
       .site-back-button{
         width:40px;height:40px;flex:0 0 40px;display:inline-grid;place-items:center;
-        border-radius:11px;border:1px solid rgba(180,35,24,.22);
-        background:rgba(180,35,24,.07);color:#b42318;text-decoration:none;
-        transition:background .16s ease,border-color .16s ease,transform .16s ease;
+        border-radius:12px;border:1px solid rgba(180,35,24,.2);
+        background:rgba(255,253,248,.94);color:#b42318;text-decoration:none;
+        box-shadow:0 6px 18px rgba(80,20,14,.08);
+        transition:background .16s ease,border-color .16s ease,transform .16s ease,box-shadow .16s ease;
         -webkit-tap-highlight-color:transparent;
       }
-      .site-back-button:hover{background:rgba(180,35,24,.12);border-color:rgba(180,35,24,.32)}
+      .site-back-button:hover{background:#fff7f4;border-color:rgba(180,35,24,.32);box-shadow:0 8px 20px rgba(80,20,14,.12)}
       .site-back-button:active{transform:scale(.96)}
       .site-back-button svg{width:20px;height:20px;display:block;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-      @media(max-width:720px){.site-back-button{width:38px;height:38px;flex-basis:38px;border-radius:10px}}
+      @media(max-width:820px){
+        .site-header .nav{position:relative}
+        .site-back-button{
+          position:absolute;left:0;top:calc(100% + 9px);z-index:70;
+          width:40px;height:40px;flex-basis:40px;border-radius:12px;
+          background:rgba(255,253,248,.96);backdrop-filter:blur(10px);
+          box-shadow:0 10px 26px rgba(80,20,14,.14);
+        }
+      }
     `;
     document.head.appendChild(style);
   }
