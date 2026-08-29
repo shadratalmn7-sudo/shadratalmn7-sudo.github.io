@@ -1,0 +1,4 @@
+.auth-message.progress{color:#176b4b}
+.auth-submit[aria-busy="true"],.google-btn[aria-busy="true"]{cursor:wait;opacity:.78}
+.auth-submit[aria-busy="true"]::before{content:"";width:16px;height:16px;border:2px solid #ffffff66;border-top-color:#fff;border-radius:50%;animation:auth-spin .7s linear infinite}
+@keyframes auth-spin{to{transform:rotate(1turn)}}

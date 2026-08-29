@@ -2,11 +2,11 @@ import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2
 import{collection,doc,getDocs,getFirestore,serverTimestamp,updateDoc}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import{firebaseConfig}from'./firebase-config.js';
-const OWNER='shadrat.almn7@gmail.com',STAFF_ROLES=['editor','support','communityModerator','admin'];
+const OWNER='shadrat.almn7@gmail.com',STAFF_ROLES=['editor','support','admin'];
 const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);let users=[];
 const body=document.querySelector('#staff-body'),search=document.querySelector('#staff-search'),count=document.querySelector('#staff-count'),editor=document.querySelector('#staff-editor'),form=document.querySelector('#staff-form'),status=form.querySelector('.admin-status'),help=document.querySelector('#role-help'),candidateSearch=document.querySelector('#candidate-search'),candidateResults=document.querySelector('#candidate-results');
-const roleText={student:'إزالة الرتبة الإدارية وإرجاع الحساب كطالب عادي.',editor:'محرر محتوى — يدير المنح والخدمات والعروض والفيديوهات.',support:'دعم وخدمة طلاب — يتعامل مع الطلبات والرسائل وملفات الطلاب اللازمة للدعم.',communityModerator:'مشرف مجتمع — يدير المنشورات والتعليقات والبلاغات.',admin:'مدير — صلاحيات إدارية واسعة مع بقاء حساب المالك محميًا.'};
-const roleName={editor:'محرر محتوى',support:'دعم وخدمة طلاب',communityModerator:'مشرف مجتمع',admin:'مدير'};
+const roleText={student:'إزالة الرتبة الإدارية وإرجاع الحساب كطالب عادي.',editor:'محرر محتوى — يدير المنح والخدمات والعروض والفيديوهات.',support:'دعم وخدمة طلاب — يتعامل مع الطلبات والرسائل وملفات الطلاب اللازمة للدعم.',admin:'مدير — صلاحيات إدارية واسعة مع بقاء حساب المالك محميًا.'};
+const roleName={editor:'محرر محتوى',support:'دعم وخدمة طلاب',admin:'مدير'};
 const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function staffList(){const q=search.value.trim().toLowerCase();return users.filter(u=>u.email!==OWNER&&STAFF_ROLES.includes(u.role)&&(!q||[u.fullName,u.email,u.username,roleName[u.role]].some(v=>String(v||'').toLowerCase().includes(q))))}
 function renderStaff(){const list=staffList();count.textContent=`${list.length} موظف`;body.innerHTML=list.map(u=>`<tr><td><b>${esc(u.fullName||u.username||'بدون اسم')}</b><br><small>${esc(u.email||'')}</small></td><td><span class="admin-pill">${esc(roleName[u.role]||u.role)}</span></td><td>${esc(u.accountStatus||'active')}</td><td><button class="admin-action" data-staff-uid="${esc(u.uid)}">تعديل الرتبة</button></td></tr>`).join('')||'<tr><td colspan="4">لا يوجد موظفون حتى الآن. أضف رتبة لحساب من الأسفل وسيظهر هنا.</td></tr>';body.querySelectorAll('[data-staff-uid]').forEach(b=>b.onclick=()=>open(users.find(u=>u.uid===b.dataset.staffUid)))}

@@ -28,11 +28,12 @@ service cloud.firestore {
       allow update: if own(uid)
         && weeklyProfileEditAllowed()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'fullName','username','location','studyLevel','lastProfileEditAt','updatedAt'
+          'fullName','username','location','studyLevel','lastProfileEditAt','profileEditCount','updatedAt'
         ])
         && safeText(request.resource.data.fullName, 3, 80)
         && request.resource.data.username.matches('^[a-z0-9_]{3,24}$')
         && !request.resource.data.username.matches('.*(owner|admin|support|staff|shazarat).*')
+        && request.resource.data.profileEditCount == resource.data.get('profileEditCount', 0) + 1
         && request.resource.data.lastProfileEditAt == request.time;
       allow update: if own(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -73,18 +74,18 @@ service cloud.firestore {
         && request.resource.data.publishStatus in ['draft','published','hidden','archived']
         && safeText(request.resource.data.title, 3, 160)
         && safeText(request.resource.data.shortDescription, 10, 500);
-      allow delete: if ownerOnly();
+      allow delete: if adminRole();
     }
 
     match /services/{serviceId} {
       allow read: if resource.data.publishStatus == 'published' || contentStaff();
       allow create, update: if contentStaff() && request.resource.data.publishStatus in ['draft','published','hidden','archived'] && safeText(request.resource.data.title,3,160);
-      allow delete: if ownerOnly();
+      allow delete: if adminRole();
     }
     match /offers/{offerId} {
       allow read: if resource.data.publishStatus == 'published' || contentStaff();
       allow create, update: if contentStaff() && request.resource.data.publishStatus in ['draft','published','hidden','archived'] && safeText(request.resource.data.title,3,160);
-      allow delete: if ownerOnly();
+      allow delete: if adminRole();
     }
 
     match /messages/{messageId} {

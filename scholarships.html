@@ -1,1 +1,27 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>المنح | شذرات للمنح</title><link rel="stylesheet" href="site.css"><link rel="stylesheet" href="logo.css?v=3"><link rel="stylesheet" href="nav-universal.css?v=24"><link rel="stylesheet" href="scholarships-enhanced.css?v=12"><link rel="stylesheet" href="scholarships-premium.css?v=2"><style>html,body{max-width:100%;overflow-x:hidden}body.scholarships-page .site-header{overflow:hidden}body.scholarships-page .site-header .brand{pointer-events:none!important}body.scholarships-page main,body.scholarships-page .scholarships-section,body.scholarships-page .scholarship-toolbar,body.scholarships-page #scholarship-cards{position:relative;z-index:2;max-width:100%}</style></head><body class="scholarships-page"><header class="site-header"><div class="container nav"><span class="brand"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></span></div></header><main><section class="page-hero scholarships-hero"><div class="container"><span class="eyebrow">فرص موثقة من المصدر</span><h1>المنح الدراسية</h1><p class="lead">اختر الدولة وشاهد أهم المعلومات فقط، ثم افتح المنحة للدليل الكامل.</p></div></section><section class="section scholarships-section"><div class="container"><div class="scholarship-toolbar"><div><b>فلترة حسب الدولة</b><p class="muted">اختر الدولة بدون مغادرة الصفحة.</p></div><div class="country-filters" role="group" aria-label="فلترة المنح حسب الدولة"><button class="country-filter is-active" type="button" data-country="all">كل الدول</button><button class="country-filter" type="button" data-country="روسيا">🇷🇺 روسيا</button><button class="country-filter" type="button" data-country="المجر">🇭🇺 المجر</button><button class="country-filter" type="button" data-country="تركيا">🇹🇷 تركيا</button></div></div><div class="scholarship-result-head"><h2>المنح المتاحة في الدليل</h2><span id="scholarship-count">جارٍ التحميل…</span></div><div class="cards grid grid-2" id="scholarship-cards"></div><div class="empty scholarship-empty" id="scholarship-empty" hidden>لا توجد منح في هذه الدولة حاليًا.</div></div></section></main><script src="nav-universal.js?v=33"></script></body></html>
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>المنح الدراسية | شذرات للمنح</title>
+  <meta name="description" content="ابحث في منح دراسية موثقة وفلترها حسب الدولة والمرحلة وحالة التقديم.">
+  <link rel="stylesheet" href="site.css?v=21"><link rel="stylesheet" href="site-polish.css?v=1"><link rel="stylesheet" href="logo.css?v=10"><link rel="stylesheet" href="nav-universal.css?v=21"><link rel="stylesheet" href="scholarships-enhanced.css?v=20"><link rel="stylesheet" href="scholarships-premium.css?v=10"><link rel="stylesheet" href="section-pages.css?v=1">
+</head>
+<body class="scholarships-page">
+  <header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div></header>
+  <main>
+    <section class="page-hero compact-hero"><div class="container"><span class="eyebrow">دليل محدث من المصادر الرسمية</span><h1>اعثر على المنحة المناسبة</h1><p class="lead">ابحث بالاسم أو الدولة أو المرحلة، ثم افتح دليلًا واضحًا للشروط والمواعيد والمصدر الرسمي.</p></div></section>
+    <section class="section scholarships-section"><div class="container">
+      <div class="filter-panel" aria-label="البحث وفلترة المنح">
+        <label class="search-field"><span>البحث</span><input id="scholarship-search" type="search" placeholder="مثال: روسيا، ذكاء اصطناعي، بكالوريوس"><i>⌕</i></label>
+        <label><span>المرحلة</span><select id="scholarship-level"><option value="all">كل المراحل</option><option>دبلوم متوسط</option><option>بكالوريوس</option><option>ماجستير</option><option>دكتوراه</option><option>ما بعد الدكتوراه</option></select></label>
+        <label><span>الحالة</span><select id="scholarship-status"><option value="all">كل الحالات</option><option value="open">مفتوحة أو قادمة</option><option value="closed">مغلقة</option><option value="unknown">حسب الجهة</option></select></label>
+      </div>
+      <div class="country-filters" role="group" aria-label="فلترة المنح حسب الدولة"><button class="country-filter is-active" type="button" data-country="all">كل الدول</button><button class="country-filter" type="button" data-country="روسيا">🇷🇺 روسيا</button><button class="country-filter" type="button" data-country="المجر">🇭🇺 المجر</button><button class="country-filter" type="button" data-country="تركيا">🇹🇷 تركيا</button></div>
+      <div class="scholarship-result-head"><div><h2>المنح المتاحة</h2><small id="scholarship-source-state">نعرض الدليل الموثق فورًا</small></div><span id="scholarship-count" aria-live="polite">جارٍ التحميل…</span></div>
+      <div class="cards grid grid-2" id="scholarship-cards" aria-live="polite"></div>
+      <div class="empty scholarship-empty" id="scholarship-empty" hidden><b>لا توجد نتائج مطابقة</b><span>غيّر كلمة البحث أو أحد الفلاتر.</span><button class="btn outline" id="reset-scholarship-filters" type="button">إعادة ضبط البحث</button></div>
+    </div></section>
+  </main>
+  <footer class="site-footer"><div class="container footer-grid"><div><b>شذرات للمنح</b><p>نراجع المعلومة ونربطك بالمصدر الرسمي، والقرار النهائي دائمًا للجهة المانحة.</p></div><div><b>روابط مهمة</b><a href="services.html">الخدمات</a><a href="offers.html">العروض</a></div><div><b>المساعدة</b><a href="contact.html">تواصل معنا</a><a href="privacy.html">الخصوصية</a></div></div></footer>
+  <script src="nav-universal.js?v=21"></script>
+</body></html>
