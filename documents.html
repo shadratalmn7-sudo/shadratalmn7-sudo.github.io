@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>مستنداتي | تحويل الملفات مجانًا | شذرات للمنح</title>
-  <meta name="description" content="مربع واحد بسيط لتحويل الملفات: اختر من، اختر إلى، ارفع الملف، ثم حمّل الناتج داخل المتصفح.">
+  <meta name="description" content="مربع واحد بسيط لتحويل الملفات: اختر نوع الملف من وإلى، ارفع الملف، ثم حمّل الناتج داخل المتصفح.">
   <link rel="stylesheet" href="site.css?v=21">
   <link rel="stylesheet" href="site-polish.css?v=1">
   <link rel="stylesheet" href="logo.css?v=11">
-  <link rel="stylesheet" href="nav-universal.css?v=50">
+  <link rel="stylesheet" href="nav-universal.css?v=60">
   <link rel="stylesheet" href="section-pages.css?v=1">
-  <link rel="stylesheet" href="documents.css?v=50">
+  <link rel="stylesheet" href="documents.css?v=60">
 </head>
 <body>
   <header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div></header>
@@ -19,7 +19,7 @@
       <div class="container">
         <span class="eyebrow">أدوات تجهيز الملف</span>
         <h1>مستنداتي</h1>
-        <p class="lead">كل التحويلات في مربع واحد: اختر من، اختر إلى، ارفع الملف، ثم اضغط تحويل وحمّل الناتج.</p>
+        <p class="lead">اختر نوع الملف من القائمة الأولى، ثم اختر النوع المطلوب من القائمة الثانية، وبعدها تظهر لك الأداة المناسبة مباشرة.</p>
         <div class="docs-privacy"><b>خصوصية مهمة:</b><span>الملفات تُعالج داخل متصفحك ولا تُحفظ في شذرات. حتى الإدارة لا تستطيع الوصول إلى الملفات المرفقة أو الناتجة.</span></div>
       </div>
     </section>
@@ -29,34 +29,23 @@
         <article class="converter-box" aria-label="مربع تحويل المستندات">
           <div class="converter-head">
             <div><span class="eyebrow">تحويل مباشر</span><h2>اختر التحويل المطلوب</h2></div>
-            <p>بدون كروت كثيرة أو قوائم طويلة.</p>
+            <p>كل الأنواع تظهر في خانة من وخانة إلى، بدون كروت كثيرة.</p>
           </div>
 
           <div class="from-to-grid">
-            <label class="field"><span>من</span><select id="convert-from">
-              <option value="image">صورة JPG / PNG / WebP</option>
-              <option value="pdf">PDF</option>
-              <option value="word">Word</option>
-              <option value="excel">Excel</option>
-              <option value="powerpoint">PowerPoint</option>
-            </select></label>
+            <label class="field"><span>من</span><select id="convert-from" aria-label="نوع الملف الأصلي"></select></label>
             <button class="swap-btn" id="swap-conversion" type="button" aria-label="عكس التحويل">↔</button>
-            <label class="field"><span>إلى</span><select id="convert-to">
-              <option value="pdf">PDF</option>
-              <option value="image">صورة</option>
-              <option value="word">Word</option>
-              <option value="excel">Excel</option>
-              <option value="powerpoint">PowerPoint</option>
-            </select></label>
+            <label class="field"><span>إلى</span><select id="convert-to" aria-label="نوع الملف المطلوب"></select></label>
           </div>
 
-          <label class="field service-field"><span>الخدمة</span><select id="service-select"></select></label>
-          <div id="active-tool-area" class="active-tool-area"></div>
+          <div id="active-tool-area" class="active-tool-area" aria-live="polite"></div>
+
+          <div class="coming-conversions"><b>كل التحويلات</b><span>صورة</span><span>PDF</span><span>Word</span><span>Excel</span><span>PowerPoint</span></div>
         </article>
       </div>
     </section>
   </main>
   <footer class="site-footer"><div class="container footer-grid"><div><img class="footer-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><p>أدوات ومعلومات تساعد الطالب على تجهيز ملفه الدراسي دون ضمان القبول.</p></div><div><b>الأدوات</b><a href="documents.html">مستنداتي</a><a href="scholarships.html">المنح</a><a href="about.html">من نحن</a></div><div><b>المعلومات</b><a href="privacy.html">الخصوصية</a><a href="terms.html">الشروط</a></div></div></footer>
-  <script src="nav-universal.js?v=50"></script>
+  <script src="nav-universal.js?v=60"></script>
 </body>
 </html>
