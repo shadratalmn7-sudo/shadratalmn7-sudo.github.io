@@ -3,6 +3,8 @@ import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/
 import { doc, getDoc, getFirestore } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 
+document.body?.setAttribute('data-admin-page','');
+
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -46,6 +48,7 @@ function withTimeout(promise, milliseconds = 10000) {
 }
 
 export async function requireAdmin() {
+  document.body?.setAttribute('data-admin-page','');
   const user = await waitForUser();
   if (!user) throw new Error('not-authenticated');
   const owner = (user.email || '').toLowerCase() === OWNER_EMAIL;
