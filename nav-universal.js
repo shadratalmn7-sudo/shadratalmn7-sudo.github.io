@@ -38,10 +38,20 @@
 
   const icon = path => `<svg class="shadrat-nav-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="${path}"/></svg>`;
   const icons = {
-    home: icon('M4 11.2 12 4l8 7.2v8.3H14.5v-5.5h-5V19.5H4v-8.3Z'), scholarship: icon('m3.5 8.2 8.5-4 8.5 4-8.5 4-8.5-4Zm3 2.1v4.2c0 1.7 2.5 3.5 5.5 3.5s5.5-1.8 5.5-3.5v-4.2M20.5 8.5v5'), documents: icon('M7 3.5h7l3 3v13H7v-16Zm7 0v4h4M9.5 11h5M9.5 14h5M9.5 17H13'), currency: icon('M7 7h10m0 0-3-3m3 3-3 3M17 17H7m0 0 3 3m-3-3 3-3'), services: icon('M7 6.5h10l1 3.5-2 8H8l-2-8 1-3.5Zm2-2h6v2H9v-2ZM9.5 12h5M12 9.5v5'), offers: icon('M4.5 8 9 3.5h8.5l2 2V14L15 18.5 4.5 8Zm10-1.2h.01M9 13l6-6'), videos: icon('M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v10a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 17V7A1.5 1.5 0 0 1 5 5.5Zm5 4 5 2.5-5 2.5v-5Z'), contact: icon('M4 6h16v12H4V6Zm0 1 8 6 8-6'), profile: icon('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20c.7-3.6 3-5.5 7-5.5s6.3 1.9 7 5.5'), about: icon('M12 4a8 8 0 0 0-8 8v6l2.5-1.5A8 8 0 1 0 12 4Zm-3 7h.01M12 11h.01M15 11h.01M8.5 14.5c2.2 1.6 4.8 1.6 7 0'), terms: icon('M7 4h10v16H7V4Zm2.5 4h5M9.5 11h5M9.5 14h3'), privacy: icon('M12 3.5 18 6v5.5c0 4-2.3 7-6 9-3.7-2-6-5-6-9V6l6-2.5Z'), grid: icon('M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h5v5h-5v-5Z')
+    home: icon('M4 11.2 12 4l8 7.2v8.3H14.5v-5.5h-5V19.5H4v-8.3Z'),
+    scholarship: icon('m3.5 8.2 8.5-4 8.5 4-8.5 4-8.5-4Zm3 2.1v4.2c0 1.7 2.5 3.5 5.5 3.5s5.5-1.8 5.5-3.5v-4.2M20.5 8.5v5'),
+    documents: icon('M7 3.5h7l3 3v13H7v-16Zm7 0v4h4M9.5 11h5M9.5 14h5M9.5 17H13'),
+    currency: icon('M7 7h10m0 0-3-3m3 3-3 3M17 17H7m0 0 3 3m-3-3 3-3'),
+    services: icon('M7 6.5h10l1 3.5-2 8H8l-2-8 1-3.5Zm2-2h6v2H9v-2ZM9.5 12h5M12 9.5v5'),
+    offers: icon('M4.5 8 9 3.5h8.5l2 2V14L15 18.5 4.5 8Zm10-1.2h.01M9 13l6-6'),
+    contact: icon('M4 6h16v12H4V6Zm0 1 8 6 8-6'),
+    profile: icon('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20c.7-3.6 3-5.5 7-5.5s6.3 1.9 7 5.5'),
+    about: icon('M12 4a8 8 0 0 0-8 8v6l2.5-1.5A8 8 0 1 0 12 4Zm-3 7h.01M12 11h.01M15 11h.01M8.5 14.5c2.2 1.6 4.8 1.6 7 0'),
+    grid: icon('M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h5v5h-5v-5Z')
   };
+
   const item = (href, key, label, extra = '') => `<a href="${href}" ${extra}><span class="menu-icon" aria-hidden="true">${icons[key]}</span><span class="menu-label">${label}</span></a>`;
-  const section = (title, subtitle, items) => `<section class="hamburger-section"><div class="hamburger-section-title"><b>${title}</b><small>${subtitle}</small></div><div class="hamburger-section-links">${items}</div></section>`;
+  const section = (title, subtitle, items, key) => `<section class="hamburger-section" data-accordion="${key}"><button type="button" class="hamburger-section-toggle" aria-expanded="false"><span><b>${title}</b><small>${subtitle}</small></span><i aria-hidden="true">⌄</i></button><div class="hamburger-section-links" hidden>${items}</div></section>`;
 
   let header = document.querySelector('.site-header');
   if (!header) { header = document.createElement('header'); header.className = 'site-header'; header.innerHTML = '<div class="container nav"></div>'; document.body.prepend(header); }
@@ -55,21 +65,54 @@
 
   if (!isAdmin && !nav.querySelector('.desktop-student-nav')) {
     const desktop = document.createElement('nav'); desktop.className = 'desktop-student-nav'; desktop.setAttribute('aria-label','أقسام شذرات');
-    desktop.innerHTML = `${item('profile.html','profile','حسابي','class="student-profile-link"')}${item('scholarships.html','scholarship','المنح')}${item('documents.html','documents','مستنداتي')}${item('currency.html','currency','العملات')}${item('services.html','services','الخدمات')}${item('offers.html','offers','العروض')}<div class="desktop-more"><button type="button" class="desktop-more-button" aria-expanded="false"><span class="desktop-nav-icon">${icons.grid}</span><span>المزيد</span><i>⌄</i></button><div class="desktop-more-menu" aria-hidden="true">${item('index.html','home','الرئيسية')}${item('videos.html','videos','الفيديوهات')}${item('contact.html','contact','تواصل معنا')}${item('about.html','about','من نحن')}${item('terms.html','terms','الشروط')}${item('privacy.html','privacy','الخصوصية')}<div class="desktop-admin-slot"></div></div></div>`;
+    desktop.innerHTML = `${item('profile.html','profile','حسابي','class="student-profile-link"')}${item('scholarships.html','scholarship','المنح')}${item('documents.html','documents','مستنداتي')}${item('currency.html','currency','العملات')}${item('services.html','services','الخدمات')}${item('offers.html','offers','العروض')}<div class="desktop-more"><button type="button" class="desktop-more-button" aria-expanded="false"><span class="desktop-nav-icon">${icons.grid}</span><span>المزيد</span><i>⌄</i></button><div class="desktop-more-menu" aria-hidden="true">${item('index.html','home','الرئيسية')}${item('contact.html','contact','تواصل معنا')}${item('about.html','about','من نحن')}<div class="desktop-admin-slot"></div></div></div>`;
     brand.insertAdjacentElement('afterend', desktop);
     const more = desktop.querySelector('.desktop-more'), button = desktop.querySelector('.desktop-more-button'), menu = desktop.querySelector('.desktop-more-menu');
     const close = () => { more.classList.remove('open'); button.setAttribute('aria-expanded','false'); menu.setAttribute('aria-hidden','true'); };
     button.addEventListener('click', event => { event.stopPropagation(); const open = !more.classList.contains('open'); more.classList.toggle('open', open); button.setAttribute('aria-expanded', String(open)); menu.setAttribute('aria-hidden', String(!open)); });
-    document.addEventListener('click', event => { if (!more.contains(event.target)) close(); }); document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+    document.addEventListener('click', event => { if (!more.contains(event.target)) close(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') close(); });
+  }
+
+  function wireAccordion(container) {
+    container.querySelectorAll('.hamburger-section-toggle').forEach(toggle => {
+      if (toggle.dataset.ready === '1') return;
+      toggle.dataset.ready = '1';
+      toggle.addEventListener('click', () => {
+        const sectionEl = toggle.closest('.hamburger-section');
+        const links = sectionEl?.querySelector('.hamburger-section-links');
+        if (!sectionEl || !links) return;
+        const willOpen = toggle.getAttribute('aria-expanded') !== 'true';
+        container.querySelectorAll('.hamburger-section').forEach(other => {
+          const otherToggle = other.querySelector('.hamburger-section-toggle');
+          const otherLinks = other.querySelector('.hamburger-section-links');
+          if (!otherToggle || !otherLinks) return;
+          other.classList.remove('is-open');
+          otherToggle.setAttribute('aria-expanded','false');
+          otherLinks.hidden = true;
+        });
+        if (willOpen) {
+          sectionEl.classList.add('is-open');
+          toggle.setAttribute('aria-expanded','true');
+          links.hidden = false;
+        }
+      });
+    });
   }
 
   if (!isAdmin && !document.querySelector('.global-menu')) {
     const toggle = document.createElement('button'); toggle.className = 'global-hamburger'; toggle.type = 'button'; toggle.setAttribute('aria-label','فتح القائمة'); toggle.setAttribute('aria-expanded','false'); toggle.innerHTML = '<span aria-hidden="true">☰</span>'; nav.appendChild(toggle);
     const menu = document.createElement('div'); menu.className = 'global-menu'; menu.setAttribute('aria-hidden','true');
-    menu.innerHTML = `<div class="global-menu-backdrop" data-menu-close></div><aside class="global-menu-panel"><div class="global-menu-head"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><button class="global-menu-close" type="button" data-menu-close aria-label="إغلاق القائمة">×</button></div><div class="hamburger-sections">${section('حساب الطالب','ملفك وخطواتك', item('profile.html','profile','حسابي','class="student-profile-link"') + '<div class="hamburger-auth-mini"><a href="login.html">دخول</a><a href="register.html">إنشاء حساب</a></div>')}${section('الأقسام الأساسية','أكثر ما يحتاجه الطالب', item('index.html','home','الرئيسية') + item('scholarships.html','scholarship','المنح') + item('documents.html','documents','مستنداتي') + item('currency.html','currency','تحويل العملات') + item('services.html','services','الخدمات') + item('offers.html','offers','العروض'))}${section('المحتوى','شرح ومتابعة', item('videos.html','videos','الفيديوهات'))}${section('الدعم والمعلومات','تواصل وسياسات المنصة', item('contact.html','contact','تواصل معنا') + item('about.html','about','من نحن') + item('terms.html','terms','الشروط') + item('privacy.html','privacy','الخصوصية'))}</div></aside>`;
+    menu.innerHTML = `<div class="global-menu-backdrop" data-menu-close></div><aside class="global-menu-panel"><div class="global-menu-head"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><button class="global-menu-close" type="button" data-menu-close aria-label="إغلاق القائمة">×</button></div><div class="hamburger-sections">${section('حساب الطالب','ملفك وخطواتك', item('profile.html','profile','حسابي','class="student-profile-link"') + '<div class="hamburger-auth-mini"><a href="login.html">دخول</a><a href="register.html">إنشاء حساب</a></div>','account')}${section('الأقسام الأساسية','أكثر ما يحتاجه الطالب', item('index.html','home','الرئيسية') + item('scholarships.html','scholarship','المنح') + item('documents.html','documents','مستنداتي') + item('currency.html','currency','تحويل العملات') + item('services.html','services','الخدمات') + item('offers.html','offers','العروض'),'main')}${section('تواصل معنا','التواصل ومعلومات شذرات', item('contact.html','contact','تواصل معنا') + item('about.html','about','من نحن'),'contact')}</div></aside>`;
     document.body.appendChild(menu);
+    const accordionRoot = menu.querySelector('.hamburger-sections');
+    wireAccordion(accordionRoot);
+    const observer = new MutationObserver(() => wireAccordion(accordionRoot));
+    observer.observe(accordionRoot,{childList:true,subtree:true});
     const setOpen = open => { menu.classList.toggle('is-open', open); menu.setAttribute('aria-hidden', String(!open)); toggle.setAttribute('aria-expanded', String(open)); document.body.classList.toggle('menu-open', open); };
-    toggle.addEventListener('click', () => setOpen(true)); menu.querySelectorAll('[data-menu-close]').forEach(node => node.addEventListener('click', () => setOpen(false))); document.addEventListener('keydown', event => { if (event.key === 'Escape') setOpen(false); });
+    toggle.addEventListener('click', () => setOpen(true));
+    menu.querySelectorAll('[data-menu-close]').forEach(node => node.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') setOpen(false); });
   }
 
   document.querySelectorAll('.desktop-student-nav a,.global-menu a').forEach(link => { const href = link.getAttribute('href'); if (href === page) { link.classList.add('is-current'); link.setAttribute('aria-current','page'); } });
@@ -79,12 +122,12 @@
   const publicModules = async () => {
     const routes = { 'index.html': async () => { await load('./homepage-fixes.js?v=11','homepage setup'); await load('./homepage-live.js?v=12','homepage data'); }, 'scholarships.html': () => Promise.all([load('./scholarships-live.js?v=22','scholarships'), load('./scholarship-favorites.js?v=10','favorites')]), 'documents.html': () => load('./documents.js?v=80','documents tools'), 'services.html': () => load('./public-commerce-live.js?v=21','services'), 'offers.html': () => load('./public-commerce-live.js?v=21','offers'), 'contact.html': () => load('./contact-live.js?v=10','contact'), 'profile.html': () => load('./scholarship-favorites.js?v=10','favorites') };
     await routes[page]?.();
-    onIdle(() => { if (!['login.html','register.html'].includes(page)) load('./nav-auth.js?v=100','navigation account state'); load('./analytics.js?v=10','analytics'); if (!['login.html','register.html','terms.html','privacy.html'].includes(page)) load('./notifications-live.js?v=10','notifications'); load('./ads.js?v=1','ads'); });
+    onIdle(() => { if (!['login.html','register.html'].includes(page)) load('./nav-auth.js?v=101','navigation account state'); load('./analytics.js?v=10','analytics'); if (!['login.html','register.html','terms.html','privacy.html'].includes(page)) load('./notifications-live.js?v=11','notifications'); load('./ads.js?v=1','ads'); });
   };
   const adminModules = async () => {
     try {
       const { requireAdmin } = await import('./admin-access.js?v=10'); const session = await requireAdmin(); if (page === 'admin-community.html') { location.replace('admin-analytics.html'); return; }
-      document.body.dataset.role = session.role; root.classList.remove('admin-pending'); await load('./admin-navigation.js?v=10','admin navigation'); load('./admin-mobile.js?v=10','admin mobile navigation'); load('./admin-hamburger-fix.js?v=10','admin menu'); load('./admin-alert-badges.js?v=10','admin alerts');
+      document.body.dataset.role = session.role; root.classList.remove('admin-pending'); await load('./admin-navigation.js?v=14','admin navigation'); load('./admin-mobile.js?v=10','admin mobile navigation'); load('./admin-hamburger-fix.js?v=10','admin menu'); load('./admin-alert-badges.js?v=10','admin alerts');
       const routes = { 'admin-analytics.html':'./admin-analytics.js?v=10', 'admin-homepage.html':'./admin-live-data.js?v=10', 'admin-scholarships.html':'./scholarships-admin.js?v=10', 'admin-users.html':'./admin-users.js?v=10', 'admin-student.html':'./admin-student.js?v=10', 'admin-staff.html':'./admin-staff.js?v=10', 'admin-gamification.html':'./admin-gamification.js?v=10', 'admin-services.html':'./admin-commerce.js?v=21', 'admin-offers.html':'./admin-commerce.js?v=21', 'admin-orders.html':'./admin-orders.js?v=10', 'admin-messages.html':'./admin-messages.js?v=10', 'admin-announcements.html':'./admin-announcements.js?v=21' };
       if (routes[page]) await load(routes[page], page);
     } catch (error) { report('admin access denied', error); location.replace(`login.html?next=${encodeURIComponent(page)}`); }
