@@ -8,3 +8,37 @@
 @media(max-width:980px){.desktop-student-nav{gap:2px}.desktop-student-nav>a,.desktop-more-button{padding:8px 8px;font-size:12px}.desktop-nav-icon{width:25px;height:25px}.site-header .brand,.global-site-header .brand{max-width:175px}.site-header .brand-logo,.global-site-header .brand-logo{width:160px}}
 @media(max-width:820px){.desktop-student-nav{display:none!important}.global-hamburger{display:flex}.hamburger{display:none!important}.mobile-menu{display:none!important}.nav>.btn:not(.global-hamburger),.nav>.button:not(.global-hamburger){display:none}.site-header .brand,.global-site-header .brand{max-width:180px}.site-header .brand-logo,.global-site-header .brand-logo{width:165px;max-height:46px}}
 @media(max-width:420px){.global-menu-panel{width:min(92vw,340px);right:6px;top:6px;bottom:6px;padding:12px}.hamburger-section-links{grid-template-columns:1fr}.hamburger-section-title{display:block}.hamburger-section-title small{text-align:right;display:block;margin-top:2px}.global-menu-head .brand-logo{width:132px}.site-header .brand,.global-site-header .brand{max-width:155px}.site-header .brand-logo,.global-site-header .brand-logo{width:145px}}
+
+/* Desktop student rail: mirrors the compact admin navigation style while keeping mobile unchanged. */
+@media(min-width:821px){
+  body:not([data-admin-page]) .site-header .nav{position:relative;min-height:72px}
+  body:not([data-admin-page]) .desktop-student-nav{
+    position:fixed;right:28px;top:108px;z-index:45;width:224px;display:flex;flex-direction:column;align-items:stretch;gap:7px;
+    margin:0;padding:14px;border:1px solid #e3dacb;border-radius:24px;background:rgba(255,253,248,.96);
+    box-shadow:0 18px 44px rgba(23,53,43,.10);backdrop-filter:blur(14px)
+  }
+  body:not([data-admin-page]) .desktop-student-nav>a,
+  body:not([data-admin-page]) .desktop-more-button{
+    width:100%;min-height:49px;justify-content:flex-start;gap:11px;padding:9px 11px;border-radius:15px;border:1px solid transparent;
+    color:#40534d;background:transparent;font-size:14px;font-weight:900;text-align:right
+  }
+  body:not([data-admin-page]) .desktop-student-nav>a .menu-icon,
+  body:not([data-admin-page]) .desktop-more-button .desktop-nav-icon{width:31px;height:31px;flex:0 0 31px;border:0;background:transparent;box-shadow:none;color:#6c8178}
+  body:not([data-admin-page]) .desktop-student-nav>a:hover,
+  body:not([data-admin-page]) .desktop-more-button:hover{background:#f0f5f2;color:#176b4b}
+  body:not([data-admin-page]) .desktop-student-nav>a.is-current,
+  body:not([data-admin-page]) .desktop-student-nav>a.student-profile-link.is-current{background:#264e68!important;color:#fff!important;border-color:#264e68!important;box-shadow:0 10px 22px rgba(38,78,104,.18)}
+  body:not([data-admin-page]) .desktop-student-nav>a.is-current .menu-icon{color:#fff!important}
+  body:not([data-admin-page]) .student-profile-link{background:transparent!important;color:#40534d!important;border-color:transparent!important}
+  body:not([data-admin-page]) .student-profile-link .menu-icon{background:transparent;color:#6c8178;border:0}
+  body:not([data-admin-page]) .desktop-more{width:100%;position:relative}
+  body:not([data-admin-page]) .desktop-more-button i{margin-inline-start:auto}
+  body:not([data-admin-page]) .desktop-more-menu{top:0;right:calc(100% + 10px);left:auto;width:245px}
+  body:not([data-admin-page]) main,
+  body:not([data-admin-page]) .site-footer{padding-right:252px}
+  body:not([data-admin-page]) .site-header .brand{margin-inline-start:auto}
+}
+@media(min-width:821px) and (max-width:1100px){
+  body:not([data-admin-page]) .desktop-student-nav{right:14px;width:205px}
+  body:not([data-admin-page]) main,body:not([data-admin-page]) .site-footer{padding-right:225px}
+}
