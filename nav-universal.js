@@ -138,7 +138,7 @@
   const publicModules = async () => {
     const routes = {
       'index.html': async () => { await load('./homepage-fixes.js?v=10', 'homepage setup'); await load('./homepage-live.js?v=10', 'homepage data'); },
-      'scholarships.html': () => Promise.all([load('./scholarships-live.js?v=20', 'scholarships'), load('./scholarship-favorites.js?v=10', 'favorites')]),
+      'scholarships.html': () => Promise.all([load('./scholarships-live.js?v=22', 'scholarships'), load('./scholarship-favorites.js?v=10', 'favorites')]),
       'services.html': () => load('./public-commerce-live.js?v=21', 'services'),
       'offers.html': () => load('./public-commerce-live.js?v=21', 'offers'),
       'contact.html': () => load('./contact-live.js?v=10', 'contact'),
