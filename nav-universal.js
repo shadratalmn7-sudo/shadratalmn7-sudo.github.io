@@ -11,14 +11,17 @@
   const seo = {
     'index.html': ['شذرات للمنح | منح دراسية وفرص موثوقة', 'منصة عربية تساعد الطلاب على اكتشاف المنح وتجهيز ملفاتهم ومتابعة التقديم من مصدر موثوق.'],
     'scholarships.html': ['المنح الدراسية | شذرات للمنح', 'ابحث في منح دراسية موثقة وفلترها حسب الدولة والمرحلة وحالة التقديم.'],
-    'documents.html': ['مستنداتي | أدوات PDF للطلاب | شذرات للمنح', 'حوّل الصور إلى PDF، ادمج ملفات PDF، واستخرج صفحات محددة داخل المتصفح دون رفع ملفاتك إلى شذرات.'],
+    'documents.html': ['مستنداتي | تحويل الملفات مجانًا | شذرات للمنح', 'حوّل ملفاتك الأساسية داخل المتصفح مع توضيح التحويلات المتاحة والقادمة.'],
     'services.html': ['خدمات الطلاب | شذرات للمنح', 'استشارات وخدمات واضحة لمساعدة الطلاب في تجهيز طلبات المنح والوثائق.'],
     'offers.html': ['عروض الطلاب | شذرات للمنح', 'عروض محددة المدة والنطاق لخدمات الطلاب والمنح.'],
     'videos.html': ['الفيديوهات والقنوات | شذرات للمنح', 'فيديوهات وقنوات مختارة تشرح المنح وخطوات التقديم.'],
     'about.html': ['من نحن | شذرات للمنح', 'تعرف على إدارة شذرات للمنح وقنوات التواصل المباشر مع الإدارة.'],
     'contact.html': ['تواصل معنا | شذرات للمنح', 'تواصل مع فريق شذرات للاستفسارات والخدمات والبلاغات.'],
+    'privacy.html': ['الخصوصية | شذرات للمنح', 'سياسة الخصوصية في منصة شذرات للمنح.'],
+    'terms.html': ['الشروط | شذرات للمنح', 'شروط استخدام منصة شذرات للمنح.'],
     'login.html': ['تسجيل الدخول | شذرات للمنح', 'سجّل الدخول إلى حسابك في شذرات للمنح.'],
-    'register.html': ['إنشاء حساب | شذرات للمنح', 'أنشئ حساب طالب في شذرات واحفظ منحك وتابع خطواتك.']
+    'register.html': ['إنشاء حساب | شذرات للمنح', 'أنشئ حساب طالب في شذرات واحفظ منحك وتابع خطواتك.'],
+    'profile.html': ['حسابي | شذرات للمنح', 'مساحة الطالب في منصة شذرات للمنح.']
   };
 
   if (!isAdmin) {
@@ -51,10 +54,13 @@
     contact: icon('M4 6h16v12H4V6Zm0 1 8 6 8-6'),
     profile: icon('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20c.7-3.6 3-5.5 7-5.5s6.3 1.9 7 5.5'),
     about: icon('M12 4a8 8 0 0 0-8 8v6l2.5-1.5A8 8 0 1 0 12 4Zm-3 7h.01M12 11h.01M15 11h.01M8.5 14.5c2.2 1.6 4.8 1.6 7 0'),
+    terms: icon('M7 4h10v16H7V4Zm2.5 4h5M9.5 11h5M9.5 14h3'),
+    privacy: icon('M12 3.5 18 6v5.5c0 4-2.3 7-6 9-3.7-2-6-5-6-9V6l6-2.5Z'),
     grid: icon('M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h5v5h-5v-5Z')
   };
-
   const item = (href, key, label, extra = '') => `<a href="${href}" ${extra}><span class="menu-icon" aria-hidden="true">${icons[key]}</span><span class="menu-label">${label}</span></a>`;
+  const section = (title, subtitle, items) => `<section class="hamburger-section"><div class="hamburger-section-title"><b>${title}</b><small>${subtitle}</small></div><div class="hamburger-section-links">${items}</div></section>`;
+
   let header = document.querySelector('.site-header');
   if (!header) {
     header = document.createElement('header');
@@ -86,12 +92,12 @@
     const desktop = document.createElement('nav');
     desktop.className = 'desktop-student-nav';
     desktop.setAttribute('aria-label', 'أقسام شذرات');
-    desktop.innerHTML = `${item('profile.html', 'profile', 'حسابي', 'class="student-profile-link"')}${item('scholarships.html', 'scholarship', 'المنح')}${item('documents.html', 'documents', 'مستنداتي')}${item('services.html', 'services', 'الخدمات')}${item('offers.html', 'offers', 'العروض')}<div class="desktop-more"><button type="button" class="desktop-more-button" aria-expanded="false"><span class="desktop-nav-icon">${icons.grid}</span><span>المزيد</span><i>⌄</i></button><div class="desktop-more-menu" aria-hidden="true">${item('index.html', 'home', 'الرئيسية')}${item('videos.html', 'videos', 'الفيديوهات')}${item('contact.html', 'contact', 'تواصل معنا')}${item('about.html', 'about', 'من نحن')}<div class="desktop-admin-slot"></div></div></div>`;
+    desktop.innerHTML = `${item('profile.html','profile','حسابي','class="student-profile-link"')}${item('scholarships.html','scholarship','المنح')}${item('documents.html','documents','مستنداتي')}${item('services.html','services','الخدمات')}${item('offers.html','offers','العروض')}<div class="desktop-more"><button type="button" class="desktop-more-button" aria-expanded="false"><span class="desktop-nav-icon">${icons.grid}</span><span>المزيد</span><i>⌄</i></button><div class="desktop-more-menu" aria-hidden="true">${item('index.html','home','الرئيسية')}${item('videos.html','videos','الفيديوهات')}${item('contact.html','contact','تواصل معنا')}${item('about.html','about','من نحن')}${item('terms.html','terms','الشروط')}${item('privacy.html','privacy','الخصوصية')}<div class="desktop-admin-slot"></div></div></div>`;
     brand.insertAdjacentElement('afterend', desktop);
     const more = desktop.querySelector('.desktop-more');
     const button = desktop.querySelector('.desktop-more-button');
     const menu = desktop.querySelector('.desktop-more-menu');
-    const close = () => { more.classList.remove('open'); button.setAttribute('aria-expanded', 'false'); menu.setAttribute('aria-hidden', 'true'); };
+    const close = () => { more.classList.remove('open'); button.setAttribute('aria-expanded','false'); menu.setAttribute('aria-hidden','true'); };
     button.addEventListener('click', event => {
       event.stopPropagation();
       const open = !more.classList.contains('open');
@@ -111,10 +117,11 @@
     toggle.setAttribute('aria-expanded', 'false');
     toggle.innerHTML = '<span aria-hidden="true">☰</span>';
     nav.appendChild(toggle);
+
     const menu = document.createElement('div');
     menu.className = 'global-menu';
     menu.setAttribute('aria-hidden', 'true');
-    menu.innerHTML = `<div class="global-menu-backdrop" data-menu-close></div><aside class="global-menu-panel"><div class="global-menu-head"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><button class="global-menu-close" type="button" data-menu-close aria-label="إغلاق القائمة">×</button></div><div class="student-menu-card"><span class="student-avatar">${icons.profile}</span><div><b>مساحة الطالب</b><small>منحك وخطواتك في مكان واحد</small></div></div><nav class="global-menu-links">${item('profile.html','profile','حسابي','class="student-profile-link"')}${item('index.html','home','الرئيسية')}${item('scholarships.html','scholarship','المنح')}${item('documents.html','documents','مستنداتي')}${item('services.html','services','الخدمات')}${item('offers.html','offers','العروض')}${item('videos.html','videos','الفيديوهات')}${item('contact.html','contact','تواصل معنا')}${item('about.html','about','من نحن')}</nav><div class="global-menu-actions"><a href="login.html">تسجيل الدخول</a><a class="primary" href="register.html">إنشاء حساب</a></div></aside>`;
+    menu.innerHTML = `<div class="global-menu-backdrop" data-menu-close></div><aside class="global-menu-panel"><div class="global-menu-head"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><button class="global-menu-close" type="button" data-menu-close aria-label="إغلاق القائمة">×</button></div><div class="hamburger-sections">${section('حساب الطالب','ملفك وخطواتك', item('profile.html','profile','حسابي','class="student-profile-link"') + '<div class="hamburger-auth-mini"><a href="login.html">دخول</a><a href="register.html">إنشاء حساب</a></div>')}${section('الأقسام الأساسية','أكثر ما يحتاجه الطالب', item('index.html','home','الرئيسية') + item('scholarships.html','scholarship','المنح') + item('documents.html','documents','مستنداتي') + item('services.html','services','الخدمات') + item('offers.html','offers','العروض'))}${section('المحتوى','شرح ومتابعة', item('videos.html','videos','الفيديوهات'))}${section('الدعم والمعلومات','تواصل وسياسات المنصة', item('contact.html','contact','تواصل معنا') + item('about.html','about','من نحن') + item('terms.html','terms','الشروط') + item('privacy.html','privacy','الخصوصية'))}</div></aside>`;
     document.body.appendChild(menu);
     const setOpen = open => {
       menu.classList.toggle('is-open', open);
@@ -127,10 +134,11 @@
     document.addEventListener('keydown', event => { if (event.key === 'Escape') setOpen(false); });
   }
 
-  document.querySelectorAll('.desktop-student-nav a,.global-menu-links a').forEach(link => {
-    if (link.getAttribute('href') === page) {
+  document.querySelectorAll('.desktop-student-nav a,.global-menu a').forEach(link => {
+    const href = link.getAttribute('href');
+    if (href === page) {
       link.classList.add('is-current');
-      link.setAttribute('aria-current', 'page');
+      link.setAttribute('aria-current','page');
     }
   });
 
@@ -140,20 +148,20 @@
 
   const publicModules = async () => {
     const routes = {
-      'index.html': async () => { await load('./homepage-fixes.js?v=10', 'homepage setup'); await load('./homepage-live.js?v=11', 'homepage data'); },
-      'scholarships.html': () => Promise.all([load('./scholarships-live.js?v=22', 'scholarships'), load('./scholarship-favorites.js?v=10', 'favorites')]),
-      'documents.html': () => load('./documents.js?v=4', 'documents tools'),
-      'services.html': () => load('./public-commerce-live.js?v=21', 'services'),
-      'offers.html': () => load('./public-commerce-live.js?v=21', 'offers'),
-      'contact.html': () => load('./contact-live.js?v=10', 'contact'),
-      'profile.html': () => load('./scholarship-favorites.js?v=10', 'favorites')
+      'index.html': async () => { await load('./homepage-fixes.js?v=10','homepage setup'); await load('./homepage-live.js?v=11','homepage data'); },
+      'scholarships.html': () => Promise.all([load('./scholarships-live.js?v=22','scholarships'), load('./scholarship-favorites.js?v=10','favorites')]),
+      'documents.html': () => load('./documents.js?v=80','documents tools'),
+      'services.html': () => load('./public-commerce-live.js?v=21','services'),
+      'offers.html': () => load('./public-commerce-live.js?v=21','offers'),
+      'contact.html': () => load('./contact-live.js?v=10','contact'),
+      'profile.html': () => load('./scholarship-favorites.js?v=10','favorites')
     };
     await routes[page]?.();
     onIdle(() => {
-      if (!['login.html', 'register.html'].includes(page)) load('./nav-auth.js?v=20', 'navigation account state');
-      load('./analytics.js?v=10', 'analytics');
-      if (!['login.html', 'register.html', 'terms.html', 'privacy.html'].includes(page)) load('./notifications-live.js?v=10', 'notifications');
-      load('./ads.js?v=1', 'ads');
+      if (!['login.html','register.html'].includes(page)) load('./nav-auth.js?v=20','navigation account state');
+      load('./analytics.js?v=10','analytics');
+      if (!['login.html','register.html','terms.html','privacy.html'].includes(page)) load('./notifications-live.js?v=10','notifications');
+      load('./ads.js?v=1','ads');
     });
   };
 
@@ -161,29 +169,26 @@
     try {
       const { requireAdmin } = await import('./admin-access.js?v=10');
       const session = await requireAdmin();
-      if (page === 'admin-community.html') {
-        location.replace('admin-analytics.html');
-        return;
-      }
+      if (page === 'admin-community.html') { location.replace('admin-analytics.html'); return; }
       document.body.dataset.role = session.role;
       root.classList.remove('admin-pending');
-      await load('./admin-navigation.js?v=10', 'admin navigation');
-      load('./admin-mobile.js?v=10', 'admin mobile navigation');
-      load('./admin-hamburger-fix.js?v=10', 'admin menu');
-      load('./admin-alert-badges.js?v=10', 'admin alerts');
+      await load('./admin-navigation.js?v=10','admin navigation');
+      load('./admin-mobile.js?v=10','admin mobile navigation');
+      load('./admin-hamburger-fix.js?v=10','admin menu');
+      load('./admin-alert-badges.js?v=10','admin alerts');
       const routes = {
-        'admin-analytics.html': './admin-analytics.js?v=10',
-        'admin-homepage.html': './admin-live-data.js?v=10',
-        'admin-scholarships.html': './scholarships-admin.js?v=10',
-        'admin-users.html': './admin-users.js?v=10',
-        'admin-student.html': './admin-student.js?v=10',
-        'admin-staff.html': './admin-staff.js?v=10',
-        'admin-gamification.html': './admin-gamification.js?v=10',
-        'admin-services.html': './admin-commerce.js?v=21',
-        'admin-offers.html': './admin-commerce.js?v=21',
-        'admin-orders.html': './admin-orders.js?v=10',
-        'admin-messages.html': './admin-messages.js?v=10',
-        'admin-announcements.html': './admin-announcements.js?v=21'
+        'admin-analytics.html':'./admin-analytics.js?v=10',
+        'admin-homepage.html':'./admin-live-data.js?v=10',
+        'admin-scholarships.html':'./scholarships-admin.js?v=10',
+        'admin-users.html':'./admin-users.js?v=10',
+        'admin-student.html':'./admin-student.js?v=10',
+        'admin-staff.html':'./admin-staff.js?v=10',
+        'admin-gamification.html':'./admin-gamification.js?v=10',
+        'admin-services.html':'./admin-commerce.js?v=21',
+        'admin-offers.html':'./admin-commerce.js?v=21',
+        'admin-orders.html':'./admin-orders.js?v=10',
+        'admin-messages.html':'./admin-messages.js?v=10',
+        'admin-announcements.html':'./admin-announcements.js?v=21'
       };
       if (routes[page]) await load(routes[page], page);
     } catch (error) {
