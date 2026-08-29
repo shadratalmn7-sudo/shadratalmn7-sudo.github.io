@@ -55,6 +55,32 @@ function markCurrentAdminLink() {
 
 const logout = async () => { await signOut(auth); location.replace('index.html'); };
 
+function addContextBackButton() {
+  const page = location.pathname.split('/').pop() || 'index.html';
+  const parents = {
+    'scholarship.html': ['scholarships.html', 'العودة إلى قائمة المنح'],
+    'university-shukhov.html': ['services.html', 'العودة إلى الخدمات'],
+    'service-request.html': ['services.html', 'العودة إلى الخدمات']
+  };
+  const config = parents[page];
+  if (!config || document.querySelector('[data-context-back]')) return;
+
+  const [href, label] = config;
+  const a = document.createElement('a');
+  a.href = href;
+  a.dataset.contextBack = '';
+  a.setAttribute('aria-label', label);
+  a.title = label;
+  a.innerHTML = '<span aria-hidden="true">←</span>';
+  a.style.cssText = 'position:fixed;z-index:1190;left:14px;top:86px;width:46px;height:46px;display:grid;place-items:center;border-radius:12px;background:#b42318;color:#fff;text-decoration:none;font-size:25px;line-height:1;font-weight:900;box-shadow:0 8px 24px rgba(80,20,14,.22);border:1px solid rgba(255,255,255,.22);-webkit-tap-highlight-color:transparent';
+  a.addEventListener('pointerdown', () => { a.style.transform = 'scale(.96)'; });
+  const reset = () => { a.style.transform = ''; };
+  a.addEventListener('pointerup', reset);
+  a.addEventListener('pointercancel', reset);
+  a.addEventListener('pointerleave', reset);
+  document.body.appendChild(a);
+}
+
 function addHamburgerLogout() {
   const hamburger = document.querySelector('.hamburger-auth-mini') || document.querySelector('.hamburger-sections') || document.querySelector('.global-menu-links');
   if (!hamburger || hamburger.querySelector('[data-auth-logout]')) return;
@@ -66,6 +92,8 @@ function addHamburgerLogout() {
   b.addEventListener('click', logout);
   hamburger.appendChild(b);
 }
+
+addContextBackButton();
 
 document.querySelectorAll('span.btn,span.dark').forEach(el => {
   if (/إنشاء|حساب/.test(el.textContent)) {
