@@ -18,16 +18,34 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-const setText = (key, value) => document.querySelectorAll(`[data-edit-key="${CSS.escape(key)}"]`).forEach(el => el.textContent = value);
-async function applySavedText(){try{const snap=await getDocs(collection(db,'siteText'));snap.forEach(item=>{const data=item.data()||{};if(typeof data.value==='string')setText(item.id,data.value);});}catch(error){console.warn('[Shadrat] saved text unavailable',error);}}
+const pageName = location.pathname.split('/').pop() || 'index.html';
+const slug = value => value.toLowerCase().replace(/\.html$/,'').replace(/[^a-z0-9_-]+/g,'-').replace(/^-+|-+$/g,'') || 'page';
+function prepareAutomaticEditableText(){
+  const root = document.querySelector('main');
+  if(!root) return;
+  const selectors = 'h1,h2,h3,p,small,b,span';
+  const counters = new Map();
+  root.querySelectorAll(selectors).forEach(el=>{
+    if(el.dataset.editKey || el.closest('a,button,label,form,script,style,[data-no-inline-edit]')) return;
+    if(el.children.length || !el.textContent.trim()) return;
+    const section = el.closest('[id]')?.id || el.closest('section')?.className?.toString().split(/\s+/)[0] || 'main';
+    const base = `${slug(pageName)}-${slug(section)}-${el.tagName.toLowerCase()}`;
+    const next = (counters.get(base)||0)+1; counters.set(base,next);
+    el.dataset.editKey = `${base}-${next}`;
+    el.dataset.autoEditKey = '1';
+  });
+}
 
-function status(message,error=false){let el=document.querySelector('.owner-inline-status');if(!el){el=document.createElement('div');el.className='owner-inline-status';document.body.appendChild(el);}el.textContent=message;el.classList.toggle('error',error);clearTimeout(status.t);status.t=setTimeout(()=>el.remove(),1800);}
+const setText = (key, value) => document.querySelectorAll(`[data-edit-key="${CSS.escape(key)}"]`).forEach(el => el.textContent = value);
+async function applySavedText(){prepareAutomaticEditableText();try{const snap=await getDocs(collection(db,'siteText'));snap.forEach(item=>{const data=item.data()||{};if(typeof data.value==='string')setText(item.id,data.value);});}catch(error){console.warn('[Shadrat] saved text unavailable',error);}}
+
+function status(message,error=false){let el=document.querySelector('.owner-inline-status');if(!el){el=document.createElement('div');el.className='owner-inline-status';document.body.appendChild(el);}el.textContent=message;el.classList.toggle('error',error);clearTimeout(status.t);status.t=setTimeout(()=>el.remove(),2200);}
 function closeActions(){document.querySelector('.owner-inline-actions')?.remove();}
 function stopEditing(restore=false){if(!active)return;if(restore)active.textContent=original;active.removeAttribute('contenteditable');active.classList.remove('owner-inline-active');active=null;original='';closeActions();}
 function placeActions(target){closeActions();const box=document.createElement('div');box.className='owner-inline-actions';box.innerHTML='<button type="button" class="owner-inline-save">حفظ</button><button type="button" class="owner-inline-cancel">إلغاء</button>';document.body.appendChild(box);const rect=target.getBoundingClientRect();box.style.top=`${rect.bottom+window.scrollY+7}px`;box.style.left=`${Math.max(8,rect.left+window.scrollX)}px`;box.querySelector('.owner-inline-cancel').addEventListener('click',()=>stopEditing(true));box.querySelector('.owner-inline-save').addEventListener('click',saveActive);}
-async function saveActive(){if(!active)return;const value=active.textContent.trim();if(!value){status('النص ما يقدر يكون فاضي',true);return;}const key=active.dataset.editKey;status('جاري الحفظ…');try{await setDoc(doc(db,'siteText',key),{value,page:location.pathname.split('/').pop()||'index.html',updatedAt:serverTimestamp()},{merge:true});setText(key,value);stopEditing(false);status('تم الحفظ مباشرة');}catch(error){console.error(error);status('تعذر الحفظ بسبب صلاحيات قاعدة البيانات',true);}}
+async function saveActive(){if(!active)return;const value=active.textContent.trim();if(!value){status('النص ما يقدر يكون فاضي',true);return;}const key=active.dataset.editKey;status('جاري الحفظ…');try{await setDoc(doc(db,'siteText',key),{value,page:pageName,updatedAt:serverTimestamp()},{merge:true});setText(key,value);stopEditing(false);status('تم الحفظ مباشرة');}catch(error){console.error(error);status(`تعذر الحفظ: ${error?.code||'راجع صلاحيات قاعدة البيانات'}`,true);}}
 function startEditing(element,event){if(!editMode)return;event.preventDefault();event.stopPropagation();if(active&&active!==element)stopEditing(false);active=element;original=element.textContent;element.setAttribute('contenteditable','true');element.classList.add('owner-inline-active');element.focus();const range=document.createRange();range.selectNodeContents(element);const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);placeActions(element);}
-function enableOwner(){if(document.querySelector('.owner-edit-toggle'))return;const toggle=document.createElement('button');toggle.type='button';toggle.className='owner-edit-toggle';toggle.textContent='تفعيل التعديل';document.body.appendChild(toggle);toggle.addEventListener('click',()=>{editMode=!editMode;document.documentElement.classList.toggle('owner-edit-mode',editMode);toggle.classList.toggle('active',editMode);toggle.textContent=editMode?'إنهاء التعديل':'تفعيل التعديل';if(!editMode)stopEditing(false);status(editMode?'اضغط على أي نص محدد وعدله في مكانه':'تم إيقاف وضع التعديل');});document.addEventListener('click',event=>{const el=event.target.closest?.(editableSelector);if(el)startEditing(el,event);},true);document.addEventListener('keydown',event=>{if(!active)return;if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();saveActive();}if(event.key==='Escape'){event.preventDefault();stopEditing(true);}});window.addEventListener('scroll',()=>{if(active)placeActions(active);},{passive:true});}
+function enableOwner(){if(document.querySelector('.owner-edit-toggle'))return;prepareAutomaticEditableText();const toggle=document.createElement('button');toggle.type='button';toggle.className='owner-edit-toggle';toggle.textContent='تفعيل التعديل';document.body.appendChild(toggle);toggle.addEventListener('click',()=>{prepareAutomaticEditableText();editMode=!editMode;document.documentElement.classList.toggle('owner-edit-mode',editMode);toggle.classList.toggle('active',editMode);toggle.textContent=editMode?'إنهاء التعديل':'تفعيل التعديل';if(!editMode)stopEditing(false);status(editMode?'اضغط على أي نص لتعديله في مكانه':'تم إيقاف وضع التعديل');});document.addEventListener('click',event=>{const el=event.target.closest?.(editableSelector);if(el)startEditing(el,event);},true);document.addEventListener('keydown',event=>{if(!active)return;if((event.ctrlKey||event.metaKey)&&event.key==='Enter'){event.preventDefault();saveActive();}if(event.key==='Escape'){event.preventDefault();stopEditing(true);}});window.addEventListener('scroll',()=>{if(active)placeActions(active);},{passive:true});new MutationObserver(()=>{prepareAutomaticEditableText();}).observe(document.body,{childList:true,subtree:true});}
 
 applySavedText();
 onAuthStateChanged(auth,user=>{if(user?.email===OWNER_EMAIL)enableOwner();});
