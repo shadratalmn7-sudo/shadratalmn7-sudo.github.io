@@ -101,9 +101,33 @@ service cloud.firestore {
     }
 
     match /orders/{orderId} {
-      allow create: if activeUser() && request.resource.data.userId == request.auth.uid
-        && safeText(request.resource.data.serviceTitle, 3, 200)
-        && request.resource.data.status == 'created';
+      allow create: if (
+          activeUser()
+          && request.resource.data.userId == request.auth.uid
+          && safeText(request.resource.data.serviceTitle, 3, 200)
+          && request.resource.data.status == 'created'
+        ) || (
+          request.resource.data.keys().hasOnly([
+            'source','submissionChannel','userId','userName','userEmail','age','nationality',
+            'contactMethod','contactValue','currentCountry','requestDetails','serviceTitle',
+            'servicePriceText','amount','currency','paymentStatus','status','adminRecipients',
+            'createdAt','updatedAt'
+          ])
+          && request.resource.data.source == 'service_request_email'
+          && request.resource.data.submissionChannel == 'email+admin'
+          && request.resource.data.status == 'created'
+          && request.resource.data.paymentStatus == 'not_paid'
+          && safeText(request.resource.data.userName, 2, 120)
+          && safeText(request.resource.data.serviceTitle, 3, 200)
+          && safeText(request.resource.data.contactMethod, 3, 40)
+          && safeText(request.resource.data.contactValue, 3, 200)
+          && request.resource.data.requestDetails is string
+          && request.resource.data.requestDetails.size() <= 5000
+          && request.resource.data.age is number
+          && request.resource.data.age >= 12
+          && request.resource.data.age <= 80
+          && request.resource.data.userId == (signedIn() ? request.auth.uid : null)
+        );
       allow read: if supportStaff() || (signedIn() && resource.data.userId == request.auth.uid);
       allow update: if supportStaff();
       allow delete: if ownerOnly();
