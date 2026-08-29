@@ -1,6 +1,6 @@
 (() => {
   const page = location.pathname.split('/').pop() || '';
-  if (page === 'university-shukhov.html') import('./dorm-gallery-fix.js?v=2').catch(error => console.warn('[Shadrat] dorm gallery unavailable', error));
+  if (page === 'university-shukhov.html') import('./dorm-gallery-fix.js?v=3').catch(error => console.warn('[Shadrat] dorm gallery unavailable', error));
 
   if (window.__shadratAdsLoaded || !document.querySelector('[data-shazarat-ad-unit],.adsbygoogle')) return;
   window.__shadratAdsLoaded = true;
