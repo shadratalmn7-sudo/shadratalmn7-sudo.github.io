@@ -1,6 +1,5 @@
 import { getApp, getApps, initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
 import {
-  browserLocalPersistence,
   browserSessionPersistence,
   createUserWithEmailAndPassword,
   deleteUser,
@@ -19,12 +18,13 @@ import { firebaseConfig } from './firebase-config.js';
 
 const OWNER_EMAIL = 'shadrat.almn7@gmail.com';
 const STAFF_ROLES = new Set(['owner', 'admin', 'support', 'editor', 'communityModerator']);
+const AUTH_SESSION_KEY = 'shadrat_auth_session';
 const ADMIN_SESSION_KEY = 'shadrat_admin_session';
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-await setPersistence(auth, browserLocalPersistence).catch(error => console.warn('[Shadrat] local session unavailable', error));
+await setPersistence(auth, browserSessionPersistence).catch(error => console.warn('[Shadrat] session unavailable', error));
 
 const clean = (value = '') => String(value).trim().toLowerCase();
 const isOwner = email => clean(email) === OWNER_EMAIL;
@@ -114,11 +114,15 @@ function wantsAdminPage() {
 }
 
 async function prepareLoginPersistence() {
-  const persistence = wantsAdminPage() ? browserSessionPersistence : browserLocalPersistence;
-  await setPersistence(auth, persistence).catch(error => console.warn('[Shadrat] session mode unavailable', error));
+  await setPersistence(auth, browserSessionPersistence).catch(error => console.warn('[Shadrat] session mode unavailable', error));
+}
+
+function markAuthSession(user, role) {
+  sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({ uid: user.uid, role, at: Date.now() }));
 }
 
 function markAdminSession(user, role, next) {
+  markAuthSession(user, role);
   if (!next?.startsWith('admin-') || !STAFF_ROLES.has(role)) {
     sessionStorage.removeItem(ADMIN_SESSION_KEY);
     return;
@@ -275,6 +279,8 @@ registerForm?.addEventListener('submit', async event => {
 });
 
 document.querySelectorAll('[data-sign-out]').forEach(button => button.addEventListener('click', async () => {
+  sessionStorage.removeItem(AUTH_SESSION_KEY);
+  sessionStorage.removeItem(ADMIN_SESSION_KEY);
   await signOut(auth);
   location.replace('login.html');
 }));
