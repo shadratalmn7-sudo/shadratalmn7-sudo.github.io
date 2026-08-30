@@ -1,5 +1,5 @@
 import { getApp, getApps, initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import { doc, getDoc, getFirestore } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 
@@ -16,6 +16,8 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const OWNER_EMAIL = 'shadrat.almn7@gmail.com';
+const ADMIN_SESSION_KEY = 'shadrat_admin_session';
+const ADMIN_SESSION_MAX_AGE = 12 * 60 * 60 * 1000;
 const access = {
   'admin-staff.html': ['owner'],
   'admin-users.html': ['owner', 'admin', 'support'],
@@ -54,12 +56,28 @@ function withTimeout(promise, milliseconds = 10000) {
   return Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('profile-timeout')), milliseconds))]);
 }
 
+function hasFreshAdminSession(user) {
+  try {
+    const session = JSON.parse(sessionStorage.getItem(ADMIN_SESSION_KEY) || 'null');
+    return session?.uid === user.uid && Date.now() - Number(session.at || 0) <= ADMIN_SESSION_MAX_AGE;
+  } catch {
+    return false;
+  }
+}
+
+async function rejectSavedAdminSession() {
+  sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  await signOut(auth).catch(() => {});
+  throw new Error('admin-login-required');
+}
+
 export async function requireAdmin() {
   document.body?.setAttribute('data-admin-page','');
   document.documentElement.classList.add('admin-pending');
   document.documentElement.classList.remove('admin-authorized');
   const user = await waitForUser();
   if (!user) throw new Error('not-authenticated');
+  if (!hasFreshAdminSession(user)) await rejectSavedAdminSession();
   const owner = (user.email || '').toLowerCase() === OWNER_EMAIL;
   let role = owner ? 'owner' : 'student';
   if (!owner) {
