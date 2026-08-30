@@ -1,6 +1,6 @@
 (() => {
   const page = location.pathname.split('/').pop() || 'index.html';
-  if (page === 'university-shukhov.html') import('./dorm-gallery-fix.js?v=3').catch(error => console.warn('[Shadrat] dorm gallery unavailable', error));
+  if (page === 'university-shukhov.html') import('./dorm-gallery-fix.js?v=3).catch(error => console.warn('[Shadrat] dorm gallery unavailable', error));
 
   if (!window.__shadratAdsLoaded) {
     window.__shadratAdsLoaded = true;
@@ -23,8 +23,12 @@
   window.__shadratAdsterraAuto = true;
 
   const mobile = innerWidth < 900;
+  const BAR_KEY = '81784add9b99f179fe38269f88f2f669';
+  const RECT_KEY = 'eda2c4586cf38ead23cc20bf961a2503';
+  const RAIL_KEY = '3e949efa2489333e349b38867c9f47fd';
+
   const style = document.createElement('style');
-  style.textContent = `.shadrat-auto-ad{display:flex;justify-content:center;align-items:center;width:min(1160px,calc(100% - 32px));margin:22px auto;overflow:hidden;min-height:60px}.shadrat-auto-ad iframe{border:0;display:block}.shadrat-ad-bar{width:100%;max-width:100%;margin:10px auto 14px;padding:6px 0;background:rgba(248,251,255,.72);border-block:1px solid rgba(29,78,216,.09);min-height:60px}.shadrat-ad-bottom{margin:18px auto 0}.shadrat-ad-bar iframe{transform-origin:center top}.shadrat-desktop-rail{position:fixed;left:12px;top:120px;z-index:7;width:160px;height:600px;overflow:hidden}@media(max-width:1299px){.shadrat-desktop-rail{display:none!important}}@media(max-width:899px){.shadrat-auto-ad{width:100%;margin:16px auto;padding:4px 0;min-height:60px}.shadrat-mobile-ad{min-height:300px}.shadrat-mobile-ad iframe{width:160px!important;height:300px!important}.shadrat-ad-bar{margin:8px auto 12px;padding:5px 0;background:rgba(248,251,255,.78)}.shadrat-ad-bottom{margin-top:16px}}`;
+  style.textContent = `.shadrat-auto-ad{display:flex;justify-content:center;align-items:center;width:min(1160px,calc(100% - 32px));margin:22px auto;overflow:hidden;min-height:60px}.shadrat-auto-ad iframe{border:0;display:block}.shadrat-ad-bar{width:100%;max-width:100%;margin:10px auto 14px;padding:6px 0;background:rgba(248,251,255,.72);border-block:1px solid rgba(29,78,216,.09);min-height:60px}.shadrat-ad-bottom{margin:18px auto 0}.shadrat-ad-bar iframe{transform-origin:center top}.shadrat-desktop-rect{min-height:300px}.shadrat-desktop-rail{position:fixed;left:12px;top:120px;z-index:7;width:160px;height:600px;overflow:hidden}@media(max-width:1299px){.shadrat-desktop-rail{display:none!important}}@media(max-width:899px){.shadrat-auto-ad{width:100%;margin:14px auto;padding:4px 0;min-height:60px}.shadrat-ad-bar{margin:8px auto 12px;padding:5px 0;background:rgba(248,251,255,.78)}.shadrat-ad-bottom{margin-top:16px}.shadrat-desktop-rect,.shadrat-desktop-rail{display:none!important}}`;
   document.head.appendChild(style);
 
   function makeAd(key, width, height, extraClass='') {
@@ -53,19 +57,19 @@
   const sections = [...main.querySelectorAll(':scope > section')];
   if (!sections.length) return;
 
-  if (!document.querySelector('.shadrat-ad-top')) main.prepend(makeAd('81784add9b99f179fe38269f88f2f669',468,60,'shadrat-ad-bar shadrat-ad-top'));
-  if (!document.querySelector('.shadrat-ad-bottom')) main.appendChild(makeAd('81784add9b99f179fe38269f88f2f669',468,60,'shadrat-ad-bar shadrat-ad-bottom'));
+  if (!document.querySelector('.shadrat-ad-top')) main.prepend(makeAd(BAR_KEY,468,60,'shadrat-ad-bar shadrat-ad-top'));
+  if (!document.querySelector('.shadrat-ad-bottom')) main.appendChild(makeAd(BAR_KEY,468,60,'shadrat-ad-bar shadrat-ad-bottom'));
 
   if (mobile) {
-    const targets = sections.filter((_,i) => i === 0 || (i + 1) % 2 === 0).slice(0,3);
+    const targets = sections.filter((_,i) => (i + 1) % 2 === 0).slice(0,2);
     targets.forEach(target => {
       if (target.nextElementSibling?.classList?.contains('shadrat-auto-ad')) return;
-      target.after(makeAd('eda2c4586cf38ead23cc20bf961a2503',160,300,'shadrat-mobile-ad'));
+      target.after(makeAd(BAR_KEY,468,60,'shadrat-ad-bar shadrat-ad-mid'));
     });
     return;
   }
 
   const rectTarget = sections[1] || sections[0];
-  if (rectTarget && !rectTarget.nextElementSibling?.classList?.contains('shadrat-auto-ad')) rectTarget.after(makeAd('eda2c4586cf38ead23cc20bf961a2503',160,300));
-  if (innerWidth >= 1300) document.body.appendChild(makeAd('3e949efa2489333e349b38867c9f47fd',160,600,'shadrat-desktop-rail'));
+  if (rectTarget && !rectTarget.nextElementSibling?.classList?.contains('shadrat-auto-ad')) rectTarget.after(makeAd(RECT_KEY,160,300,'shadrat-desktop-rect'));
+  if (innerWidth >= 1300) document.body.appendChild(makeAd(RAIL_KEY,160,600,'shadrat-desktop-rail'));
 })();
