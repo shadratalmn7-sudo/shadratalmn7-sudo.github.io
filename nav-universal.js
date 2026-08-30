@@ -122,7 +122,7 @@
   const publicModules = async () => {
     const routes = { 'index.html': async () => { await load('./homepage-fixes.js?v=11','homepage setup'); await load('./homepage-live.js?v=12','homepage data'); }, 'scholarships.html': () => Promise.all([load('./scholarships-live.js?v=22','scholarships'), load('./scholarship-favorites.js?v=10','favorites')]), 'documents.html': () => load('./documents.js?v=80','documents tools'), 'services.html': () => load('./public-commerce-live.js?v=21','services'), 'offers.html': () => load('./public-commerce-live.js?v=21','offers'), 'contact.html': () => load('./contact-live.js?v=10','contact'), 'profile.html': () => load('./scholarship-favorites.js?v=10','favorites') };
     await routes[page]?.();
-    onIdle(() => { if (!['login.html','register.html'].includes(page)) load('./nav-auth.js?v=101','navigation account state'); load('./analytics.js?v=10','analytics'); if (!['login.html','register.html','terms.html','privacy.html'].includes(page)) load('./notifications-live.js?v=11','notifications'); load('./ads.js?v=1','ads'); });
+    onIdle(() => { if (!['login.html','register.html'].includes(page)) load('./nav-auth.js?v=102','navigation account state'); load('./analytics.js?v=10','analytics'); if (!['login.html','register.html','terms.html','privacy.html'].includes(page)) load('./notifications-live.js?v=11','notifications'); load('./ads.js?v=1','ads'); });
   };
   const adminModules = async () => {
     try {
