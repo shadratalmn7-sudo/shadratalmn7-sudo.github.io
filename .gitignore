@@ -1,0 +1,21 @@
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+service-account*.json
+*serviceAccount*.json
+firebase-admin*.json
+credentials*.json
+secrets*.json
+
+# Local tooling
+node_modules/
+.wrangler/
+.dev.vars
+.DS_Store
+Thumbs.db
