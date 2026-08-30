@@ -1,4 +1,5 @@
-const css=document.createElement('link');css.rel='stylesheet';css.href='admin-navigation.css?v=16';document.head.appendChild(css);
+const css=document.createElement('link');css.rel='stylesheet';css.href='admin-navigation.css?v=17';document.head.appendChild(css);
+if(window.__shadratAdminNavigationReady){throw new Error('admin-navigation-ready')}window.__shadratAdminNavigationReady=true;
 const icon=p=>`<svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="${p}"/></svg>`;
 const path={
   overview:'M4 11.2 12 4l8 7.2v8.3H14.5v-5.5h-5V19.5H4v-8.3Z',
@@ -8,42 +9,26 @@ const path={
   support:'M5 5h14v14H5V5Zm3 4h8M8 13h5M8 17h7',
   gamification:'M12 3l2.3 4.7 5.2.8-3.8 3.7.9 5.3-4.6-2.5-4.6 2.5.9-5.3-3.8-3.7 5.2-.8L12 3Z',
   system:'M12 3 19 6v5c0 4.6-2.7 7.8-7 10-4.3-2.2-7-5.4-7-10V6l7-3Zm-3 9 2 2 4-4',
-  home:'M4 11.2 12 4l8 7.2v8.3H14.5v-5.5h-5V19.5H4v-8.3Z',
-  scholarship:'m3.5 8.2 8.5-4 8.5 4-8.5 4-8.5-4Zm3 2.1v4.2c0 1.7 2.5 3.5 5.5 3.5s5.5-1.8 5.5-3.5v-4.2M20.5 8.5v5',
-  documents:'M7 3.5h7l3 3v13H7v-16Zm7 0v4h4M9.5 11h5M9.5 14h5M9.5 17H13',
-  currency:'M7 7h10m0 0-3-3m3 3-3 3M17 17H7m0 0 3 3m-3-3 3-3',
-  services:'M7 6.5h10l1 3.5-2 8H8l-2-8 1-3.5Zm2-2h6v2H9v-2ZM9.5 12h5M12 9.5v5',
-  offers:'M4.5 8 9 3.5h8.5l2 2V14L15 18.5 4.5 8Zm10-1.2h.01M9 13l6-6',
-  contact:'M4 6h16v12H4V6Zm0 1 8 6 8-6',
-  about:'M12 4a8 8 0 0 0-8 8v6l2.5-1.5A8 8 0 1 0 12 4Z',
-  profile:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20c.7-3.6 3-5.5 7-5.5s6.3 1.9 7 5.5'
+  finance:'M5 6h14M7 10h10M8 14h8M10 18h4',
+  home:'M4 11.2 12 4l8 7.2v8.3H14.5v-5.5h-5V19.5H4v-8.3Z'
 };
-const groups=[['overview','نظرة عامة','إحصائيات ومؤشرات سريعة'],['content','المحتوى والخدمات','المنح، الصفحة، الخدمات والعروض'],['people','العملاء والفريق','الطلاب، الموظفون والصلاحيات'],['support','الطلبات والمحاسبة','طلبات الطلاب، الدعم والتسليم'],['system','النظام والتحفيز','الإشعارات، XP، الأمان والدخل']];
 const sections=[
-  {href:'admin-analytics.html',label:'مركز المراقبة',desc:'ملخص المنصة والأرقام المهمة',key:'overview',group:'overview',icon:'overview',roles:['owner','admin','support','editor','communityModerator']},
-  {href:'admin-homepage.html',label:'إدارة المحتوى',desc:'الرئيسية، المنح، الخدمات، العروض',key:'content',group:'content',icon:'content',roles:['owner','admin','editor']},
-  {href:'admin-users.html',label:'الطلاب والعملاء',desc:'الحسابات، الحالات وبيانات الطلاب',key:'students',group:'people',icon:'students',roles:['owner','admin','support']},
-  {href:'admin-staff.html',label:'الموظفون والصلاحيات',desc:'إضافة فريق وتحديد أدوار الوصول',key:'staff',group:'people',icon:'staff',roles:['owner']},
-  {href:'admin-orders.html',label:'الطلبات والدعم',desc:'طلبات الخدمات، التسليم والمحاسبة',key:'support',group:'support',icon:'support',roles:['owner','admin','support']},
-  {href:'admin-gamification.html',label:'الإشعارات و XP',desc:'المهام، التنبيهات ونظام التحفيز',key:'gamification',group:'system',icon:'gamification',roles:['owner','admin']},
-  {href:'admin-security.html',label:'النظام والمالية',desc:'الأمان، الدخل والإعدادات الحساسة',key:'system',group:'system',icon:'system',roles:['owner','admin']}
+  {href:'admin-analytics.html',label:'مركز المراقبة',desc:'الأرقام والتنبيهات اليومية',key:'overview',icon:'overview',roles:['owner','admin','support','editor','communityModerator']},
+  {href:'admin-homepage.html',label:'المحتوى والخدمات',desc:'الرئيسية، المنح، الخدمات، العروض',key:'content',icon:'content',roles:['owner','admin','editor']},
+  {href:'admin-users.html',label:'الطلاب والعملاء',desc:'الحسابات وبيانات الطلاب',key:'students',icon:'students',roles:['owner','admin','support']},
+  {href:'admin-staff.html',label:'الفريق والصلاحيات',desc:'الموظفون وأدوار الوصول',key:'staff',icon:'staff',roles:['owner']},
+  {href:'admin-orders.html',label:'الطلبات والدعم',desc:'الطلبات، الرسائل والتسليم',key:'support',icon:'support',roles:['owner','admin','support']},
+  {href:'admin-gamification.html',label:'النظام والتحفيز',desc:'الإشعارات، XP، الإعلانات',key:'gamification',icon:'gamification',roles:['owner','admin']},
+  {href:'admin-security.html',label:'الأمان والمالية',desc:'الحماية، الدخل والإعدادات الحساسة',key:'system',icon:'system',roles:['owner','admin']}
 ];
-const studentSections=[['index.html','الرئيسية','home'],['profile.html','حسابي','profile'],['scholarships.html','المنح','scholarship'],['documents.html','مستنداتي','documents'],['currency.html','تحويل العملات','currency'],['services.html','الخدمات','services'],['offers.html','العروض','offers'],['contact.html','تواصل معنا','contact'],['about.html','من نحن','about']];
+const aliases={'admin-scholarships.html':'admin-homepage.html','admin-services.html':'admin-homepage.html','admin-offers.html':'admin-homepage.html','admin-videos.html':'admin-homepage.html','admin-messages.html':'admin-orders.html','admin-announcements.html':'admin-gamification.html','admin-revenue.html':'admin-security.html','admin-community.html':'admin-analytics.html'};
 const role=document.body.dataset.role||'student';
-const current=location.pathname.split('/').pop();const aliases={'admin-scholarships.html':'admin-homepage.html','admin-services.html':'admin-homepage.html','admin-offers.html':'admin-homepage.html','admin-videos.html':'admin-homepage.html','admin-messages.html':'admin-orders.html','admin-announcements.html':'admin-gamification.html','admin-revenue.html':'admin-security.html','admin-community.html':'admin-analytics.html'};const active=aliases[current]||current;
-const visibleAdmin=sections.filter(item=>(item.roles||[]).includes(role));
-const adminLink=item=>`<a href="${item.href}" data-admin-section="${item.key}" class="admin-nav-item ${active===item.href?'active is-current':''}"><span class="admin-nav-label"><span class="admin-nav-icon-wrap">${icon(path[item.icon])}</span><span><b>${item.label}</b><small>${item.desc}</small></span></span><b class="admin-count-badge" data-admin-badge="${item.key}" hidden>0</b></a>`;
-const adminGrouped=()=>groups.map(([key,title,subtitle])=>{const items=visibleAdmin.filter(item=>item.group===key);if(!items.length)return '';const open=items.some(item=>item.href===active);return `<section class="admin-nav-group ${open?'is-open':''}" data-admin-nav-group><button type="button" class="admin-nav-group-toggle" aria-expanded="${open?'true':'false'}"><span><b>${title}</b><small>${subtitle}</small></span><i>⌄</i></button><div class="admin-nav-group-body" ${open?'':'hidden'}>${items.map(adminLink).join('')}</div></section>`}).join('');
-function wireGroupAccordions(root){root.querySelectorAll('.admin-nav-group-toggle').forEach(btn=>{if(btn.dataset.ready)return;btn.dataset.ready='1';btn.addEventListener('click',()=>{const card=btn.closest('[data-admin-nav-group]'),body=card?.querySelector('.admin-nav-group-body');if(!card||!body)return;const open=btn.getAttribute('aria-expanded')!=='true';card.classList.toggle('is-open',open);btn.setAttribute('aria-expanded',String(open));body.hidden=!open;});});}
-document.querySelectorAll('.admin-nav').forEach(nav=>{nav.innerHTML=`<div class="admin-nav-intro"><b>لوحة شذرات</b><span>اختر القسم حسب المهمة المطلوبة</span></div>${adminGrouped()}`;wireGroupAccordions(nav)});
-const headerNav=document.querySelector('.site-header .nav');
-if(headerNav){
- headerNav.querySelectorAll('.admin-student-menu-button').forEach(el=>el.remove());document.querySelectorAll('.admin-student-menu').forEach(el=>el.remove());
- const button=document.createElement('button');button.type='button';button.className='admin-student-menu-button';button.setAttribute('aria-label','فتح قائمة الواجهات');button.setAttribute('aria-expanded','false');button.innerHTML='<span>☰</span><b>القائمة</b>';headerNav.appendChild(button);
- const studentLinks=studentSections.map(([href,label,key])=>`<a href="${href}"><span class="admin-student-icon">${icon(path[key])}</span><span>${label}</span></a>`).join('');
- const adminCards=groups.map(([key,title,subtitle])=>{const items=visibleAdmin.filter(item=>item.group===key);if(!items.length)return '';const open=items.some(item=>item.href===active);return `<section class="admin-switch-subgroup ${open?'is-open':''}" data-admin-drawer><button type="button" class="admin-subgroup-toggle" aria-expanded="${open?'true':'false'}"><span><b>${title}</b><small>${subtitle}</small></span><i>⌄</i></button><div class="admin-subgroup-body" ${open?'':'hidden'}>${items.map(item=>`<a href="${item.href}" data-admin-section="${item.key}" class="${active===item.href?'is-current':''}"><span class="admin-student-icon">${icon(path[item.icon])}</span><span><b>${item.label}</b><small>${item.desc}</small></span><b class="admin-count-badge" data-admin-badge="${item.key}" hidden>0</b></a>`).join('')}</div></section>`}).join('');
- const menu=document.createElement('div');menu.className='admin-student-menu';menu.setAttribute('aria-hidden','true');menu.innerHTML=`<div class="admin-student-backdrop" data-student-close></div><aside class="admin-student-panel"><div class="admin-student-head"><img src="assets/shazarat-logo.svg" alt="شذرات للمنح"><button type="button" data-student-close aria-label="إغلاق">×</button></div><div class="admin-switches"><section class="admin-switch-card" data-switch-card><button type="button" class="admin-switch-toggle student" data-switch-toggle aria-expanded="false"><span class="admin-switch-main"><span class="admin-switch-mark">${icon(path.profile)}</span><span><b>واجهة الطالب</b><small>أقسام الموقع العامة</small></span></span><i>⌄</i></button><div class="admin-switch-body" data-switch-body hidden><div class="admin-student-links">${studentLinks}</div></div></section><section class="admin-switch-card admin" data-switch-card><button type="button" class="admin-switch-toggle admin" data-switch-toggle aria-expanded="false"><span class="admin-switch-main"><span class="admin-switch-mark">${icon(path.system)}</span><span><b>إدارة شذرات</b><small>مرتبة حسب نوع المهمة</small></span></span><i>⌄</i></button><div class="admin-switch-body" data-switch-body hidden><div class="admin-admin-drawers">${adminCards}</div></div></section></div></aside>`;document.body.appendChild(menu);
- const cards=[...menu.querySelectorAll('[data-switch-card]')];const closeCard=card=>{const t=card.querySelector('[data-switch-toggle]'),body=card.querySelector('[data-switch-body]');card.classList.remove('is-open');t.setAttribute('aria-expanded','false');body.hidden=true};const openCard=card=>{cards.forEach(c=>{if(c!==card)closeCard(c)});const t=card.querySelector('[data-switch-toggle]'),body=card.querySelector('[data-switch-body]');card.classList.add('is-open');t.setAttribute('aria-expanded','true');body.hidden=false};cards.forEach(card=>card.querySelector('[data-switch-toggle]').addEventListener('click',()=>card.classList.contains('is-open')?closeCard(card):openCard(card)));
- menu.querySelectorAll('[data-admin-drawer]').forEach(drawer=>{const btn=drawer.querySelector('.admin-subgroup-toggle'),body=drawer.querySelector('.admin-subgroup-body');btn.addEventListener('click',()=>{const open=btn.getAttribute('aria-expanded')!=='true';drawer.classList.toggle('is-open',open);btn.setAttribute('aria-expanded',String(open));body.hidden=!open;});});
- const setOpen=open=>{menu.classList.toggle('is-open',open);menu.setAttribute('aria-hidden',String(!open));button.setAttribute('aria-expanded',String(open));document.body.classList.toggle('student-menu-open',open);if(open){const adminCard=menu.querySelector('.admin-switch-card.admin');if(adminCard&&!adminCard.classList.contains('is-open'))openCard(adminCard);}else cards.forEach(closeCard)};button.addEventListener('click',()=>setOpen(true));menu.querySelectorAll('[data-student-close]').forEach(el=>el.addEventListener('click',()=>setOpen(false)));document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false)});
-}
+const current=location.pathname.split('/').pop()||'admin-analytics.html';
+const active=aliases[current]||current;
+const visible=sections.filter(item=>item.roles.includes(role));
+const adminLink=item=>`<a href="${item.href}" data-admin-section="${item.key}" class="admin-nav-item ${active===item.href?'active is-current':''}"><span class="admin-nav-icon-wrap">${icon(path[item.icon])}</span><span class="admin-nav-copy"><b>${item.label}</b><small>${item.desc}</small></span><b class="admin-count-badge" data-admin-badge="${item.key}" hidden>0</b></a>`;
+document.querySelectorAll('.admin-nav').forEach(nav=>{
+  nav.innerHTML=`<div class="admin-nav-intro"><b>إدارة شذرات</b><span>أقسام تشغيل مرتبة مثل لوحة شركة</span></div><div class="admin-nav-flat">${visible.map(adminLink).join('')}</div>`;
+});
+document.querySelectorAll('.admin-student-menu-button,.admin-student-menu').forEach(el=>el.remove());
+document.body.classList.remove('student-menu-open');
