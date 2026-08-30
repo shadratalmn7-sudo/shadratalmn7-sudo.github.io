@@ -8,7 +8,6 @@ const path={
   support:'M5 5h14v14H5V5Zm3 4h8M8 13h5M8 17h7',
   gamification:'M12 3l2.3 4.7 5.2.8-3.8 3.7.9 5.3-4.6-2.5-4.6 2.5.9-5.3-3.8-3.7 5.2-.8L12 3Z',
   system:'M12 3 19 6v5c0 4.6-2.7 7.8-7 10-4.3-2.2-7-5.4-7-10V6l7-3Zm-3 9 2 2 4-4',
-  money:'M6 6h12v12H6V6Zm3 4h6M9 14h4M16 9v6',
   home:'M4 11.2 12 4l8 7.2v8.3H14.5v-5.5h-5V19.5H4v-8.3Z',
   scholarship:'m3.5 8.2 8.5-4 8.5 4-8.5 4-8.5-4Zm3 2.1v4.2c0 1.7 2.5 3.5 5.5 3.5s5.5-1.8 5.5-3.5v-4.2M20.5 8.5v5',
   documents:'M7 3.5h7l3 3v13H7v-16Zm7 0v4h4M9.5 11h5M9.5 14h5M9.5 17H13',
@@ -19,13 +18,7 @@ const path={
   about:'M12 4a8 8 0 0 0-8 8v6l2.5-1.5A8 8 0 1 0 12 4Z',
   profile:'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20c.7-3.6 3-5.5 7-5.5s6.3 1.9 7 5.5'
 };
-const groups=[
-  ['overview','نظرة عامة','إحصائيات ومؤشرات سريعة'],
-  ['content','المحتوى والخدمات','المنح، الصفحة، الخدمات والعروض'],
-  ['people','العملاء والفريق','الطلاب، الموظفون والصلاحيات'],
-  ['support','الطلبات والمحاسبة','طلبات الطلاب، الدعم والتسليم'],
-  ['system','النظام والتحفيز','الإشعارات، XP، الأمان والدخل']
-];
+const groups=[['overview','نظرة عامة','إحصائيات ومؤشرات سريعة'],['content','المحتوى والخدمات','المنح، الصفحة، الخدمات والعروض'],['people','العملاء والفريق','الطلاب، الموظفون والصلاحيات'],['support','الطلبات والمحاسبة','طلبات الطلاب، الدعم والتسليم'],['system','النظام والتحفيز','الإشعارات، XP، الأمان والدخل']];
 const sections=[
   {href:'admin-analytics.html',label:'مركز المراقبة',desc:'ملخص المنصة والأرقام المهمة',key:'overview',group:'overview',icon:'overview',roles:['owner','admin','support','editor','communityModerator']},
   {href:'admin-homepage.html',label:'إدارة المحتوى',desc:'الرئيسية، المنح، الخدمات، العروض',key:'content',group:'content',icon:'content',roles:['owner','admin','editor']},
@@ -44,7 +37,8 @@ const adminGrouped=()=>groups.map(([key,title,subtitle])=>{const items=visibleAd
 function wireGroupAccordions(root){root.querySelectorAll('.admin-nav-group-toggle').forEach(btn=>{if(btn.dataset.ready)return;btn.dataset.ready='1';btn.addEventListener('click',()=>{const card=btn.closest('[data-admin-nav-group]'),body=card?.querySelector('.admin-nav-group-body');if(!card||!body)return;const open=btn.getAttribute('aria-expanded')!=='true';card.classList.toggle('is-open',open);btn.setAttribute('aria-expanded',String(open));body.hidden=!open;});});}
 document.querySelectorAll('.admin-nav').forEach(nav=>{nav.innerHTML=`<div class="admin-nav-intro"><b>لوحة شذرات</b><span>اختر القسم حسب المهمة المطلوبة</span></div>${adminGrouped()}`;wireGroupAccordions(nav)});
 const headerNav=document.querySelector('.site-header .nav');
-if(headerNav&&!headerNav.querySelector('.admin-student-menu-button')){
+if(headerNav){
+ headerNav.querySelectorAll('.admin-student-menu-button').forEach(el=>el.remove());document.querySelectorAll('.admin-student-menu').forEach(el=>el.remove());
  const button=document.createElement('button');button.type='button';button.className='admin-student-menu-button';button.setAttribute('aria-label','فتح قائمة الواجهات');button.setAttribute('aria-expanded','false');button.innerHTML='<span>☰</span><b>القائمة</b>';headerNav.appendChild(button);
  const studentLinks=studentSections.map(([href,label,key])=>`<a href="${href}"><span class="admin-student-icon">${icon(path[key])}</span><span>${label}</span></a>`).join('');
  const adminCards=groups.map(([key,title,subtitle])=>{const items=visibleAdmin.filter(item=>item.group===key);if(!items.length)return '';const open=items.some(item=>item.href===active);return `<section class="admin-switch-subgroup ${open?'is-open':''}" data-admin-drawer><button type="button" class="admin-subgroup-toggle" aria-expanded="${open?'true':'false'}"><span><b>${title}</b><small>${subtitle}</small></span><i>⌄</i></button><div class="admin-subgroup-body" ${open?'':'hidden'}>${items.map(item=>`<a href="${item.href}" data-admin-section="${item.key}" class="${active===item.href?'is-current':''}"><span class="admin-student-icon">${icon(path[item.icon])}</span><span><b>${item.label}</b><small>${item.desc}</small></span><b class="admin-count-badge" data-admin-badge="${item.key}" hidden>0</b></a>`).join('')}</div></section>`}).join('');
