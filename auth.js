@@ -1,6 +1,7 @@
 import { getApp, getApps, initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
 import {
   browserLocalPersistence,
+  browserSessionPersistence,
   createUserWithEmailAndPassword,
   deleteUser,
   getAuth,
@@ -18,6 +19,7 @@ import { firebaseConfig } from './firebase-config.js';
 
 const OWNER_EMAIL = 'shadrat.almn7@gmail.com';
 const STAFF_ROLES = new Set(['owner', 'admin', 'support', 'editor', 'communityModerator']);
+const ADMIN_SESSION_KEY = 'shadrat_admin_session';
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -107,11 +109,32 @@ function safeNext() {
   }
 }
 
+function wantsAdminPage() {
+  return safeNext()?.startsWith('admin-') || false;
+}
+
+async function prepareLoginPersistence() {
+  const persistence = wantsAdminPage() ? browserSessionPersistence : browserLocalPersistence;
+  await setPersistence(auth, persistence).catch(error => console.warn('[Shadrat] session mode unavailable', error));
+}
+
+function markAdminSession(user, role, next) {
+  if (!next?.startsWith('admin-') || !STAFF_ROLES.has(role)) {
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
+    return;
+  }
+  sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify({ uid: user.uid, role, at: Date.now() }));
+}
+
 async function destination(user) {
   const next = safeNext();
   const role = await roleFor(user);
-  if (next?.startsWith('admin-') && !STAFF_ROLES.has(role)) return 'profile.html';
-  return next || (STAFF_ROLES.has(role) ? 'admin-analytics.html' : 'profile.html');
+  if (next?.startsWith('admin-') && !STAFF_ROLES.has(role)) {
+    markAdminSession(user, role, null);
+    return 'profile.html';
+  }
+  markAdminSession(user, role, next);
+  return next || 'profile.html';
 }
 
 async function ensureGoogleProfile(user) {
@@ -146,6 +169,7 @@ document.querySelectorAll('[data-google-auth]').forEach(button => button.addEven
   button.setAttribute('aria-busy', 'true');
   show(form, 'جارٍ فتح تسجيل Google…', 'progress');
   try {
+    await prepareLoginPersistence();
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     const result = await withTimeout(signInWithPopup(auth, provider), 45000);
@@ -167,6 +191,7 @@ loginForm?.addEventListener('submit', async event => {
   setBusy(loginForm, true, 'جارٍ تسجيل الدخول…');
   show(loginForm, 'نتحقق من بياناتك…', 'progress');
   try {
+    await prepareLoginPersistence();
     const credential = await withTimeout(signInWithEmailAndPassword(auth, clean(loginForm.email.value), loginForm.password.value));
     location.href = await destination(credential.user);
   } catch (error) {
