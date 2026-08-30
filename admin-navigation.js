@@ -1,5 +1,5 @@
 const css=document.createElement('link');css.rel='stylesheet';css.href='admin-navigation.css?v=17';document.head.appendChild(css);
-if(window.__shadratAdminNavigationReady){throw new Error('admin-navigation-ready')}window.__shadratAdminNavigationReady=true;
+if(window.__shadratAdminNavigationReady){}else{window.__shadratAdminNavigationReady=true;
 const icon=p=>`<svg class="admin-nav-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="${p}"/></svg>`;
 const path={
   overview:'M4 11.2 12 4l8 7.2v8.3H14.5v-5.5h-5V19.5H4v-8.3Z',
@@ -32,3 +32,4 @@ document.querySelectorAll('.admin-nav').forEach(nav=>{
 });
 document.querySelectorAll('.admin-student-menu-button,.admin-student-menu').forEach(el=>el.remove());
 document.body.classList.remove('student-menu-open');
+}
