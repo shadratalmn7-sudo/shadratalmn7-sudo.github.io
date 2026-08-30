@@ -4,6 +4,13 @@ import { doc, getDoc, getFirestore } from 'https://www.gstatic.com/firebasejs/12
 import { firebaseConfig } from './firebase-config.js';
 
 document.body?.setAttribute('data-admin-page','');
+document.documentElement.classList.add('admin-pending');
+if (!document.getElementById('admin-access-guard-style')) {
+  const style = document.createElement('style');
+  style.id = 'admin-access-guard-style';
+  style.textContent = `html.admin-pending body{visibility:hidden!important}html.admin-authorized body{visibility:visible!important}`;
+  document.head.appendChild(style);
+}
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -49,6 +56,8 @@ function withTimeout(promise, milliseconds = 10000) {
 
 export async function requireAdmin() {
   document.body?.setAttribute('data-admin-page','');
+  document.documentElement.classList.add('admin-pending');
+  document.documentElement.classList.remove('admin-authorized');
   const user = await waitForUser();
   if (!user) throw new Error('not-authenticated');
   const owner = (user.email || '').toLowerCase() === OWNER_EMAIL;
@@ -63,5 +72,7 @@ export async function requireAdmin() {
   }
   const page = location.pathname.split('/').pop() || '';
   if (!(access[page] || ['owner', 'admin']).includes(role)) throw new Error('not-authorized');
+  document.documentElement.classList.remove('admin-pending');
+  document.documentElement.classList.add('admin-authorized');
   return { user, role };
 }
