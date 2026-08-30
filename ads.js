@@ -19,12 +19,12 @@
     }
   }
 
-  if (window.__shadratAdsterraAuto || page.startsWith('admin-') || ['login.html','register.html','service-request.html'].includes(page)) return;
+  if (window.__shadratAdsterraAuto || page.startsWith('admin-') || ['login.html','register.html','profile.html','service-request.html'].includes(page)) return;
   window.__shadratAdsterraAuto = true;
 
   const mobile = innerWidth < 900;
   const style = document.createElement('style');
-  style.textContent = `.shadrat-auto-ad{display:flex;justify-content:center;align-items:center;width:min(1160px,calc(100% - 32px));margin:22px auto;overflow:hidden;min-height:60px}.shadrat-auto-ad iframe{border:0;display:block;max-width:100%}.shadrat-desktop-rail{position:fixed;left:12px;top:120px;z-index:7;width:160px;height:600px;overflow:hidden}@media(max-width:1299px){.shadrat-desktop-rail{display:none!important}}@media(max-width:899px){.shadrat-auto-ad{width:100%;margin:16px auto;padding:4px 0;min-height:60px}.shadrat-mobile-ad{min-height:300px}.shadrat-mobile-ad iframe{width:160px!important;height:300px!important}}`;
+  style.textContent = `.shadrat-auto-ad{display:flex;justify-content:center;align-items:center;width:min(1160px,calc(100% - 32px));margin:22px auto;overflow:hidden;min-height:60px}.shadrat-auto-ad iframe{border:0;display:block}.shadrat-ad-bar{width:100%;max-width:100%;margin:10px auto 14px;padding:6px 0;background:rgba(248,251,255,.72);border-block:1px solid rgba(29,78,216,.09);min-height:60px}.shadrat-ad-bottom{margin:18px auto 0}.shadrat-ad-bar iframe{transform-origin:center top}.shadrat-desktop-rail{position:fixed;left:12px;top:120px;z-index:7;width:160px;height:600px;overflow:hidden}@media(max-width:1299px){.shadrat-desktop-rail{display:none!important}}@media(max-width:899px){.shadrat-auto-ad{width:100%;margin:16px auto;padding:4px 0;min-height:60px}.shadrat-mobile-ad{min-height:300px}.shadrat-mobile-ad iframe{width:160px!important;height:300px!important}.shadrat-ad-bar{margin:8px auto 12px;padding:5px 0;background:rgba(248,251,255,.78)}.shadrat-ad-bottom{margin-top:16px}}`;
   document.head.appendChild(style);
 
   function makeAd(key, width, height, extraClass='') {
@@ -34,7 +34,18 @@
     const frame = document.createElement('iframe');
     frame.width = String(width); frame.height = String(height); frame.scrolling = 'no'; frame.loading = 'lazy'; frame.title = 'إعلان';
     frame.srcdoc = `<!doctype html><html><body style="margin:0;overflow:hidden;display:flex;justify-content:center"><script>atOptions={'key':'${key}','format':'iframe','height':${height},'width':${width},'params':{}};<\/script><script src="https://www.highrevenueformat.com/${key}/invoke.js"><\/script></body></html>`;
-    wrap.appendChild(frame); return wrap;
+    wrap.appendChild(frame);
+    if (extraClass.includes('shadrat-ad-bar')) {
+      requestAnimationFrame(() => {
+        const available = Math.max(1, wrap.clientWidth - 16);
+        const scale = Math.min(1, available / width);
+        frame.style.transform = `scale(${scale})`;
+        frame.style.width = `${width}px`;
+        frame.style.height = `${height}px`;
+        wrap.style.minHeight = `${Math.ceil(height * scale) + 12}px`;
+      });
+    }
+    return wrap;
   }
 
   const main = document.querySelector('main');
@@ -42,18 +53,18 @@
   const sections = [...main.querySelectorAll(':scope > section')];
   if (!sections.length) return;
 
+  if (!document.querySelector('.shadrat-ad-top')) main.prepend(makeAd('81784add9b99f179fe38269f88f2f669',468,60,'shadrat-ad-bar shadrat-ad-top'));
+  if (!document.querySelector('.shadrat-ad-bottom')) main.appendChild(makeAd('81784add9b99f179fe38269f88f2f669',468,60,'shadrat-ad-bar shadrat-ad-bottom'));
+
   if (mobile) {
     const targets = sections.filter((_,i) => i === 0 || (i + 1) % 2 === 0).slice(0,3);
-    targets.forEach((target,i) => {
+    targets.forEach(target => {
       if (target.nextElementSibling?.classList?.contains('shadrat-auto-ad')) return;
       target.after(makeAd('eda2c4586cf38ead23cc20bf961a2503',160,300,'shadrat-mobile-ad'));
     });
     return;
   }
 
-  if (!document.querySelector('.adsterra-banner-468,.shadrat-auto-ad')) {
-    sections[0].after(makeAd('81784add9b99f179fe38269f88f2f669',468,60));
-  }
   const rectTarget = sections[1] || sections[0];
   if (rectTarget && !rectTarget.nextElementSibling?.classList?.contains('shadrat-auto-ad')) rectTarget.after(makeAd('eda2c4586cf38ead23cc20bf961a2503',160,300));
   if (innerWidth >= 1300) document.body.appendChild(makeAd('3e949efa2489333e349b38867c9f47fd',160,600,'shadrat-desktop-rail'));
