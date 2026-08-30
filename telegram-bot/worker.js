@@ -1,5 +1,4 @@
 const SITE_BASE = 'https://shadratalmn7-sudo.github.io';
-const FALLBACK_ADMIN_CHAT_ID = '8679324666';
 const siteUrl=(path='')=>`${SITE_BASE}/${path}${path.includes('?')?'&':'?'}utm_source=telegram_bot&utm_medium=bot`;
 
 const LANGUAGE_MENU = {
@@ -223,7 +222,7 @@ async function sendAdminNotification(env, { title, user, chatId, details }) {
   return sendMessage(env, getAdminChatId(env), body);
 }
 
-function getAdminChatId(env) { return String(env.ADMIN_CHAT_ID || FALLBACK_ADMIN_CHAT_ID); }
+function getAdminChatId(env) { if (!env.ADMIN_CHAT_ID) throw new Error('ADMIN_CHAT_ID is missing'); return String(env.ADMIN_CHAT_ID); }
 function isAdmin(message, env) { return String(message.chat.id) === getAdminChatId(env); }
 function extractUserId(text) { const m = text.match(/\[USER_ID:(-?\d+)\]/); return m ? m[1] : null; }
 
