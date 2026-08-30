@@ -25,6 +25,7 @@ service cloud.firestore {
         && request.resource.data.accountStatus == 'active'
         && request.resource.data.publicProfile == false;
       allow read: if own(uid) || supportStaff();
+
       // الاسم، الموقع والمرحلة قابلة للتعديل في أي وقت.
       allow update: if own(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
@@ -40,7 +41,11 @@ service cloud.firestore {
           'fullName','username','location','studyLevel','lastUsernameEditAt','usernameEditCount','updatedAt'
         ])
         && safeText(request.resource.data.fullName, 3, 80)
-        && request.resource.data.username.matches('^[a-z0-9_]{3,24}
+        && request.resource.data.username.matches('^[a-z0-9_]{3,24}$')
+        && !request.resource.data.username.matches('.*(owner|admin|support|staff|shazarat).*')
+        && request.resource.data.usernameEditCount == resource.data.get('usernameEditCount', 0) + 1
+        && request.resource.data.lastUsernameEditAt == request.time;
+
       allow update: if own(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'publicProfile','avatarKey','updatedAt'
