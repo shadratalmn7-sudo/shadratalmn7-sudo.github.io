@@ -29,7 +29,7 @@ service cloud.firestore {
       // الاسم، الموقع والمرحلة قابلة للتعديل في أي وقت.
       allow update: if own(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'fullName','location','studyLevel','updatedAt'
+          'fullName','age','nationality','currentCountry','city','contactMethod','contactValue','location','studyLevel','updatedAt'
         ])
         && safeText(request.resource.data.fullName, 3, 80);
 
@@ -38,7 +38,7 @@ service cloud.firestore {
         && request.resource.data.username != resource.data.username
         && weeklyUsernameEditAllowed()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'fullName','username','location','studyLevel','lastUsernameEditAt','usernameEditCount','updatedAt'
+          'fullName','username','age','nationality','currentCountry','city','contactMethod','contactValue','location','studyLevel','lastUsernameEditAt','usernameEditCount','updatedAt'
         ])
         && safeText(request.resource.data.fullName, 3, 80)
         && request.resource.data.username.matches('^[a-z0-9_]{3,24}$')
@@ -100,12 +100,15 @@ service cloud.firestore {
     }
 
     match /messages/{messageId} {
-      allow create: if activeUser() && request.resource.data.userId == request.auth.uid
-        && safeText(request.resource.data.name, 2, 120)
+      allow create: if safeText(request.resource.data.name, 2, 120)
         && safeText(request.resource.data.email, 5, 200)
         && safeText(request.resource.data.message, 10, 5000)
         && request.resource.data.type in ['general','service','complaint','report','achievement']
-        && request.resource.data.status == 'new';
+        && request.resource.data.status == 'new'
+        && (
+          (signedIn() && request.resource.data.userId == request.auth.uid)
+          || (!signedIn() && request.resource.data.userId == null && request.resource.data.accountProfile == null)
+        );
       allow read: if supportStaff() || (signedIn() && resource.data.userId == request.auth.uid);
       allow update: if supportStaff();
       allow delete: if ownerOnly();
