@@ -2,6 +2,7 @@ import { getApp, getApps, initializeApp } from 'https://www.gstatic.com/firebase
 import { collection, getDocs, getFirestore, query, where } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 import { mergeScholarships } from './scholarship-catalog.js?v=20260902branches';
+import { referenceOpportunities } from './opportunity-index.js?v=1';
 
 if (!window.__shadratScholarshipsLiveReady) {
 window.__shadratScholarshipsLiveReady = true;
@@ -18,7 +19,7 @@ if (cards) {
   const branchHeadlines = {all:'المنح الدراسية المتاحة','open-now':'المنح المفتوحة الآن',olympiads:'أولمبيادات القبول والمنح',universities:'فرص الجامعات'};
   let country = 'all';
   let branch = 'open-now';
-  let scholarships = mergeScholarships([]).filter(item => item.publishStatus === 'published');
+  let scholarships = mergeScholarships(referenceOpportunities).filter(item => item.publishStatus === 'published');
   const esc = (value='') => String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const parseDate = value => { if(!value) return null; const d=new Date(String(value).length===10?`${value}T00:00:00`:value); return Number.isNaN(d.getTime())?null:d; };
   const formatDate = value => { const d=parseDate(value); return d?d.toLocaleDateString('ar-SA-u-ca-gregory',{year:'numeric',month:'short',day:'numeric'}):'غير محدد'; };
@@ -35,7 +36,7 @@ if (cards) {
   [search,level,status].forEach(control=>control.addEventListener(control===search?'input':'change',render));
   document.querySelector('#reset-scholarship-filters')?.addEventListener('click',()=>{search.value='';level.value='all';status.value='all';country='all';branch='open-now';branchButtons.forEach(b=>b.classList.toggle('is-active',b.dataset.scholarshipBranch==='open-now'));countryButtons.forEach(b=>b.classList.toggle('is-active',b.dataset.country==='all'));render();search.focus();});
   render();
-  const refresh=async()=>{try{const app=getApps().length?getApp():initializeApp(firebaseConfig);const snapshot=await getDocs(query(collection(getFirestore(app),'scholarships'),where('publishStatus','==','published')));const remote=snapshot.docs.map(document=>({id:document.id,...document.data()}));if(remote.length)scholarships=mergeScholarships(remote).filter(item=>item.publishStatus==='published');sourceState.textContent='تم تحديث الدليل من قاعدة البيانات';render();}catch(error){sourceState.textContent='نعرض النسخة الموثقة المحفوظة';console.warn('[Shadrat] scholarship refresh unavailable',error);}};
+  const refresh=async()=>{try{const app=getApps().length?getApp():initializeApp(firebaseConfig);const snapshot=await getDocs(query(collection(getFirestore(app),'scholarships'),where('publishStatus','==','published')));const remote=snapshot.docs.map(document=>({id:document.id,...document.data()}));if(remote.length)scholarships=mergeScholarships([...referenceOpportunities,...remote]).filter(item=>item.publishStatus==='published');sourceState.textContent='تم تحديث الدليل من قاعدة البيانات';render();}catch(error){sourceState.textContent='نعرض النسخة الموثقة المحفوظة';console.warn('[Shadrat] scholarship refresh unavailable',error);}};
   ('requestIdleCallback'in window?requestIdleCallback(refresh,{timeout:1800}):setTimeout(refresh,700));
 }
 }
