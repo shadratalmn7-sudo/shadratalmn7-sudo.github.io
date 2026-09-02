@@ -127,7 +127,7 @@
   const adminModules = async () => {
     try {
       const { requireAdmin } = await import('./admin-access.js?v=12'); const session = await requireAdmin(); if (page === 'admin-community.html') { location.replace('admin-analytics.html'); return; }
-      document.body.dataset.role = session.role; root.classList.remove('admin-pending'); await load('./admin-navigation.js?v=18','admin navigation'); load('./admin-mobile.js?v=11','admin mobile navigation'); load('./admin-alert-badges.js?v=10','admin alerts');
+      document.body.dataset.role = session.role; root.classList.remove('admin-pending'); await load('./admin-navigation.js?v=19','admin navigation'); load('./admin-mobile.js?v=11','admin mobile navigation'); load('./admin-alert-badges.js?v=10','admin alerts');
       const routes = { 'admin-analytics.html':'./admin-analytics.js?v=10', 'admin-homepage.html':'./admin-live-data.js?v=10', 'admin-scholarships.html':'./scholarships-admin.js?v=10', 'admin-users.html':'./admin-users.js?v=10', 'admin-student.html':'./admin-student.js?v=10', 'admin-staff.html':'./admin-staff.js?v=10', 'admin-gamification.html':'./admin-gamification.js?v=10', 'admin-services.html':'./admin-commerce.js?v=21', 'admin-offers.html':'./admin-commerce.js?v=21', 'admin-orders.html':'./admin-orders.js?v=10', 'admin-messages.html':'./admin-messages.js?v=11', 'admin-announcements.html':'./admin-announcements.js?v=21' };
       if (routes[page]) await load(routes[page], page);
     } catch (error) { report('admin access denied', error); location.replace(`login.html?next=${encodeURIComponent(page)}`); }
