@@ -14,6 +14,7 @@
       <form class="card form" data-demo-form>
         <div class="field"><label for="name">الاسم</label><input id="name" required minlength="2"></div>
         <div class="field"><label for="email">البريد الإلكتروني</label><input id="email" type="email" required></div>
+        <div class="field"><label for="nationality">الجنسية</label><input id="nationality" list="nationalities-list" autocomplete="country-name" required placeholder="اختر من القائمة أو اكتب جنسيتك"><datalist id="nationalities-list"></datalist><small class="muted">يمكنك الاختيار من القائمة أو كتابة الجنسية يدويًا.</small></div>
         <div class="field"><label for="type">نوع الرسالة</label><select id="type" required><option value="">اختر</option><option value="general">استفسار عام</option><option value="service">طلب خدمة</option><option value="complaint">شكوى</option><option value="report">معلومة غير صحيحة</option><option value="achievement">إنجازات</option></select></div>
         <div class="field" data-service-field hidden><label for="service-name">الخدمة المطلوبة</label><input id="service-name" readonly></div>
         <div class="field" data-achievement-field hidden><label for="contact-method">حساب تيليجرام أو وسيلة التواصل</label><input id="contact-method" placeholder="مثال: @username أو رقم جوال"><small class="muted">اكتب وسيلة صحيحة حتى يتواصل معك فريق شذرات بعد المراجعة.</small></div>
