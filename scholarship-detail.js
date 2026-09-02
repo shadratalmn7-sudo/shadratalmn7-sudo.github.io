@@ -1,4 +1,4 @@
-import{mergeScholarships}from'./scholarship-catalog.js?v=20260902hse';
+import{mergeScholarships}from'./scholarship-catalog.js?v=20260902open';
 const root=document.querySelector('#scholarship-detail'),slug=new URLSearchParams(location.search).get('slug'),esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));if(!slug){root.innerHTML='<div class="empty">لم يتم تحديد المنحة.</div>';throw new Error('missing slug')}
 const theme=x=>x.country==='روسيا'?'ru':x.country==='المجر'?'hu':x.country==='تركيا'?'tr':'global';let item=null;
 const parseDate=value=>{if(!value)return null;const d=new Date(String(value).length===10?`${value}T00:00:00`:value);return Number.isNaN(d.getTime())?null:d};
