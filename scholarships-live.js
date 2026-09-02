@@ -1,7 +1,7 @@
 import { getApp, getApps, initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
 import { collection, getDocs, getFirestore, query, where } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
-import { mergeScholarships } from './scholarship-catalog.js?v=20260902hse';
+import { mergeScholarships } from './scholarship-catalog.js?v=20260902open';
 
 if (!window.__shadratScholarshipsLiveReady) {
 window.__shadratScholarshipsLiveReady = true;
