@@ -1,8 +1,8 @@
 import { getApp, getApps, initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
 import { collection, getDocs, getFirestore, query, where } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
-import { mergeScholarships } from './scholarship-catalog.js?v=20260902branches';
-import { referenceOpportunities } from './opportunity-index.js?v=2';
+import { mergeScholarships } from './scholarship-catalog.js?v=20260902open-grants';
+import { referenceOpportunities } from './opportunity-index.js?v=20260902open-grants';
 
 if (!window.__shadratScholarshipsLiveReady) {
 window.__shadratScholarshipsLiveReady = true;
@@ -16,7 +16,7 @@ if (cards) {
   const status = document.querySelector('#scholarship-status');
   const branchButtons = [...document.querySelectorAll('[data-scholarship-branch]')];
   const countryButtons = [...document.querySelectorAll('[data-country]')];
-  const branchHeadlines = {all:'كل المنح والفرص',scholarship:'المنح الحكومية والممولة',bachelor:'فرص البكالوريوس',master:'فرص الماجستير'};
+  const branchHeadlines = {all:'كل المنح والفرص',scholarship:'منح مفتوحة الآن',bachelor:'فرص البكالوريوس',master:'فرص الماجستير'};
   let country = 'all';
   let branch = 'all';
   let scholarships = mergeScholarships(referenceOpportunities).filter(item => item.publishStatus === 'published');
@@ -28,7 +28,8 @@ if (cards) {
   function dateState(item){const now=Date.now(),opens=parseDate(item.openDate||item.openingDate),closes=parseDate(item.deadline||item.closeDate||item.endDate);if(opens&&now<opens)return{key:'open',tone:'upcoming',label:'تفتح قريبًا'};if(closes&&now>closes)return{key:'closed',tone:'closed',label:'مغلقة'};if(opens||closes)return{key:'open',tone:'open',label:'مفتوحة'};return{key:'unknown',tone:'unknown',label:'الموعد غير محدد'};}
   function searchable(item){return[item.title,item.country,item.provider,item.shortDescription,item.funding,...(item.studyLevels||[]),...(item.subjectAreas||[])].filter(Boolean).join(' ').toLowerCase();}
   function isScholarship(item){const slug=String(item.slug||item.id||'').toLowerCase(),title=String(item.title||'').toLowerCase();return /education-in-russia|turkiye-scholarships|stipendium-hungaricum/.test(slug)||(/منحة|scholarship/.test(title)&&!/olympiad|أولمبياد|الأوليمبياد|الأولمبياد|بطولة/.test(title));}
-  function branchMatch(item){const levels=item.studyLevels||[];if(branch==='scholarship')return isScholarship(item);if(branch==='bachelor')return levels.includes('بكالوريوس');if(branch==='master')return levels.includes('ماجستير');return true;}
+  function isOpenNow(item){return dateState(item).tone==='open';}
+  function branchMatch(item){const levels=item.studyLevels||[];if(branch==='scholarship')return isOpenNow(item);if(branch==='bachelor')return levels.includes('بكالوريوس');if(branch==='master')return levels.includes('ماجستير');return true;}
   function filtered(){const term=search.value.trim().toLowerCase();return scholarships.filter(item=>branchMatch(item)&&(country==='all'||item.country===country)&&(level.value==='all'||(item.studyLevels||[]).includes(level.value))&&(status.value==='all'||dateState(item).key===status.value)&&(!term||searchable(item).includes(term)));}
   function render(){const items=filtered();document.querySelector('.scholarship-result-head h2').textContent=branchHeadlines[branch]||branchHeadlines.all;count.textContent=`${items.length} منحة`;empty.hidden=items.length>0;cards.hidden=items.length===0;cards.innerHTML=items.map(item=>{const slug=item.slug||item.id,state=dateState(item),opens=item.openDate||item.openingDate,closes=item.deadline||item.closeDate||item.endDate;return `<article class="scholarship-card scholarship-card-clean status-${state.tone}" data-scholarship-card><div class="scholarship-card-head"><div class="country-badge-large"><span>${flag(item.country)}</span><b>${esc(item.country||'دولي')}</b></div><span class="scholarship-state ${state.tone}"><i></i>${esc(state.label)}</span></div><div class="scholarship-provider">${esc(item.provider||'جهة مانحة')}</div><h2>${esc(item.title)}</h2><div class="scholarship-dates"><div><small>يفتح</small><b>${formatDate(opens)}</b></div><div><small>يغلق</small><b>${formatDate(closes)}</b></div></div><div class="scholarship-card-actions"><button type="button" class="scholarship-favorite-btn" data-favorite-slug="${esc(slug)}" data-favorite-title="${esc(item.title)}" data-favorite-country="${esc(item.country||'')}" aria-label="حفظ المنحة" aria-pressed="false">${heartIcon}</button><a class="btn primary scholarship-details-btn" href="scholarship.html?slug=${encodeURIComponent(slug)}">عرض التفاصيل</a></div></article>`;}).join('');document.dispatchEvent(new CustomEvent('shadrat:scholarships-rendered'));}
   branchButtons.forEach(button=>button.addEventListener('click',()=>{branch=button.dataset.scholarshipBranch||'all';branchButtons.forEach(n=>n.classList.toggle('is-active',n===button));render();}));
