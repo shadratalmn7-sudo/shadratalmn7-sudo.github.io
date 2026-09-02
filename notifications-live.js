@@ -25,7 +25,9 @@ function scheduleMillis(item,kind){
 }
 function isActive(item,now=Date.now()){
   if(item.publishStatus!=='published')return false;
-  const start=scheduleMillis(item,'start'),end=scheduleMillis(item,'end');
+  const start=scheduleMillis(item,'start')??toMillis(item.createdAt);
+  const explicitEnd=scheduleMillis(item,'end');
+  const end=explicitEnd??(start!==null?start+24*60*60*1000:null);
   if(start!==null&&now<start)return false;
   if(end!==null&&now>=end)return false;
   return true;
@@ -58,7 +60,7 @@ function scheduleNextBoundary(){
   clearTimeout(scheduleTimer);
   const now=Date.now(),boundaries=[];
   generalItems.forEach(x=>{
-    const start=scheduleMillis(x,'start'),end=scheduleMillis(x,'end');
+    const start=scheduleMillis(x,'start')??toMillis(x.createdAt),explicitEnd=scheduleMillis(x,'end'),end=explicitEnd??(start!==null?start+24*60*60*1000:null);
     if(start!==null&&start>now)boundaries.push(start);
     if(end!==null&&end>now)boundaries.push(end);
   });
