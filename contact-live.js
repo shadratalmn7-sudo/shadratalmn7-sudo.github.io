@@ -5,6 +5,35 @@ import { firebaseConfig } from './firebase-config.js';
 const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const form=document.querySelector('form[data-demo-form]');
 if(!form) throw new Error('contact form not found');
+
+const nationalities=[
+'أفغانستان','ألبانيا','الجزائر','أندورا','أنغولا','أنتيغوا وباربودا','الأرجنتين','أرمينيا','أستراليا','النمسا','أذربيجان',
+'الباهاما','البحرين','بنغلاديش','باربادوس','بيلاروسيا','بلجيكا','بليز','بنين','بوتان','بوليفيا','البوسنة والهرسك','بوتسوانا','البرازيل','بروناي','بلغاريا','بوركينا فاسو','بوروندي',
+'الرأس الأخضر','كمبوديا','الكاميرون','كندا','جمهورية أفريقيا الوسطى','تشاد','تشيلي','الصين','كولومبيا','جزر القمر','جمهورية الكونغو','جمهورية الكونغو الديمقراطية','كوستاريكا','ساحل العاج','كرواتيا','كوبا','قبرص','التشيك',
+'الدنمارك','جيبوتي','دومينيكا','جمهورية الدومينيكان',
+'الإكوادور','مصر','السلفادور','غينيا الاستوائية','إريتريا','إستونيا','إسواتيني','إثيوبيا',
+'فيجي','فنلندا','فرنسا',
+'الغابون','غامبيا','جورجيا','ألمانيا','غانا','اليونان','غرينادا','غواتيمالا','غينيا','غينيا بيساو','غيانا',
+'هايتي','هندوراس','المجر',
+'آيسلندا','الهند','إندونيسيا','إيران','العراق','أيرلندا','إسرائيل','إيطاليا',
+'جامايكا','اليابان','الأردن',
+'كازاخستان','كينيا','كيريباتي','كوريا الشمالية','كوريا الجنوبية','الكويت','قيرغيزستان',
+'لاوس','لاتفيا','لبنان','ليسوتو','ليبيريا','ليبيا','ليختنشتاين','ليتوانيا','لوكسمبورغ',
+'مدغشقر','مالاوي','ماليزيا','المالديف','مالي','مالطا','جزر مارشال','موريتانيا','موريشيوس','المكسيك','ولايات ميكرونيسيا المتحدة','مولدوفا','موناكو','منغوليا','الجبل الأسود','المغرب','موزمبيق','ميانمار',
+'ناميبيا','ناورو','نيبال','هولندا','نيوزيلندا','نيكاراغوا','النيجر','نيجيريا','مقدونيا الشمالية','النرويج',
+'عُمان',
+'باكستان','بالاو','فلسطين','بنما','بابوا غينيا الجديدة','باراغواي','بيرو','الفلبين','بولندا','البرتغال',
+'قطر',
+'رومانيا','روسيا','رواندا',
+'سانت كيتس ونيفيس','سانت لوسيا','سانت فنسنت والغرينادين','ساموا','سان مارينو','ساو تومي وبرينسيب','السعودية','السنغال','صربيا','سيشل','سيراليون','سنغافورة','سلوفاكيا','سلوفينيا','جزر سليمان','الصومال','جنوب أفريقيا','جنوب السودان','إسبانيا','سريلانكا','السودان','سورينام','السويد','سويسرا','سوريا',
+'طاجيكستان','تنزانيا','تايلاند','تيمور الشرقية','توغو','تونغا','ترينيداد وتوباغو','تونس','تركيا','تركمانستان','توفالو',
+'أوغندا','أوكرانيا','الإمارات العربية المتحدة','المملكة المتحدة','الولايات المتحدة','أوروغواي','أوزبكستان',
+'فانواتو','الفاتيكان','فنزويلا','فيتنام',
+'اليمن','زامبيا','زيمبابوي',
+'كوسوفو','تايوان','الصحراء الغربية'
+];
+const nationalityList=form.querySelector('#nationalities-list');
+if(nationalityList) nationalityList.innerHTML=nationalities.map(value=>`<option value="${value}"></option>`).join('');
 const params=new URLSearchParams(location.search),type=params.get('type')||'',service=params.get('service')||'',serviceId=params.get('serviceId')||'';
 if(type&&form.querySelector('#type')) form.querySelector('#type').value=type;
 if(service&&form.querySelector('#service-name')){form.querySelector('#service-name').value=service;form.querySelector('[data-service-field]')?.removeAttribute('hidden')}
@@ -27,7 +56,7 @@ form.addEventListener('submit',async event=>{
   const user=auth.currentUser;if(!user){show('يلزم تسجيل الدخول حتى تصل رسالتك أو طلبك إلى الإدارة.',false);setTimeout(()=>location.href=`login.html?next=${encodeURIComponent(location.href)}`,1200);return}
   button.disabled=true;show('جارٍ الإرسال…');
   try{
-    const payload={userId:user.uid,name:form.querySelector('#name').value.trim(),email:form.querySelector('#email').value.trim(),type:form.querySelector('#type').value,message:form.querySelector('#message').value.trim(),serviceTitle:form.querySelector('#service-name')?.value.trim()||null,contactMethod:form.querySelector('#contact-method')?.value.trim()||null,proofLink:form.querySelector('#proof-link')?.value.trim()||null,status:'new',priority:'normal',createdAt:serverTimestamp(),updatedAt:serverTimestamp()};
+    const payload={userId:user.uid,name:form.querySelector('#name').value.trim(),email:form.querySelector('#email').value.trim(),nationality:form.querySelector('#nationality')?.value.trim()||null,type:form.querySelector('#type').value,message:form.querySelector('#message').value.trim(),serviceTitle:form.querySelector('#service-name')?.value.trim()||null,contactMethod:form.querySelector('#contact-method')?.value.trim()||null,proofLink:form.querySelector('#proof-link')?.value.trim()||null,status:'new',priority:'normal',createdAt:serverTimestamp(),updatedAt:serverTimestamp()};
     const msgRef=await addDoc(collection(db,'messages'),payload);
     if(payload.type==='service'&&payload.serviceTitle){
       let price=0,serviceData=null;
