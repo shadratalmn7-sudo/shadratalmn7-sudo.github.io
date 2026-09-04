@@ -9,15 +9,47 @@
   <link rel="stylesheet" href="nav-universal.css?v=155">
   <link rel="stylesheet" href="section-pages.css?v=5">
   <link rel="stylesheet" href="scholarship-interactive.css?v=2">
+  <style>
+    .od-funding-wrap{display:none}
+    .od-funding-wrap.show{display:block}
+    .od-funding-card{margin-top:20px;background:linear-gradient(135deg,#eef8ff,#f8fcff);border:1px solid #b7d9f5;border-radius:24px;padding:24px;box-shadow:0 14px 34px rgba(30,92,140,.08)}
+    .od-funding-card h2{margin:0 0 10px;color:#0f4f7e}.od-funding-card p{margin:8px 0}
+    .od-funding-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+    .od-funding-item{background:#fff;border:1px solid #d7e8f5;border-radius:16px;padding:14px}.od-funding-item b{display:block;color:#0f4f7e;margin-bottom:4px}
+    .od-funding-note{background:#fff5d8;border:1px solid #ead08a;border-radius:16px;padding:14px 16px;color:#5b430d}
+    @media(max-width:720px){.od-funding-grid{grid-template-columns:1fr}.od-funding-card{padding:18px}}
+  </style>
 </head>
 <body class="scholarship-detail-page">
   <header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div></header>
   <main>
     <section class="page-hero compact-hero detail-page-intro"><div class="container"><span class="eyebrow">دليل المنحة</span><h1>كل تفاصيل المنحة في مكان واحد</h1><p class="lead">اختر مرحلتك، راجع الشروط والمستندات والمراحل، ثم ارجع للمصدر الرسمي عند التقديم.</p></div></section>
     <section class="section"><div class="container" id="scholarship-detail"><div class="empty">جاري تحميل تفاصيل المنحة…</div></div></section>
+    <section class="section od-funding-wrap" id="open-doors-funding-update">
+      <div class="container">
+        <div class="od-funding-card">
+          <h2>🔥 تحديث مهم بخصوص تمويل Open Doors عند اختيار الدراسة باللغة الروسية</h2>
+          <p>يمكن للفائزين والوصيف الذين يختارون برنامجًا دراسيًا باللغة الروسية أن يكونوا مؤهلين للحصول على دعم حكومي إضافي إلى جانب الدراسة المجانية ضمن الكوتة الروسية.</p>
+          <div class="od-funding-grid">
+            <div class="od-funding-item"><b>✈️ السفر</b>تغطية أو تعويض تكاليف الوصول إلى روسيا والعودة بعد انتهاء الدراسة وفق قواعد الدعم.</div>
+            <div class="od-funding-item"><b>🎓 الدراسة</b>الدراسة دون رسوم ضمن المقعد الحكومي للفائزين وفق قواعد Open Doors.</div>
+            <div class="od-funding-item"><b>💰 دفعة شهرية</b>يوجد دعم مالي شهري للمستفيدين الذين يعتمد لهم هذا التمويل الإضافي.</div>
+            <div class="od-funding-item"><b>🏠 السكن</b>يمكن أن يشمل الدعم تعويض تكاليف السكن خلال فترة الدراسة.</div>
+            <div class="od-funding-item"><b>🩺 التأمين الصحي</b>يمكن أن يشمل الدعم بوليصة التأمين الصحي أثناء الدراسة.</div>
+            <div class="od-funding-item"><b>🇷🇺 السنة التحضيرية</b>عند الحاجة إلى تعلم الروسية، قد تتاح سنة تحضيرية ممولة قبل بدء البرنامج الأكاديمي.</div>
+          </div>
+          <div class="od-funding-note"><b>مهم:</b> اختيار الدراسة باللغة الروسية لا يعني أن التمويل الإضافي مضمون تلقائيًا لكل طالب. القرار النهائي يصدر بعد مراجعة الوزارة والجامعة. لذلك لا نعرض مبلغ 27,000 روبل كراتب ثابت للجميع إلا عند وجود تأكيد رسمي خاص بالحالة.</div>
+        </div>
+      </div>
+    </section>
   </main>
   <footer class="site-footer"><div class="container footer-grid"><div><b>شذرات للمنح</b><p>نرتب لك المعلومة ونربطك بالمصدر الرسمي، والقرار النهائي للجهة المانحة.</p></div><div><b>روابط مهمة</b><a href="scholarships.html">المنح</a><a href="services.html">الخدمات</a></div><div><b>المساعدة</b><a href="contact.html">تواصل معنا</a><a href="privacy.html">الخصوصية</a></div></div></footer>
   <script src="nav-universal.js?v=155"></script>
   <script src="scholarship-detail-bootstrap.js?v=20260902full"></script>
+  <script>
+    if(new URLSearchParams(location.search).get('slug')==='open-doors'){
+      document.getElementById('open-doors-funding-update')?.classList.add('show');
+    }
+  </script>
 </body>
 </html>
