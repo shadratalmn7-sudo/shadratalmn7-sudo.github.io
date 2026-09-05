@@ -103,6 +103,7 @@ function styleExportClone(clone){
     direction:rtl?'rtl':'ltr','text-align':rtl?'right':'left','font-family':'Arial,Tahoma,sans-serif','font-size':'14px','line-height':'1.65'
   });
   applyAll(clone,'*',{'box-sizing':'border-box','max-width':'100%'});
+  if(rtl)applyAll(clone,'h1,h2,p,li,.role,.contact,.letter-meta,.letter-body',{direction:'rtl','unicode-bidi':'plaintext','text-align':'right','font-family':'Tahoma,Arial,sans-serif','letter-spacing':'0'});
 
   if(clone.classList.contains('cv')){
     applyAll(clone,'h1',{margin:'0 0 5px','font-size':'34px','line-height':'1.18','font-weight':'800','letter-spacing':'0','overflow-wrap':'anywhere'});
@@ -116,6 +117,14 @@ function styleExportClone(clone){
 
     if(clone.classList.contains('template-modern')){
       apply(clone,{'border-top':'10px solid #2563eb'});applyAll(clone,'.role,h2',{color:'#2563eb'});applyAll(clone,'.contact',{'border-bottom':'2px solid #dbeafe'});
+    }else if(clone.classList.contains('template-editorial')){
+      apply(clone,{'border-top':'12px solid #111827','font-family':'Georgia,Times New Roman,serif'});applyAll(clone,'h1,h2,p,li,.role,.contact',{'font-family':'Georgia,Times New Roman,serif'});applyAll(clone,'h2',{'border-bottom':'2px solid #111827','padding-bottom':'5px'});
+    }else if(clone.classList.contains('template-creative')){
+      apply(clone,{'border-top':'11px solid #7c3aed'});applyAll(clone,'.role,h2',{color:'#6d28d9'});applyAll(clone,'section',{background:'#faf5ff',padding:'10px 12px','border-radius':'10px'});
+    }else if(clone.classList.contains('template-technical')){
+      apply(clone,{'border-top':'11px solid #0f172a'});applyAll(clone,'h1,.role,h2',{'font-family':'Arial,Tahoma,sans-serif',color:'#0f172a'});applyAll(clone,'h2',{'border-bottom':'1px dashed #64748b','padding-bottom':'5px'});
+    }else if(clone.classList.contains('template-timeline')){
+      apply(clone,{'border-left':'12px solid #0f766e'});applyAll(clone,'.role,h2',{color:'#0f766e'});applyAll(clone,'section',{'border-left':'2px solid #99f6e4','padding-left':'14px'});
     }else if(clone.classList.contains('template-classic')){
       apply(clone,{'font-family':'Georgia,Times New Roman,serif'});applyAll(clone,'h1,h2,p,li,.role,.contact',{'font-family':'Georgia,Times New Roman,serif'});applyAll(clone,'h2',{'border-bottom':'1px solid #cbd5e1','padding-bottom':'5px'});applyAll(clone,'.contact',{'border-bottom':'1px solid #cbd5e1'});
     }else if(clone.classList.contains('template-navy')){
@@ -146,6 +155,14 @@ function styleExportClone(clone){
 
     if(clone.classList.contains('letter-template-academic')){
       apply(clone,{'font-family':'Georgia,Times New Roman,serif','border-top':'8px solid #1e3a8a'});applyAll(clone,'h1,p,.letter-meta',{'font-family':'Georgia,Times New Roman,serif'});applyAll(clone,'h1',{color:'#1e3a8a'});
+    }else if(clone.classList.contains('letter-template-editorial')){
+      apply(clone,{'font-family':'Georgia,Times New Roman,serif','border-top':'12px solid #111827'});applyAll(clone,'h1,p,.letter-meta',{'font-family':'Georgia,Times New Roman,serif'});applyAll(clone,'h1',{'border-bottom':'2px solid #111827','padding-bottom':'12px'});
+    }else if(clone.classList.contains('letter-template-creative')){
+      apply(clone,{'border-top':'11px solid #7c3aed'});applyAll(clone,'h1',{color:'#6d28d9'});applyAll(clone,'.letter-meta',{background:'#faf5ff',padding:'10px 12px','border-radius':'10px'});
+    }else if(clone.classList.contains('letter-template-technical')){
+      apply(clone,{'border-top':'11px solid #0f172a'});applyAll(clone,'h1',{'color':'#0f172a','border-bottom':'1px dashed #64748b','padding-bottom':'12px'});
+    }else if(clone.classList.contains('letter-template-executive')){
+      apply(clone,{'border-left':'12px solid #334155','padding':'58px 68px'});applyAll(clone,'h1',{color:'#334155','font-size':'29px'});
     }else if(clone.classList.contains('letter-template-formal')){
       apply(clone,{'font-family':'Georgia,Times New Roman,serif','border':'1px solid #cbd5e1'});applyAll(clone,'h1,p,.letter-meta',{'font-family':'Georgia,Times New Roman,serif'});applyAll(clone,'h1',{'text-align':'center',color:'#111827'});
     }else if(clone.classList.contains('letter-template-minimal')){
@@ -182,6 +199,16 @@ function decoratePdfPage(ctx,canvas,node,pageNumber,totalPages){
   else if(cls.contains('template-editorial')||cls.contains('letter-template-editorial'))band('#111827');
   ctx.save();ctx.strokeStyle=cls.contains('template-minimal')||cls.contains('letter-template-minimal')?'#cbd5e1':'rgba(15,23,42,.14)';ctx.lineWidth=Math.max(1,unit);ctx.strokeRect(5*unit,5*unit,w-10*unit,h-10*unit);ctx.fillStyle='#64748b';ctx.font=`${Math.max(10,10*unit)}px Arial`;ctx.textAlign='center';ctx.fillText(`${pageNumber} / ${totalPages}`,w/2,h-13*unit);ctx.restore();
 }
+function safePageSlices(canvas,maxSlice){
+  const slices=[];let offset=0;const ctx=canvas.getContext('2d',{willReadFrequently:true}),scanBack=Math.round(canvas.width*.16);
+  while(offset<canvas.height){
+    const remaining=canvas.height-offset;if(remaining<=maxSlice){slices.push({offset,height:remaining});break}
+    const target=offset+maxSlice,start=Math.max(offset+Math.round(maxSlice*.72),target-scanBack),height=Math.max(1,target-start),pixels=ctx.getImageData(0,start,canvas.width,height).data;let bestY=target,bestScore=Infinity;
+    for(let y=0;y<height;y+=2){let dark=0;for(let x=Math.round(canvas.width*.07);x<canvas.width*.93;x+=8){const i=(y*canvas.width+x)*4;if(pixels[i]<238||pixels[i+1]<238||pixels[i+2]<238)dark++}const distance=(height-y)/height*.8,score=dark+distance;if(score<bestScore){bestScore=score;bestY=start+y}}
+    const sliceHeight=Math.max(1,bestY-offset);slices.push({offset,height:sliceHeight});offset=bestY;
+  }
+  return slices;
+}
 async function canvasToPdf(canvas,filename,templateNode){
   try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',()=>!!window.jspdf?.jsPDF)}
   catch{await loadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js',()=>!!window.jspdf?.jsPDF)}
@@ -190,9 +217,9 @@ async function canvasToPdf(canvas,filename,templateNode){
   const pageWidth=210,pageHeight=297,margin=10,contentWidth=190,contentHeight=277;
   const pxPerMm=canvas.width/contentWidth;
   const maxSlice=Math.max(1,Math.floor(contentHeight*pxPerMm));
-  let offset=0,pageIndex=0,totalPages=Math.max(1,Math.ceil(canvas.height/maxSlice));
-  while(offset<canvas.height){
-    const sliceHeight=Math.min(maxSlice,canvas.height-offset);
+  const slices=safePageSlices(canvas,maxSlice),totalPages=slices.length;
+  for(let pageIndex=0;pageIndex<slices.length;pageIndex++){
+    const{offset,height:sliceHeight}=slices[pageIndex];
     const pageCanvas=document.createElement('canvas');
     pageCanvas.width=canvas.width;pageCanvas.height=maxSlice;
     const ctx=pageCanvas.getContext('2d',{alpha:false});ctx.fillStyle='#fff';ctx.fillRect(0,0,pageCanvas.width,pageCanvas.height);
@@ -202,7 +229,6 @@ async function canvasToPdf(canvas,filename,templateNode){
     const renderedHeight=contentHeight;
     if(pageIndex>0)pdf.addPage();
     pdf.addImage(image,'JPEG',margin,margin,contentWidth,renderedHeight,undefined,'FAST');
-    offset+=sliceHeight;pageIndex+=1;
   }
   pdf.save(safeFilename(filename,'Shadrat-file.pdf'));
 }
@@ -217,7 +243,7 @@ export async function downloadNodePdf(node,filename){
   const clone=styleExportClone(node.cloneNode(true));
   const shell=document.createElement('div');
   shell.className='artifact-pdf-shell';
-  shell.style.cssText='position:fixed;top:0;left:0;width:794px;min-height:1123px;background:#fff;z-index:2147483645;overflow:visible;box-sizing:border-box;pointer-events:none;';
+  shell.dir=node.dir||getComputedStyle(node).direction||'ltr';shell.style.cssText=`position:fixed;top:0;left:0;width:794px;min-height:1123px;background:#fff;z-index:2147483645;overflow:visible;box-sizing:border-box;pointer-events:none;direction:${shell.dir};`;
   shell.appendChild(clone);
   const cover=document.createElement('div');
   cover.setAttribute('role','status');cover.setAttribute('aria-live','polite');cover.textContent='جاري تجهيز ملف PDF…';
@@ -227,7 +253,7 @@ export async function downloadNodePdf(node,filename){
     await nextPaint();
     const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
     const height=Math.max(1123,Math.ceil(clone.scrollHeight));
-    const canvas=await window.html2canvas(clone,{scale:isIOS?1.5:2,useCORS:true,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0,width:794,height,windowWidth:794,windowHeight:Math.min(height,1123)});
+    const canvas=await window.html2canvas(clone,{scale:isIOS?1.25:1.75,useCORS:true,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0,width:794,height,windowWidth:794,windowHeight:height});
     await canvasToPdf(canvas,filename,node);
   }finally{cover.remove();shell.remove();document.documentElement.style.overflow=oldOverflow}
 }
