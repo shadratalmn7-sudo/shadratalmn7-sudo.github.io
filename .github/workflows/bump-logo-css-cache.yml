@@ -35,7 +35,8 @@ jobs:
               ns=ns.replace('profile-core.js?v=15','profile-core.js?v=16')
               ns=ns.replace('profile-gamification-live.js?v=10','profile-gamification-live.js?v=12')
               ns=ns.replace('profile-gamification-live.js?v=11','profile-gamification-live.js?v=12')
-              ns=ns.replace('profile-settings.js?v=1','profile-settings.js?v=2')
+              ns=ns.replace('profile-settings.js?v=1','profile-settings.js?v=3')
+              ns=ns.replace('profile-settings.js?v=2','profile-settings.js?v=3')
               ns=ns.replace('profile-edit-deep.js?v=5','profile-edit-deep.js?v=7')
               ns=ns.replace('profile-edit-deep.js?v=6','profile-edit-deep.js?v=7')
               ns=ns.replace("./profile-edit-deep.js?v=2","./profile-edit-deep.js?v=7")
@@ -66,5 +67,5 @@ jobs:
           git config user.name 'shadratalmn7-sudo'
           git config user.email 'shadrat.almn7@gmail.com'
           git add -A
-          git commit -m 'Fix OneSignal prompt cache and immediate load'
+          git commit -m 'Bust profile settings cache after save fix'
           git push
