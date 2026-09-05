@@ -1,7 +1,7 @@
 (()=>{
   if(window.__shadratAccountUiV3)return;
   window.__shadratAccountUiV3=true;
-  let editorLoading=false;
+  let editorLoading=false,unifiedReady=null;
 
   function injectStyles(){
     if(document.querySelector('#profile-account-ui-style'))return;
@@ -24,19 +24,23 @@
     document.querySelectorAll('.dashboard-actions [data-open-profile-tab="student-info"]').forEach(b=>{b.hidden=true;b.setAttribute('aria-hidden','true')});
   }
 
+  function loadUnified(){
+    unifiedReady=unifiedReady||import('./profile-save-compat.js?v=1').then(()=>import('./profile-edit-unified.js?v=1));
+    return unifiedReady;
+  }
+
   async function openDeepEditor(){
     if(editorLoading)return;
     editorLoading=true;
     try{
-      await import('./profile-edit-unified.js?v=1');
+      await loadUnified();
       const m=await import('./profile-edit-deep.js?v=2');
       await m.openProfileEditor();
     }catch(e){console.error('[Shadrat] deep editor',e)}finally{editorLoading=false}
   }
 
   function init(){
-    injectStyles();cleanLegacy();
-    import('./profile-edit-unified.js?v=1').catch(e=>console.error('[Shadrat] unified editor init',e));
+    injectStyles();cleanLegacy();loadUnified().catch(e=>console.error('[Shadrat] unified editor init',e));
     const host=document.querySelector('.container.grid')||document.body;
     new MutationObserver(cleanLegacy).observe(host,{subtree:true,childList:true});
     document.addEventListener('click',e=>{
