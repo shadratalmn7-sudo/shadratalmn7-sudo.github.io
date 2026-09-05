@@ -58,17 +58,6 @@
     const wrap = document.createElement('div');
     wrap.className = `shadrat-auto-ad ${extraClass}`;
     wrap.setAttribute('aria-label','إعلان');
-    const close = document.createElement('button');
-    close.type = 'button';
-    close.className = 'shadrat-ad-close';
-    close.setAttribute('aria-label','إغلاق الإعلان');
-    close.title = 'إغلاق الإعلان';
-    close.textContent = '×';
-    close.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      wrap.remove();
-    });
     const frame = document.createElement('iframe');
     frame.width = String(width);
     frame.height = String(height);
@@ -76,7 +65,24 @@
     frame.loading = extraClass.includes('shadrat-ad-top') ? 'eager' : 'lazy';
     frame.title = 'إعلان';
     frame.srcdoc = `<!doctype html><html><body style="margin:0;overflow:hidden;display:flex;justify-content:center;align-items:flex-start"><script>atOptions={'key':'${key}','format':'iframe','height':${height},'width':${width},'params':{}};<\/script><script src="https://www.highrevenueformat.com/${key}/invoke.js"><\/script></body></html>`;
-    wrap.append(close, frame);
+
+    if (extraClass.includes('shadrat-desktop-rail')) {
+      const close = document.createElement('button');
+      close.type = 'button';
+      close.className = 'shadrat-ad-close';
+      close.setAttribute('aria-label','إغلاق الإعلان');
+      close.title = 'إغلاق الإعلان';
+      close.textContent = '×';
+      close.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        wrap.remove();
+      });
+      wrap.append(close, frame);
+    } else {
+      wrap.appendChild(frame);
+    }
+
     if (extraClass.includes('shadrat-ad-bar')) {
       const resize = () => {
         const available = Math.max(1, wrap.clientWidth - 10);
