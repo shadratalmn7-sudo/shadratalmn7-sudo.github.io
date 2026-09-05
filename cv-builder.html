@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>منشئ السيرة الذاتية | شذرات للمنح</title>
+<meta name="description" content="أنشئ سيرة ذاتية للمنح والدراسة ثم احفظها PDF من المتصفح.">
+<link rel="stylesheet" href="site.css?v=31"><link rel="stylesheet" href="nav-universal.css?v=156"><link rel="stylesheet" href="section-pages.css?v=1">
+<style>
+.builder{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.9fr);gap:22px;align-items:start}.panel{background:#fff;border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:var(--shadow-sm)}.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field.full{grid-column:1/-1}.field span{font-weight:900;font-size:13px}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:14px;padding:12px 13px;background:#fff}.field textarea{min-height:96px;resize:vertical}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.preview-wrap{position:sticky;top:92px}.cv{background:#fff;min-height:980px;padding:46px;box-shadow:var(--shadow);border-radius:18px;color:#111827}.cv h1{margin:0;font-size:34px}.cv .role{color:#2563eb;font-weight:900;margin:4px 0 10px}.cv .contact{font-size:13px;color:#475569;border-bottom:2px solid #dbeafe;padding-bottom:14px}.cv section{margin-top:24px}.cv h2{font-size:16px;text-transform:uppercase;letter-spacing:.03em;color:#1d4ed8;margin:0 0 8px}.cv p,.cv li{font-size:14px;line-height:1.75}.cv ul{margin:6px 0;padding-inline-start:20px}.template-modern{border-top:10px solid #2563eb}.template-classic{border-top:0}.template-classic h2{color:#111827;border-bottom:1px solid #cbd5e1;padding-bottom:5px}.hint{font-size:13px;color:var(--muted);margin-top:8px}@media(max-width:900px){.builder{grid-template-columns:1fr}.preview-wrap{position:static}.fields{grid-template-columns:1fr}.field.full{grid-column:auto}}@media print{body>*:not(main){display:none!important}.page-hero,.editor{display:none!important}main,.section,.container,.builder,.preview-wrap{display:block!important;width:100%!important;max-width:none!important;margin:0!important;padding:0!important}.cv{box-shadow:none;border-radius:0;min-height:auto;padding:18mm}.preview-wrap{position:static}}
+</style>
+</head>
+<body>
+<header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div></header>
+<main>
+<section class="page-hero compact-hero"><div class="container"><span class="eyebrow">أدوات الطالب</span><h1>منشئ السيرة الذاتية</h1><p class="lead">عبّ بياناتك، اختر القالب، وشاهد النتيجة مباشرة. للطباعة كـ PDF استخدم زر «حفظ PDF» ثم اختر Save as PDF.</p></div></section>
+<section class="section"><div class="container builder">
+<div class="panel editor">
+<div class="fields">
+<label class="field"><span>الاسم الكامل</span><input id="name" placeholder="الاسم كما في الجواز"></label>
+<label class="field"><span>التخصص / الهدف</span><input id="role" placeholder="Cybersecurity Student"></label>
+<label class="field"><span>البريد</span><input id="email" type="email"></label>
+<label class="field"><span>رقم الهاتف</span><input id="phone"></label>
+<label class="field"><span>المدينة / الدولة</span><input id="location"></label>
+<label class="field"><span>LinkedIn أو موقعك</span><input id="link"></label>
+<label class="field full"><span>نبذة قصيرة</span><textarea id="summary" placeholder="من أنت؟ وما هدفك الدراسي أو المهني؟"></textarea></label>
+<label class="field full"><span>التعليم</span><textarea id="education" placeholder="كل سطر: المدرسة/الجامعة — التخصص — السنة — المعدل"></textarea></label>
+<label class="field full"><span>الشهادات والإنجازات</span><textarea id="certs" placeholder="كل شهادة أو إنجاز في سطر"></textarea></label>
+<label class="field full"><span>المشاريع / الخبرات / الأنشطة</span><textarea id="experience" placeholder="كل عنصر في سطر"></textarea></label>
+<label class="field full"><span>المهارات</span><textarea id="skills" placeholder="مثال: Python, Networking, English, Research"></textarea></label>
+<label class="field full"><span>اللغات</span><input id="languages" placeholder="العربية — الأم | الإنجليزية — B2"></label>
+<label class="field"><span>القالب</span><select id="template"><option value="modern">حديث</option><option value="classic">أكاديمي بسيط</option></select></label>
+<label class="field"><span>لغة العناوين</span><select id="lang"><option value="en">English</option><option value="ar">العربية</option></select></label>
+</div>
+<div class="actions"><button class="btn primary" id="printBtn" type="button">حفظ PDF</button><button class="btn outline" id="clearBtn" type="button">مسح</button></div>
+<p class="hint">البيانات تبقى داخل متصفحك في هذه النسخة ولا تُرسل إلى شذرات.</p>
+</div>
+<div class="preview-wrap"><div class="cv template-modern" id="cv"><h1 id="pName">اسم الطالب</h1><div class="role" id="pRole">Student</div><div class="contact" id="pContact">email@example.com</div><section><h2 data-key="summary">PROFILE</h2><p id="pSummary">اكتب نبذة قصيرة عنك.</p></section><section><h2 data-key="education">EDUCATION</h2><ul id="pEducation"></ul></section><section><h2 data-key="certs">CERTIFICATES & ACHIEVEMENTS</h2><ul id="pCerts"></ul></section><section><h2 data-key="experience">PROJECTS & EXPERIENCE</h2><ul id="pExperience"></ul></section><section><h2 data-key="skills">SKILLS</h2><p id="pSkills"></p></section><section><h2 data-key="languages">LANGUAGES</h2><p id="pLanguages"></p></section></div></div>
+</div></section>
+</main>
+<footer class="site-footer"><div class="container footer-grid"><div><img class="footer-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><p>أدوات تساعد الطالب على تجهيز ملفه.</p></div><div><b>الأدوات</b><a href="documents.html">مستنداتي</a><a href="motivation-letter.html">منشئ Motivation Letter</a></div><div><b>روابط</b><a href="scholarships.html">المنح</a><a href="privacy.html">الخصوصية</a></div></div></footer>
+<script src="nav-universal.js?v=156"></script>
+<script>
+const $=id=>document.getElementById(id), ids=['name','role','email','phone','location','link','summary','education','certs','experience','skills','languages'];
+const lines=v=>v.split(/\n+/).map(x=>x.trim()).filter(Boolean); const fillList=(id,v)=>$(id).innerHTML=lines(v).map(x=>`<li>${x.replace(/[<>]/g,'')}</li>`).join('');
+function render(){ $('pName').textContent=$('name').value||'اسم الطالب'; $('pRole').textContent=$('role').value||'Student'; $('pSummary').textContent=$('summary').value||'اكتب نبذة قصيرة عنك.'; fillList('pEducation',$('education').value); fillList('pCerts',$('certs').value); fillList('pExperience',$('experience').value); $('pSkills').textContent=$('skills').value; $('pLanguages').textContent=$('languages').value; $('pContact').textContent=[$('email').value,$('phone').value,$('location').value,$('link').value].filter(Boolean).join(' • ')||'email@example.com'; $('cv').className='cv template-'+$('template').value; const ar={summary:'النبذة',education:'التعليم',certs:'الشهادات والإنجازات',experience:'المشاريع والخبرات',skills:'المهارات',languages:'اللغات'}, en={summary:'PROFILE',education:'EDUCATION',certs:'CERTIFICATES & ACHIEVEMENTS',experience:'PROJECTS & EXPERIENCE',skills:'SKILLS',languages:'LANGUAGES'}; const map=$('lang').value==='ar'?ar:en; document.querySelectorAll('[data-key]').forEach(h=>h.textContent=map[h.dataset.key]); localStorage.setItem('shadrat-cv',JSON.stringify(Object.fromEntries(ids.concat(['template','lang']).map(i=>[i,$(i).value])))); }
+ids.concat(['template','lang']).forEach(i=>$(i).addEventListener('input',render)); try{const saved=JSON.parse(localStorage.getItem('shadrat-cv')||'{}'); Object.entries(saved).forEach(([k,v])=>{if($(k))$(k).value=v})}catch{} render(); $('printBtn').onclick=()=>window.print(); $('clearBtn').onclick=()=>{if(confirm('مسح كل البيانات؟')){ids.forEach(i=>$(i).value='');localStorage.removeItem('shadrat-cv');render()}};
+</script>
+</body></html>
