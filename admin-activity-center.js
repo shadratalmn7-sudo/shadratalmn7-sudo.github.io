@@ -1,10 +1,12 @@
 import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
+import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import{collection,getDocs,getFirestore}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import{firebaseConfig}from'./firebase-config.js';
-const app=getApps().length?getApp():initializeApp(firebaseConfig),db=getFirestore(app);
+const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ms=v=>v?.toMillis?.()||v?.toDate?.()?.getTime?.()||new Date(v||0).getTime()||0;
 const when=v=>{const t=ms(v);return t?new Intl.DateTimeFormat('ar-SA',{dateStyle:'short',timeStyle:'short'}).format(new Date(t)):'—'};
+const waitUser=()=>new Promise(resolve=>{const stop=onAuthStateChanged(auth,u=>{stop();resolve(u)},()=>resolve(null))});
 const read=async name=>{try{const s=await getDocs(collection(db,name));return s.docs.map(d=>({id:d.id,...d.data()}))}catch(e){console.warn('[Shadrat activity]',name,e);return[]}};
 const timeOf=x=>x.savedAt||x.createdAt||x.updatedAt||null;
 function event(uid,title,row,kind='نشاط'){return{uid,title,kind,time:timeOf(row),sort:ms(timeOf(row))}}
@@ -12,6 +14,7 @@ function activityTitle(row){if(row.type==='artifact')return row.artifactType==='
 function unreadFor(user,events){const seen=ms(user.adminActivityReviewedAt);return events.filter(e=>e.uid===user.uid&&e.sort>seen).length}
 function paintBadge(key,count){document.querySelectorAll(`[data-admin-badge="${key}"]`).forEach(b=>{b.textContent=Number(count||0).toLocaleString('ar');b.hidden=!count})}
 async function load(){
+  const admin=auth.currentUser||await waitUser();if(!admin)return;
   const [users,saved,orders,messages]=await Promise.all([read('users'),read('savedCommunityPosts'),read('orders'),read('messages')]);
   const students=users.filter(u=>(u.role||'student')==='student').map(u=>({uid:u.uid||u.id,...u})),byUid=new Map(students.map(u=>[u.uid,u]));
   const events=[];
