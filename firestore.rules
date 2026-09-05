@@ -15,10 +15,6 @@ service cloud.firestore {
     function moderator() { return supportStaff() || communityStaff(); }
     function safeText(value, minimum, maximum) { return value is string && value.size() >= minimum && value.size() <= maximum; }
     function validPostType(value) { return value in ['question','experience','info','guide','update','warning','accepted']; }
-    function weeklyUsernameEditAllowed() {
-      return !('lastUsernameEditAt' in resource.data)
-        || request.time >= resource.data.lastUsernameEditAt + duration.value(7, 'd');
-    }
 
     match /users/{uid} {
       allow create: if own(uid) && request.resource.data.role == 'student'
@@ -26,25 +22,14 @@ service cloud.firestore {
         && request.resource.data.publicProfile == false;
       allow read: if own(uid) || supportStaff();
 
-      // الاسم، الموقع والمرحلة قابلة للتعديل في أي وقت.
+      // معلومات الحساب واسم المستخدم قابلة للتعديل بدون حد زمني.
       allow update: if own(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'fullName','age','nationality','currentCountry','city','contactMethod','contactValue','location','studyLevel','updatedAt'
-        ])
-        && safeText(request.resource.data.fullName, 3, 80);
-
-      // مهلة السبعة أيام تطبق فقط عند تغيير اسم المستخدم.
-      allow update: if own(uid)
-        && request.resource.data.username != resource.data.username
-        && weeklyUsernameEditAllowed()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
-          'fullName','username','age','nationality','currentCountry','city','contactMethod','contactValue','location','studyLevel','lastUsernameEditAt','usernameEditCount','updatedAt'
+          'fullName','username','age','nationality','currentCountry','city','contactMethod','contactValue','location','studyLevel','updatedAt'
         ])
         && safeText(request.resource.data.fullName, 3, 80)
         && request.resource.data.username.matches('^[a-z0-9_]{3,24}$')
-        && !request.resource.data.username.matches('.*(owner|admin|support|staff|shazarat).*')
-        && request.resource.data.usernameEditCount == resource.data.get('usernameEditCount', 0) + 1
-        && request.resource.data.lastUsernameEditAt == request.time;
+        && !request.resource.data.username.matches('.*(owner|admin|support|staff|shazarat).*');
 
       allow update: if own(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
