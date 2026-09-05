@@ -26,8 +26,9 @@ jobs:
               ns=ns.replace('nav-universal.css?v=159','nav-universal.css?v=160')
               ns=ns.replace('./level-system.js?v=2','./level-system.js?v=4')
               ns=ns.replace('./level-system.js?v=3','./level-system.js?v=4')
-              ns=ns.replace('profile-core.js?v=12','profile-core.js?v=14')
-              ns=ns.replace('profile-core.js?v=13','profile-core.js?v=14')
+              ns=ns.replace('profile-core.js?v=12','profile-core.js?v=15')
+              ns=ns.replace('profile-core.js?v=13','profile-core.js?v=15')
+              ns=ns.replace('profile-core.js?v=14','profile-core.js?v=15')
               ns=ns.replace('profile-gamification-live.js?v=10','profile-gamification-live.js?v=11')
               ns=ns.replace('profile-edit-deep.js?v=5','profile-edit-deep.js?v=7')
               ns=ns.replace('profile-edit-deep.js?v=6','profile-edit-deep.js?v=7')
@@ -48,5 +49,5 @@ jobs:
           git config user.name 'shadratalmn7-sudo'
           git config user.email 'shadrat.almn7@gmail.com'
           git add -A
-          git commit -m 'Bust notification cache for OneSignal prompt'
+          git commit -m 'Bust profile settings cache'
           git push
