@@ -56,6 +56,7 @@
     if(!incoming)return;
     const host=currentHost();
     if(!host)return;
+    host.querySelector('.profile-customize-loading')?.remove();
     host.querySelector('.profile-customizer')?.remove();
     host.appendChild(incoming);
     const rewardsTitle=document.querySelector('#rewards .card-heading h2');
