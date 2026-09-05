@@ -1,6 +1,6 @@
 import{downloadNodePdf,getArtifact,safeFilename,saveArtifact,waitForUser}from'./student-artifacts-a4.js?v=5';
 import{compactCertificate,extractCertificateInfo,readCertificate,skillLabels}from'./certificate-reader.js?v=2';
-import{buildSemanticCv}from'./cv-semantic-polish.js?v=3';
+import{buildSemanticCv}from'./cv-semantic-polish.js?v=4';
 
 const $=id=>document.getElementById(id);
 const fieldIds=['artifactName','name','role','email','phone','location','link','summary','education','certs','experience','skills','languages','template','lang'];
@@ -28,7 +28,7 @@ function collect(){return Object.fromEntries(fieldIds.map(id=>[id,$(id)?.value||
 function fillList(id,items){const ul=$(id);if(!ul)return;ul.innerHTML='';items.filter(Boolean).forEach(text=>{const li=document.createElement('li');li.textContent=text;ul.appendChild(li)})}
 function extractedSkills(lang){return[...new Set(certificates.flatMap(c=>c.info?skillLabels(c.info,lang):[]))]}
 function allSkills(data,lang){return[...new Set([...splitSkills(data.skills),...extractedSkills(lang)])]}
-function manualCertificateLine(entry,lang){const info=extractCertificateInfo(entry,entry);if(info){const compact=compactCertificate(info,lang);if(compact)return compact}return lang==='ar'?`شهادة أو إنجاز: ${clean(entry)}`:`Certificate or achievement: ${clean(entry)}`}
+function manualCertificateLine(entry,lang){const info=extractCertificateInfo(entry,entry);if(info){const compact=compactCertificate(info,lang);if(compact)return compact}return lang==='ar'?'إنجاز أو شهادة موثقة أضيفت يدويًا':'Documented certificate or achievement added manually'}
 function uploadedCertificateLine(info,lang){const compact=compactCertificate(info,lang);return compact||(lang==='ar'?'شهادة موثقة':'Documented certificate')}
 function certificateItems(data,lang){const manual=lines(data.certs).map(x=>manualCertificateLine(x,lang)),automatic=certificates.filter(c=>!c.error&&c.info).map(c=>uploadedCertificateLine(c.info,lang));return[...manual,...automatic].filter(Boolean)}
 function sectionFor(id){return $(id)?.closest('section')||null}
@@ -55,9 +55,9 @@ function render(){
   $('pLanguages').textContent=semantic.languages||'';
   $('pContact').textContent=[data.email,data.phone,data.location,data.link].map(clean).filter(Boolean).join(' • ')||(lang==='ar'?'بيانات التواصل':'Contact details');
   toggleSection('pSummary',!!clean(semantic.summary));toggleSection('pEducation',semantic.education.length>0);toggleSection('pCerts',certItems.length>0);toggleSection('pExperience',semantic.experience.length>0);toggleSection('pSkills',skills.length>0);toggleSection('pLanguages',!!clean(semantic.languages));
-  const factCount=semantic.education.length+certItems.length+semantic.experience.length+skills.length+(semantic.languages?1:0)+(semantic.summary?1:0),textLoad=[semantic.summary,...semantic.education,...certItems,...semantic.experience,...skills,semantic.languages].join(' ').length,density=factCount>18||textLoad>3600?'dense':factCount>10||textLoad>2200?'medium':'sparse';
-  $('cv').className=`cv template-${data.template||'formal'} cv-one-page-full cv-${density}`;$('cv').dir=lang==='ar'?'rtl':'ltr';$('cv').dataset.factCount=String(factCount);
-  const ar={summary:'النبذة',education:'التعليم',certs:'الشهادات والإنجازات',experience:'الخبرات والمشاريع والأنشطة',skills:'المهارات',languages:'اللغات'},en={summary:'PROFILE',education:'EDUCATION',certs:'CERTIFICATES & ACHIEVEMENTS',experience:'EXPERIENCE, PROJECTS & ACTIVITIES',skills:'SKILLS',languages:'LANGUAGES'},map=lang==='ar'?ar:en;
+  const factCount=semantic.education.length+certItems.length+semantic.experience.length+skills.length+(semantic.languages?1:0)+(semantic.summary?1:0),textLoad=[semantic.summary,...semantic.education,...certItems,...semantic.experience,...skills,semantic.languages].join(' ').length,density=factCount>20||textLoad>3900?'dense':factCount>12||textLoad>2500?'medium':'sparse';
+  $('cv').className=`cv template-${data.template||'formal'} cv-one-page-full cv-${density} cv-semantic-rewrite`;$('cv').dir=lang==='ar'?'rtl':'ltr';$('cv').dataset.factCount=String(factCount);
+  const ar={summary:'النبذة المهنية',education:'الخلفية التعليمية',certs:'الشهادات والإنجازات',experience:semantic.experienceTitle||'التطوير الأكاديمي والاستعداد',skills:'مجالات المعرفة والمهارات',languages:'اللغات'},en={summary:'PROFESSIONAL PROFILE',education:'EDUCATIONAL BACKGROUND',certs:'CERTIFICATES & ACHIEVEMENTS',experience:semantic.experienceTitle||'ACADEMIC DEVELOPMENT & READINESS',skills:'KNOWLEDGE & SKILLS',languages:'LANGUAGES'},map=lang==='ar'?ar:en;
   document.querySelectorAll('#cv [data-key]').forEach(el=>el.textContent=map[el.dataset.key]);
   document.querySelectorAll('[data-cv-template]').forEach(btn=>btn.classList.toggle('is-active',btn.dataset.cvTemplate===data.template));
   renderCertificates();saveLocal();scheduleFit();
