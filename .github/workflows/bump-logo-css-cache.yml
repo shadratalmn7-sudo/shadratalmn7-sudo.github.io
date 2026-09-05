@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - '.github/workflows/bump-logo-css-cache.yml'
+      - 'nav-universal.css'
 jobs:
   bump:
     runs-on: ubuntu-latest
@@ -17,7 +18,7 @@ jobs:
           changed=[]
           for p in Path('.').rglob('*.html'):
               s=p.read_text(encoding='utf-8')
-              ns=s.replace('nav-universal.css?v=158','nav-universal.css?v=159')
+              ns=s.replace('nav-universal.css?v=159','nav-universal.css?v=160')
               if ns!=s:
                   p.write_text(ns,encoding='utf-8')
                   changed.append(str(p))
@@ -30,5 +31,5 @@ jobs:
           git config user.name 'shadratalmn7-sudo'
           git config user.email 'shadrat.almn7@gmail.com'
           git add -A
-          git commit -m 'Bust cache for larger Shadrat logo'
+          git commit -m 'Bust cache for corrected Shadrat header size'
           git push
