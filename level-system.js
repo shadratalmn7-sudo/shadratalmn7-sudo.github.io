@@ -47,5 +47,5 @@ export function templateRequiredLevel(kind,id){const map=kind==='cv'?CV_TEMPLATE
 export function isTemplateUnlocked(kind,id,level){return Number(level||1)>=templateRequiredLevel(kind,id)}
 export function artifactSaveLimit(level){return Number(level||1)>=14?8:3}
 if(typeof document!=='undefined'&&!document.querySelector('link[data-profile-art-themes]')){const link=document.createElement('link');link.rel='stylesheet';link.href='./profile-art-themes.css?v=6';link.dataset.profileArtThemes='1';document.head.appendChild(link)}
-if(typeof document!=='undefined'&&!document.querySelector('link[data-profile-card-fixes]')){const link=document.createElement('link');link.rel='stylesheet';link.href='./profile-card-fixes.css?v=2';link.dataset.profileCardFixes='1';document.head.appendChild(link)}
+if(typeof document!=='undefined'&&!document.querySelector('link[data-profile-card-fixes]')){const link=document.createElement('link');link.rel='stylesheet';link.href='./profile-card-fixes.css?v=3';link.dataset.profileCardFixes='1';document.head.appendChild(link)}
 if(typeof document!=='undefined'&&/\bprofile\.html$/i.test(location.pathname)&&!document.querySelector('script[data-public-profile-sync]')){const script=document.createElement('script');script.type='module';script.src='./profile-public-sync.js?v=2';script.dataset.publicProfileSync='1';document.head.appendChild(script)}
