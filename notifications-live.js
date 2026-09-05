@@ -7,80 +7,15 @@ const style=document.createElement('style');style.textContent=`.shz-alert-stack{
 const stack=document.createElement('div');stack.className='shz-alert-stack';document.body.appendChild(stack);
 const shown=new Set(JSON.parse(sessionStorage.getItem('shz_seen_alerts')||'[]'));
 let generalItems=[],scheduleTimer=null;
-
 function remember(id){shown.add(id);sessionStorage.setItem('shz_seen_alerts',JSON.stringify([...shown].slice(-50)))}
-function toMillis(value){
-  if(!value)return null;
-  if(typeof value?.toMillis==='function')return value.toMillis();
-  if(typeof value?.seconds==='number')return value.seconds*1000;
-  if(typeof value==='number')return value;
-  if(value instanceof Date)return value.getTime();
-  if(typeof value==='string'){const normalized=/^\d{4}-\d{2}-\d{2}$/.test(value)?value+'T00:00:00':value;const t=new Date(normalized).getTime();return Number.isNaN(t)?null:t}
-  return null;
-}
-function scheduleMillis(item,kind){
-  const keys=kind==='start'?['startAt','startDateTime','startsAt','startDate','publishFrom']:['endAt','endDateTime','endsAt','endDate','publishUntil'];
-  for(const key of keys){const ms=toMillis(item?.[key]);if(ms!==null)return ms}
-  return null;
-}
-function isActive(item,now=Date.now()){
-  if(item.publishStatus!=='published')return false;
-  const start=scheduleMillis(item,'start')??toMillis(item.createdAt);
-  const explicitEnd=scheduleMillis(item,'end');
-  const end=explicitEnd??(start!==null?start+24*60*60*1000:null);
-  if(start!==null&&now<start)return false;
-  if(end!==null&&now>=end)return false;
-  return true;
-}
-function removeExpired(){
-  const now=Date.now();
-  stack.querySelectorAll('[data-announcement-id]').forEach(el=>{
-    const item=generalItems.find(x=>x.id===el.dataset.announcementId);
-    if(!item||!isActive(item,now))el.remove();
-  });
-}
-function showItem(id,title,body,onClose,announcementId=null){
-  if(shown.has(id))return;
-  if(announcementId&&stack.querySelector(`[data-announcement-id="${CSS.escape(announcementId)}"]`))return;
-  const el=document.createElement('article');el.className='shz-alert';
-  if(announcementId)el.dataset.announcementId=announcementId;
-  el.innerHTML=`<b>${esc(title)}</b><p>${esc(body)}</p><button type="button">حسنًا</button>`;
-  el.querySelector('button').onclick=async()=>{remember(id);el.remove();try{await onClose?.()}catch{}};
-  stack.appendChild(el);
-}
-function renderGeneral(){
-  const now=Date.now();
-  removeExpired();
-  generalItems.filter(x=>isActive(x,now)).sort((a,b)=>{
-    const av=scheduleMillis(a,'start')??a.createdAt?.toMillis?.()??0,bv=scheduleMillis(b,'start')??b.createdAt?.toMillis?.()??0;return av-bv;
-  }).slice(-3).forEach(x=>showItem(`a:${x.id}`,x.title,x.body,null,x.id));
-  scheduleNextBoundary();
-}
-function scheduleNextBoundary(){
-  clearTimeout(scheduleTimer);
-  const now=Date.now(),boundaries=[];
-  generalItems.forEach(x=>{
-    const start=scheduleMillis(x,'start')??toMillis(x.createdAt),explicitEnd=scheduleMillis(x,'end'),end=explicitEnd??(start!==null?start+24*60*60*1000:null);
-    if(start!==null&&start>now)boundaries.push(start);
-    if(end!==null&&end>now)boundaries.push(end);
-  });
-  if(!boundaries.length)return;
-  const next=Math.min(...boundaries),delay=Math.min(Math.max(next-now+250,250),2147483000);
-  scheduleTimer=setTimeout(renderGeneral,delay);
-}
-async function loadGeneral(){
-  try{
-    const s=await getDocs(query(collection(db,'announcements'),where('publishStatus','==','published'),limit(30)));
-    generalItems=s.docs.map(d=>({id:d.id,...d.data()}));
-    renderGeneral();
-  }catch(e){console.warn('[Shadrat] announcements unavailable',e)}
-}
+function toMillis(value){if(!value)return null;if(typeof value?.toMillis==='function')return value.toMillis();if(typeof value?.seconds==='number')return value.seconds*1000;if(typeof value==='number')return value;if(value instanceof Date)return value.getTime();if(typeof value==='string'){const normalized=/^\d{4}-\d{2}-\d{2}$/.test(value)?value+'T00:00:00':value;const t=new Date(normalized).getTime();return Number.isNaN(t)?null:t}return null}
+function scheduleMillis(item,kind){const keys=kind==='start'?['startAt','startDateTime','startsAt','startDate','publishFrom']:['endAt','endDateTime','endsAt','endDate','publishUntil'];for(const key of keys){const ms=toMillis(item?.[key]);if(ms!==null)return ms}return null}
+function isActive(item,now=Date.now()){if(item.publishStatus!=='published')return false;const start=scheduleMillis(item,'start')??toMillis(item.createdAt);const explicitEnd=scheduleMillis(item,'end');const end=explicitEnd??(start!==null?start+24*60*60*1000:null);if(start!==null&&now<start)return false;if(end!==null&&now>=end)return false;return true}
+function removeExpired(){const now=Date.now();stack.querySelectorAll('[data-announcement-id]').forEach(el=>{const item=generalItems.find(x=>x.id===el.dataset.announcementId);if(!item||!isActive(item,now))el.remove()})}
+function showItem(id,title,body,onClose,announcementId=null){if(shown.has(id))return;if(announcementId&&stack.querySelector(`[data-announcement-id="${CSS.escape(announcementId)}"]`))return;const el=document.createElement('article');el.className='shz-alert';if(announcementId)el.dataset.announcementId=announcementId;el.innerHTML=`<b>${esc(title)}</b><p>${esc(body)}</p><button type="button">حسنًا</button>`;el.querySelector('button').onclick=async()=>{remember(id);el.remove();try{await onClose?.()}catch{}};stack.appendChild(el)}
+function renderGeneral(){const now=Date.now();removeExpired();generalItems.filter(x=>isActive(x,now)).sort((a,b)=>{const av=scheduleMillis(a,'start')??a.createdAt?.toMillis?.()??0,bv=scheduleMillis(b,'start')??b.createdAt?.toMillis?.()??0;return av-bv}).slice(-3).forEach(x=>showItem(`a:${x.id}`,x.title,x.body,null,x.id));scheduleNextBoundary()}
+function scheduleNextBoundary(){clearTimeout(scheduleTimer);const now=Date.now(),boundaries=[];generalItems.forEach(x=>{const start=scheduleMillis(x,'start')??toMillis(x.createdAt),explicitEnd=scheduleMillis(x,'end'),end=explicitEnd??(start!==null?start+24*60*60*1000:null);if(start!==null&&start>now)boundaries.push(start);if(end!==null&&end>now)boundaries.push(end)});if(!boundaries.length)return;const next=Math.min(...boundaries),delay=Math.min(Math.max(next-now+250,250),2147483000);scheduleTimer=setTimeout(renderGeneral,delay)}
+async function loadGeneral(){try{const s=await getDocs(query(collection(db,'announcements'),where('publishStatus','==','published'),limit(30)));generalItems=s.docs.map(d=>({id:d.id,...d.data()}));renderGeneral()}catch(e){console.warn('[Shadrat] announcements unavailable',e)}}
 loadGeneral();
-
-onAuthStateChanged(auth,async user=>{
-  if(!user)return;
-  try{
-    const s=await getDocs(query(collection(db,'users',user.uid,'notifications'),orderBy('createdAt','desc'),limit(8)));
-    s.docs.reverse().forEach(d=>{const x=d.data();if(x.read)return;showItem(`n:${d.id}`,x.title||'تنبيه من شذرات',x.body||'',()=>updateDoc(doc(db,'users',user.uid,'notifications',d.id),{read:true}))})
-  }catch(e){console.warn('personal notifications unavailable',e)}
-});
+onAuthStateChanged(auth,async user=>{if(!user)return;try{const s=await getDocs(query(collection(db,'users',user.uid,'notifications'),orderBy('createdAt','desc'),limit(8)));s.docs.reverse().forEach(d=>{const x=d.data();if(x.read)return;showItem(`n:${d.id}`,x.title||'تنبيه من شذرات',x.body||'',()=>updateDoc(doc(db,'users',user.uid,'notifications',d.id),{read:true}))})}catch(e){console.warn('personal notifications unavailable',e)}});
+import('./scholarship-auto-alerts.js?v=1').catch(error=>console.warn('[Shadrat] scholarship auto alerts unavailable',error));
