@@ -163,7 +163,9 @@ async function ensureGoogleProfile(user) {
     level: 1,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
-    authProvider: 'google'
+    authProvider: 'google',
+    emailVerificationRequired: false,
+    referredBy: null
   }), 15000);
 }
 
@@ -197,11 +199,48 @@ loginForm?.addEventListener('submit', async event => {
   try {
     await prepareLoginPersistence();
     const credential = await withTimeout(signInWithEmailAndPassword(auth, clean(loginForm.email.value), loginForm.password.value));
+    if (!credential.user.emailVerified) {
+      await signOut(auth).catch(() => {});
+      show(loginForm, 'لازم تؤكد بريدك الإلكتروني أولًا. افتح رسالة شذرات في بريدك واضغط رابط التأكيد، ثم سجل الدخول.', 'error');
+      return;
+    }
     location.href = await destination(credential.user);
   } catch (error) {
     show(loginForm, errorText(error));
   } finally {
     setBusy(loginForm, false);
+  }
+});
+
+if (loginForm) {
+  const params = new URLSearchParams(location.search);
+  const verification = params.get('verify');
+  const emailFromSignup = params.get('email');
+  if (emailFromSignup) loginForm.email.value = emailFromSignup;
+  if (verification === 'sent') show(loginForm, 'أرسلنا رسالة تأكيد إلى بريدك. افتحها واضغط رابط التأكيد، وبعدها سجل الدخول.', 'success');
+  if (verification === 'failed') show(loginForm, 'تم إنشاء الحساب، لكن تعذر إرسال رسالة التأكيد. اكتب بريدك وكلمة المرور واضغط «إعادة إرسال رسالة التأكيد».');
+}
+
+document.querySelector('#resend-verification')?.addEventListener('click', async event => {
+  event.preventDefault();
+  const email = clean(loginForm?.email.value);
+  const password = loginForm?.password.value || '';
+  if (!email || !password) return show(loginForm, 'اكتب البريد الإلكتروني وكلمة المرور أولًا لإعادة إرسال رسالة التأكيد.');
+  show(loginForm, 'جارٍ إعادة إرسال رسالة التأكيد…', 'progress');
+  try {
+    await prepareLoginPersistence();
+    const credential = await withTimeout(signInWithEmailAndPassword(auth, email, password), 15000);
+    if (credential.user.emailVerified) {
+      await signOut(auth).catch(() => {});
+      show(loginForm, 'بريدك مؤكد بالفعل. تقدر تسجل الدخول الآن.', 'success');
+      return;
+    }
+    await withTimeout(sendEmailVerification(credential.user), 15000);
+    await signOut(auth).catch(() => {});
+    show(loginForm, 'تم إرسال رسالة تأكيد جديدة. افحص الوارد والرسائل غير المرغوبة.', 'success');
+  } catch (error) {
+    await signOut(auth).catch(() => {});
+    show(loginForm, errorText(error));
   }
 });
 
@@ -228,6 +267,8 @@ registerForm?.addEventListener('submit', async event => {
   const phone = normalizePhone(registerForm.querySelector('#phone').value);
   const password = registerForm.querySelector('#pass').value;
   const confirmation = registerForm.querySelector('#confirm').value;
+  const referralRaw = new URLSearchParams(location.search).get('ref') || '';
+  const referralUid = /^[A-Za-z0-9_-]{20,128}$/.test(referralRaw) ? referralRaw : null;
   if (!/^[a-z0-9_]{3,24}$/.test(username) || reservedUsername(username)) return show(registerForm, 'اسم المستخدم يجب أن يكون 3–24 حرفًا إنجليزيًا أو رقمًا أو شرطة سفلية، وألا يكون اسمًا محجوزًا.');
   if (!phone) return show(registerForm, 'اكتب رقم جوال صحيحًا بصيغة دولية، مثل +9665xxxxxxxx.');
   if (password !== confirmation) return show(registerForm, 'كلمتا المرور غير متطابقتين.');
@@ -235,6 +276,7 @@ registerForm?.addEventListener('submit', async event => {
   setBusy(registerForm, true, 'جارٍ إنشاء الحساب…');
   show(registerForm, 'الخطوة 1 من 2: إنشاء حساب الدخول…', 'progress');
   let createdUser = null;
+  let profileCommitted = false;
   try {
     const phoneHash = await digest(phone);
     const credential = await withTimeout(createUserWithEmailAndPassword(auth, email, password));
@@ -259,17 +301,27 @@ registerForm?.addEventListener('submit', async event => {
       level: 1,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
-      authProvider: 'password'
+      authProvider: 'password',
+      emailVerificationRequired: true,
+      referredBy: referralUid
     });
     batch.set(doc(db, 'phoneReservations', phoneHash), { uid: createdUser.uid, createdAt: serverTimestamp() });
     batch.set(doc(db, 'usernameReservations', username), { uid: createdUser.uid, createdAt: serverTimestamp() });
     await withTimeout(batch.commit(), 18000);
-    sendEmailVerification(createdUser).catch(() => {});
-    show(registerForm, 'تم إنشاء الحساب بنجاح. جارٍ فتح ملفك…', 'success');
-    location.href = await destination(createdUser);
+    profileCommitted = true;
+    let verificationSent = true;
+    try {
+      await withTimeout(sendEmailVerification(createdUser), 15000);
+    } catch (verificationError) {
+      verificationSent = false;
+      console.warn('[Shadrat] verification email failed', verificationError);
+    }
+    await signOut(auth).catch(() => {});
+    const verifyState = verificationSent ? 'sent' : 'failed';
+    location.href = `login.html?verify=${verifyState}&email=${encodeURIComponent(email)}`;
   } catch (error) {
     console.error('[Shadrat] registration failed', error);
-    if (createdUser) {
+    if (createdUser && !profileCommitted) {
       try { await withTimeout(deleteUser(createdUser), 8000); } catch (cleanupError) { console.warn('[Shadrat] account cleanup incomplete', cleanupError); }
     }
     show(registerForm, errorText(error));
