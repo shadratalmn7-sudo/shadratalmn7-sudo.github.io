@@ -16,15 +16,24 @@ const deepClean=value=>{
   if(typeof value==='object')return Object.fromEntries(Object.entries(value).filter(([,v])=>v!==undefined).map(([k,v])=>[k,deepClean(v)]));
   return String(value);
 };
+const sanitizeStoredHtml=(html='')=>{
+  const parsed=new DOMParser().parseFromString(String(html),'text/html');
+  parsed.querySelectorAll('script,style,iframe,object,embed,link,meta,base').forEach(el=>el.remove());
+  parsed.querySelectorAll('*').forEach(el=>[...el.attributes].forEach(attr=>{
+    const name=attr.name.toLowerCase(),value=attr.value.trim().toLowerCase();
+    if(name.startsWith('on')||name==='srcdoc'||((name==='href'||name==='src')&&value.startsWith('javascript:')))el.removeAttribute(attr.name);
+  }));
+  return parsed.body.innerHTML;
+};
 export const safeFilename=(value,fallback='Shadrat-file')=>{
   const s=String(value||fallback).trim().replace(/[\\/:*?"<>|]+/g,'-').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
-  return (s||fallback).slice(0,100);
+  return(s||fallback).slice(0,100);
 };
 export const waitForUser=(timeout=3500)=>new Promise(resolve=>{
   if(auth.currentUser)return resolve(auth.currentUser);
-  let done=false;
-  const stop=onAuthStateChanged(auth,user=>{if(done)return;done=true;clearTimeout(timer);stop();resolve(user||null)});
-  const timer=setTimeout(()=>{if(done)return;done=true;stop();resolve(auth.currentUser||null)},timeout);
+  let done=false,timer=null,stop=()=>{};
+  stop=onAuthStateChanged(auth,user=>{if(done)return;done=true;if(timer)clearTimeout(timer);stop();resolve(user||null)});
+  timer=setTimeout(()=>{if(done)return;done=true;stop();resolve(auth.currentUser||null)},timeout);
 });
 
 export async function saveArtifact(record){
@@ -76,7 +85,7 @@ export function ensureBuilderCss(){
 }
 const loadScript=(src,test)=>new Promise((resolve,reject)=>{
   if(test?.())return resolve();
-  const old=[...document.scripts].find(s=>s.src===src);if(old){old.addEventListener('load',resolve,{once:true});old.addEventListener('error',reject,{once:true});return}
+  const old=[...document.scripts].find(s=>s.src===src);if(old){if(test?.())return resolve();old.addEventListener('load',resolve,{once:true});old.addEventListener('error',reject,{once:true});return}
   const s=document.createElement('script');s.src=src;s.async=true;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);
 });
 export async function downloadNodePdf(node,filename){
@@ -93,9 +102,10 @@ export async function downloadNodePdf(node,filename){
 export async function downloadArtifactPdf(artifact){
   ensureBuilderCss();
   const holder=document.createElement('div');
-  if(artifact.renderedHtml)holder.innerHTML=artifact.renderedHtml;
+  if(artifact.renderedHtml)holder.innerHTML=sanitizeStoredHtml(artifact.renderedHtml);
   else{const el=document.createElement('article');el.className=artifact.artifactType==='motivation'?'letter letter-template-academic':'cv template-modern';const p=document.createElement('p');p.textContent=artifact.renderedText||'';el.appendChild(p);holder.appendChild(el)}
   const node=holder.firstElementChild;
+  if(!node)throw new Error('ARTIFACT_RENDER_EMPTY');
   const suffix=artifact.artifactType==='motivation'?'Motivation-Letter':'CV';
   return downloadNodePdf(node,`${safeFilename(artifact.studentName||artifact.artifactName||'Student')}-${suffix}.pdf`);
 }
