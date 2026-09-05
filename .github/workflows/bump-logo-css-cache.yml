@@ -44,12 +44,15 @@ jobs:
               ns=ns.replace('profile-art-themes.css?v=4','profile-art-themes.css?v=6')
               ns=ns.replace('profile-art-themes.css?v=5','profile-art-themes.css?v=6')
               ns=ns.replace('student-profile.js?v=4','student-profile.js?v=5')
-              ns=ns.replace('nav-universal.js?v=158','nav-universal.js?v=159')
-              ns=ns.replace('nav-universal.js?v=159','nav-universal.js?v=160')
-              ns=ns.replace("./notifications-live.js?v=12","./notifications-live.js?v=13")
-              ns=ns.replace("./notifications-live.js?v=13","./notifications-live.js?v=14")
-              ns=ns.replace("./push-notifications.js?v=3","./push-notifications.js?v=4")
-              ns=ns.replace("const publicModules=async()=>{\n    const routes={","const publicModules=async()=>{\n    load('./push-notifications.js?v=4','web push');\n    const routes={")
+              for v in range(153,161):
+                  ns=ns.replace(f'nav-universal.js?v={v}','nav-universal.js?v=161')
+              ns=ns.replace("./notifications-live.js?v=12","./notifications-live.js?v=15")
+              ns=ns.replace("./notifications-live.js?v=13","./notifications-live.js?v=15")
+              ns=ns.replace("./notifications-live.js?v=14","./notifications-live.js?v=15")
+              ns=ns.replace("./push-notifications.js?v=3","./push-notifications.js?v=5")
+              ns=ns.replace("./push-notifications.js?v=4","./push-notifications.js?v=5")
+              ns=ns.replace("load('./push-notifications.js?v=4','web push');","load('./push-notifications.js?v=5','web push');")
+              ns=ns.replace("const publicModules=async()=>{\n    const routes={","const publicModules=async()=>{\n    load('./push-notifications.js?v=5','web push');\n    const routes={")
               ns=ns.replace("const required=[d.username,d.age,d.nationality,d.currentCountry||d.country,d.city,d.studyLevel,d.contactValue]","const required=[d.username,d.age,d.nationality,d.currentCountry||d.country,d.city,d.studyLevel,d.contactMethod,d.contactValue]")
               old='<button class="profile-cover-edit" type="button" data-profile-edit aria-label="تعديل حسابي" title="تعديل حسابي"><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 19.5 8 18.8 18.2 8.6a2.2 2.2 0 0 0-3.1-3.1L4.9 15.7l-.4 3.8ZM13.8 6.8l3.4 3.4"/></svg></button>'
               new='<a class="profile-cover-edit" href="profile-settings.html" aria-label="تعديل حسابي" title="تعديل حسابي"><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 19.5 8 18.8 18.2 8.6a2.2 2.2 0 0 0-3.1-3.1L4.9 15.7l-.4 3.8ZM13.8 6.8l3.4 3.4"/></svg></a>'
@@ -67,5 +70,5 @@ jobs:
           git config user.name 'shadratalmn7-sudo'
           git config user.email 'shadrat.almn7@gmail.com'
           git add -A
-          git commit -m 'Bust profile settings cache after save fix'
+          git commit -m 'Normalize OneSignal cache and prompt loader'
           git push
