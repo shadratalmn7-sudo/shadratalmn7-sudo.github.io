@@ -35,6 +35,7 @@ function applyAppearance(data={}){
   cover.style.setProperty('--student-accent',accent);
   avatar.className='student-avatar'+(frame!=='none'?` frame-${frame}`:'');
   if(avatarData)avatar.innerHTML=`<img src="${avatarData}" alt="الصورة الشخصية">`;
+  else if(!avatar.querySelector('img'))avatar.textContent=(String(data.fullName||data.displayName||'ط').trim()[0]||'ط').toUpperCase();
   const color=customColor||PROFILE_NAME_COLORS.find(x=>x.id===nameColor)?.value||'#fff';
   name.style.color=color;
   studentName?.classList.toggle('name-effect',level>=13&&!!prefs.nameEffect);
@@ -62,6 +63,32 @@ function renderDashboardTask(){
 function setTask(source,task){if(task)tasks.set(source,task);else tasks.delete(source);renderDashboardTask()}
 window.ShadratProfileDashboard={setTask,openTab:id=>window.ShadratProfileNav?.open(id)};
 
+let editOpening=false;
+async function openEditorFromPen(){
+  if(editOpening)return;
+  editOpening=true;
+  const button=document.querySelector('[data-profile-edit]');
+  button?.setAttribute('aria-busy','true');
+  try{
+    if(window.ShadratProfileEditor?.open){await window.ShadratProfileEditor.open();return}
+    const mod=await import('./profile-edit-deep.js?v=7');
+    await mod.openProfileEditor();
+  }catch(error){
+    console.error('[Shadrat] edit pencil fallback',error);
+    button?.classList.add('is-error');
+    setTimeout(()=>button?.classList.remove('is-error'),900);
+  }finally{
+    editOpening=false;
+    button?.removeAttribute('aria-busy');
+  }
+}
+document.addEventListener('click',event=>{
+  const button=event.target.closest?.('[data-profile-edit]');
+  if(!button)return;
+  event.preventDefault();event.stopImmediatePropagation();
+  openEditorFromPen();
+},true);
+
 function renderProfile(data={},email=''){
   const name=data.fullName||data.displayName||'طالب شذرات';
   const username=data.username||'student';
@@ -85,12 +112,11 @@ function renderProfile(data={},email=''){
 
 function ownerMode(user,data){
   document.body.dataset.profileMode='owner';
-  document.querySelector('[data-profile-edit]')?.remove();
   const tabs=document.querySelector('.profile-tabs');
   if(tabs)tabs.innerHTML='<a class="owner-profile-link is-active" href="profile.html">ملف المالك</a><a class="owner-profile-link" href="admin-analytics.html">لوحة الإدارة</a><a class="owner-profile-link" href="admin-users.html">إدارة الطلاب</a><a class="owner-profile-link" href="admin-homepage.html">إدارة المحتوى</a>';
   document.querySelectorAll('[data-profile-panel="overview"],[data-profile-panel="level"],[data-profile-panel="rewards"],[data-profile-panel="orders"],[data-profile-panel="support"],#missions,#level,#rewards,#orders').forEach(el=>el.remove());
   const info=document.querySelector('[data-profile-panel="student-info"]');if(info)info.classList.add('is-active');
-  renderProfile({...data,fullName:'OWNER | المالك',username:'OWNER'},user.email||data.email||'');
+  renderProfile({...data,fullName:data.fullName||'OWNER | المالك',username:data.username||'OWNER'},user.email||data.email||'');
 }
 
 const cachedUid=sessionUid();
