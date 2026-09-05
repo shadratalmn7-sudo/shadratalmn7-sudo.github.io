@@ -29,23 +29,18 @@ function publicBadges(data){
 }
 async function syncPublicProfile(user){
   const snap=await getDoc(doc(db,'users',user.uid));if(!snap.exists())return null;
-  const data=snap.data()||{},xp=Math.max(0,Number(data.xp)||0),level=levelFromXp(xp),username=cleanUsername(data.username||'student');
-  const publicData={
-    uid:user.uid,
+  const data=snap.data()||{},xp=Math.max(0,Number(data.xp)||0),level=Math.max(1,Number(data.level)||levelFromXp(xp)),username=cleanUsername(data.username||'student');
+  const safeInfo={
     fullName:clean(data.fullName||data.displayName||'طالب شذرات').slice(0,80),
-    username,
-    avatarKey:String(data.avatarKey||'').slice(0,900000),
-    level,
-    xp,
     studyLevel:clean(data.studyLevel||'').slice(0,80),
-    badges:publicBadges(data),
     achievements:listFrom(data,['achievements','completedAchievements','achievementTitles'],16),
-    completedTasks:listFrom(data,['completedTasks','completedMissions','missionsCompleted','missionHistory'],16),
-    visible:true,
-    updatedAt:serverTimestamp()
+    completedTasks:listFrom(data,['completedTasks','completedMissions','missionsCompleted','missionHistory'],16)
   };
+  // نخزن المعلومات العامة الإضافية داخل expertise لأنه موجود أصلًا في مخطط الملف العام.
+  // لا يتم نسخ البريد أو الجوال أو الملفات أو الطلبات أو الرسائل أو بيانات الدخول.
+  const publicData={uid:user.uid,username,avatarKey:String(data.avatarKey||''),level,xp,badges:publicBadges(data),expertise:safeInfo,visible:true,updatedAt:serverTimestamp()};
   await setDoc(doc(db,'publicProfiles',user.uid),publicData,{merge:true});
-  return publicData;
+  return{...publicData,...safeInfo};
 }
 function addTools(uid,username){
   if(document.querySelector('.public-profile-tools'))return;
