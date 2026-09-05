@@ -3,6 +3,7 @@
   const builderPages=new Set(['cv-builder.html','motivation-letter.html']),isBuilder=builderPages.has(page),isServiceRequest=page==='service-request.html';
   if(!isBuilder&&!isServiceRequest)return;
   if(isBuilder)import('./template-level-gate.js?v=1').then(m=>m.initTemplateLevelGate(page==='cv-builder.html'?'cv':'motivation')).catch(e=>console.warn('[Shadrat] template level gate unavailable',e));
+  if(isBuilder)return;
 
   const SERVICE_DRAFT_KEY='shadrat-service-request-draft-v1',serviceFieldIds=['student-name','student-age','nationality','contact-method','contact-value','current-country','request-details'];
   let authPromise=null,checkingBuilder=false,checkingService=false;
