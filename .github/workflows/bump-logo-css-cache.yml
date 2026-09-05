@@ -47,8 +47,9 @@ jobs:
               ns=ns.replace("./notifications-live.js?v=12","./notifications-live.js?v=13")
               ns=ns.replace("const required=[d.username,d.age,d.nationality,d.currentCountry||d.country,d.city,d.studyLevel,d.contactValue]","const required=[d.username,d.age,d.nationality,d.currentCountry||d.country,d.city,d.studyLevel,d.contactMethod,d.contactValue]")
               old='<button class="profile-cover-edit" type="button" data-profile-edit aria-label="تعديل حسابي" title="تعديل حسابي"><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 19.5 8 18.8 18.2 8.6a2.2 2.2 0 0 0-3.1-3.1L4.9 15.7l-.4 3.8ZM13.8 6.8l3.4 3.4"/></svg></button>'
-              new='<a class="profile-cover-edit" href="profile-settings.html" data-profile-edit aria-label="تعديل حسابي" title="تعديل حسابي"><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 19.5 8 18.8 18.2 8.6a2.2 2.2 0 0 0-3.1-3.1L4.9 15.7l-.4 3.8ZM13.8 6.8l3.4 3.4"/></svg></a>'
+              new='<a class="profile-cover-edit" href="profile-settings.html" aria-label="تعديل حسابي" title="تعديل حسابي"><svg viewBox="0 0 24 24" fill="none"><path d="M4.5 19.5 8 18.8 18.2 8.6a2.2 2.2 0 0 0-3.1-3.1L4.9 15.7l-.4 3.8ZM13.8 6.8l3.4 3.4"/></svg></a>'
               ns=ns.replace(old,new)
+              ns=ns.replace('<a class="profile-cover-edit" href="profile-settings.html" data-profile-edit aria-label="تعديل حسابي" title="تعديل حسابي">','<a class="profile-cover-edit" href="profile-settings.html" aria-label="تعديل حسابي" title="تعديل حسابي">')
               if ns!=s:
                   p.write_text(ns,encoding='utf-8')
                   changed.append(str(p))
@@ -61,5 +62,5 @@ jobs:
           git config user.name 'shadratalmn7-sudo'
           git config user.email 'shadrat.almn7@gmail.com'
           git add -A
-          git commit -m 'Make profile pencil a direct settings link'
+          git commit -m 'Make profile pencil independent of JavaScript'
           git push
