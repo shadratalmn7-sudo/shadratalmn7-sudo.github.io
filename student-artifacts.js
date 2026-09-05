@@ -88,16 +88,59 @@ const loadScript=(src,test)=>new Promise((resolve,reject)=>{
   const old=[...document.scripts].find(s=>s.src===src);if(old){if(test?.())return resolve();old.addEventListener('load',resolve,{once:true});old.addEventListener('error',reject,{once:true});return}
   const s=document.createElement('script');s.src=src;s.async=true;s.onload=resolve;s.onerror=reject;document.head.appendChild(s);
 });
+const nextPaint=()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 export async function downloadNodePdf(node,filename){
   if(!node)throw new Error('PDF_NODE_MISSING');
   ensureBuilderCss();
   await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js',()=>!!window.html2pdf);
+
   const clone=node.cloneNode(true);
-  clone.style.setProperty('box-shadow','none','important');clone.style.setProperty('border-radius','0','important');clone.style.setProperty('margin','0','important');clone.style.setProperty('width','190mm','important');clone.style.setProperty('max-width','190mm','important');clone.style.setProperty('min-height','auto','important');clone.style.setProperty('background','#fff','important');
-  const shell=document.createElement('div');shell.className='artifact-pdf-shell';shell.style.cssText='position:fixed;left:-12000px;top:0;width:210mm;background:#fff;padding:10mm;z-index:-9999;';shell.appendChild(clone);document.body.appendChild(shell);
+  clone.style.setProperty('position','relative','important');
+  clone.style.setProperty('inset','auto','important');
+  clone.style.setProperty('display','block','important');
+  clone.style.setProperty('visibility','visible','important');
+  clone.style.setProperty('opacity','1','important');
+  clone.style.setProperty('box-shadow','none','important');
+  clone.style.setProperty('border-radius','0','important');
+  clone.style.setProperty('margin','0','important');
+  clone.style.setProperty('width','190mm','important');
+  clone.style.setProperty('max-width','190mm','important');
+  clone.style.setProperty('min-height','auto','important');
+  clone.style.setProperty('height','auto','important');
+  clone.style.setProperty('background','#fff','important');
+  clone.style.setProperty('box-sizing','border-box','important');
+
+  // Safari/iOS can export a completely white PDF when html2canvas renders a node
+  // thousands of pixels off-screen or a detached node. Keep the render target attached
+  // to the visible viewport and cover it with a temporary progress layer instead.
+  const shell=document.createElement('div');
+  shell.className='artifact-pdf-shell';
+  shell.style.cssText='position:fixed;top:0;left:0;width:210mm;min-height:297mm;padding:10mm;background:#fff;z-index:2147483645;overflow:visible;box-sizing:border-box;pointer-events:none;';
+  shell.appendChild(clone);
+
+  const cover=document.createElement('div');
+  cover.setAttribute('role','status');
+  cover.setAttribute('aria-live','polite');
+  cover.textContent='جاري تجهيز ملف PDF…';
+  cover.style.cssText='position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;background:rgba(248,251,255,.98);color:#1d4ed8;font:800 16px Tahoma,Arial,sans-serif;text-align:center;padding:24px;';
+
+  const oldOverflow=document.documentElement.style.overflow;
+  document.documentElement.style.overflow='hidden';
+  document.body.append(shell,cover);
   try{
-    await window.html2pdf().set({margin:[8,8,8,8],filename:safeFilename(filename,'Shadrat-file.pdf'),image:{type:'jpeg',quality:.99},html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},pagebreak:{mode:['css','legacy']}}).from(clone).save();
-  }finally{setTimeout(()=>shell.remove(),250)}
+    await nextPaint();
+    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    await window.html2pdf().set({
+      margin:[8,8,8,8],
+      filename:safeFilename(filename,'Shadrat-file.pdf'),
+      image:{type:'jpeg',quality:.98},
+      html2canvas:{scale:isIOS?1.5:2,useCORS:true,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0,windowWidth:Math.max(document.documentElement.clientWidth,794)},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['css','legacy']}
+    }).from(clone).save();
+  }finally{
+    cover.remove();shell.remove();document.documentElement.style.overflow=oldOverflow;
+  }
 }
 export async function downloadArtifactPdf(artifact){
   ensureBuilderCss();
