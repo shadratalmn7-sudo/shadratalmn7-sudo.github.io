@@ -21,5 +21,5 @@ loadGeneral();
 onAuthStateChanged(auth,async user=>{await loadGeneral();if(!user)return;try{const s=await getDocs(query(collection(db,'users',user.uid,'notifications'),orderBy('createdAt','desc'),limit(8)));s.docs.reverse().forEach(d=>{const x=d.data();if(x.read)return;showItem(`n:${d.id}`,x.title||'تنبيه من شذرات',x.body||'',()=>updateDoc(doc(db,'users',user.uid,'notifications',d.id),{read:true}))})}catch(e){console.warn('personal notifications unavailable',e)}});
 import('./scholarship-auto-alerts.js?v=3').catch(error=>console.warn('[Shadrat] scholarship auto alerts unavailable',error));
 import('./service-auto-alerts.js?v=1').catch(error=>console.warn('[Shadrat] service auto alerts unavailable',error));
-import('./push-notifications.js?v=6').catch(error=>console.warn('[Shadrat] web push unavailable',error));
+import('./shadrat-messaging.js?v=1').catch(error=>console.warn('[Shadrat] web push unavailable',error));
 if((location.pathname.split('/').pop()||'')==='profile.html')import('./student-orders-center.js?v=2').catch(error=>console.warn('[Shadrat] orders center unavailable',error));

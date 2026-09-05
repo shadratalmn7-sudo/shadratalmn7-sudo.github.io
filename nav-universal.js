@@ -71,7 +71,7 @@
   document.querySelectorAll('.global-menu a').forEach(link=>{if(link.getAttribute('href')===page){link.classList.add('is-current');link.setAttribute('aria-current','page')}});
   const report=(label,error)=>console.warn(`[Shadrat] ${label}`,error),load=(path,label=path)=>import(path).catch(error=>report(label,error)),onIdle=callback=>('requestIdleCallback'in window?requestIdleCallback(callback,{timeout:1800}):setTimeout(callback,900));
   const publicModules=async()=>{
-    load('./push-notifications.js?v=6','web push');
+    load('./shadrat-messaging.js?v=1','web push');
     const routes={
       'index.html':async()=>{await load('./homepage-fixes.js?v=21','homepage fixes');load('./homepage-live.js?v=21','homepage live')},
       'scholarships.html':()=>Promise.all([load('./scholarships-live.js?v=15','scholarships'),load('./scholarship-favorites.js?v=11','favorites')]),
