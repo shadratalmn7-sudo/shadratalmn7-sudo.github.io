@@ -1,5 +1,5 @@
 import{downloadNodePdf,getArtifact,safeFilename,saveArtifact,waitForUser}from'./student-artifacts-a4.js?v=7';
-import{certificateEvidence,readCertificate}from'./certificate-reader.js?v=3';
+import{certificateEvidence,readCertificate}from'./certificate-reader.js?v=4';
 const $=id=>document.getElementById(id),clean=v=>String(v||'').trim(),split=v=>String(v||'').split(/\n+/).map(clean).filter(Boolean),esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fields=['artifactName','name','current','program','target','about','achievements','whyField','whyCountry','whyCity','whyProgram','whyCompany','relevantExperience','employerValue','future','lang','tone','wordTarget','template','manualText'];
 const templates=[['academic','أكاديمي','تنسيق جامعي كلاسيكي'],['formal','رسمي','مظهر مؤسسي واضح'],['editorial','صحيفة','عنوان تحريري مميز'],['modern','حديث','خطوط ومسافات عصرية'],['executive','تنفيذي','قوي ومهني'],['minimal','Minimal','بسيط ونظيف'],['creative','إبداعي','لمسة مرئية حديثة'],['technical','تقني','مناسب للمسارات التقنية'],['serif','Serif','طابع مطبوع أنيق'],['clean','Clean','هوامش واسعة وهادئة']];
@@ -7,6 +7,26 @@ let certificates=[],mode='auto',purpose='study',groupId=crypto.randomUUID(),vers
 const collect=()=>Object.fromEntries(fields.map(id=>[id,$(id)?.value||''])),fingerprint=d=>JSON.stringify({d,mode,purpose,certificates:certificates.map(c=>c.info||c.fileName)});
 const status=(text,type='')=>{const el=$('builderStatus');if(el){el.textContent=text;el.className=`builder-status ${type}`.trim()}};
 const words=s=>clean(s).split(/\s+/).filter(Boolean).length;
+function buildPolishedCore(d,lang){
+  const ar=lang==='ar',p=[ar?'السادة أعضاء لجنة القبول المحترمون،':'Dear Members of the Selection Committee,'];
+  p.push(ar?`أتقدم إليكم بطلب الالتحاق بـ ${d.program||'هذه الفرصة'} في مجال ${d.target}. ويعكس هذا الطلب رغبتي الجادة في بناء مسار واضح قائم على التعلم المنظم والتطور المستمر.`:`I am applying for ${d.program||'this opportunity'} in ${d.target}. This application reflects my serious intention to build a clear path based on structured learning and continuous development.`);
+  [d.about,d.current].filter(Boolean).forEach(x=>p.push(`${x}.`));
+  split(d.achievements).forEach(x=>p.push(ar?`يتضمن سجلي إنجازًا أو تجربة موثقة تتمثل في: ${x}. وقد أسهمت هذه التجربة في تعزيز الانضباط والاستمرارية والقدرة على التعلم من الملاحظات.`:`My record includes the following documented achievement or experience: ${x}. It helped strengthen my discipline, consistency, and ability to learn from feedback.`));
+  if(d.whyField)p.push(ar?`${d.whyField}. ولذلك أريد دراسة هذا المجال بعمق وربط المعرفة النظرية بالتطبيق المسؤول.`:`${d.whyField}. I therefore want to study this field in depth and connect theoretical knowledge with responsible practice.`);
+  if(purpose==='study'){
+    if(d.whyCountry)p.push(ar?`${d.whyCountry}. وتمثل البيئة الدولية بالنسبة لي فرصة لتوسيع منظوري الأكاديمي والثقافي.`:`${d.whyCountry}. An international environment would also broaden my academic and cultural perspective.`);
+    if(d.whyCity)p.push(ar?`${d.whyCity}. كما أرى أن القدرة على التكيف مع بيئة جديدة جزء مهم من النضج والاستعداد للدراسة.`:`${d.whyCity}. I also regard adapting to a new environment as an important part of maturity and academic readiness.`);
+    if(d.whyProgram)p.push(ar?`${d.whyProgram}. ويهمني أن تكون الجهة المختارة مرتبطة فعلًا بأهدافي واحتياجات مساري.`:`${d.whyProgram}. It is important to me that the selected institution genuinely aligns with my goals and the needs of my path.`);
+  }else{
+    if(d.whyCompany)p.push(ar?`${d.whyCompany}. وأبحث عن بيئة مهنية تجمع بين المسؤولية والتعاون والتعلم المستمر.`:`${d.whyCompany}. I am seeking a professional environment that combines responsibility, collaboration, and continuous learning.`);
+    if(d.relevantExperience)p.push(`${d.relevantExperience}.`);
+    if(d.employerValue)p.push(ar?`${d.employerValue}. وسأعمل على تطوير هذه المساهمة بالالتزام والتعاون ووضوح النتائج.`:`${d.employerValue}. I will develop this contribution through commitment, collaboration, and clear results.`);
+  }
+  const validCertificates=certificates.filter(c=>c.info);if(validCertificates.length)p.push(ar?'تدعم طلبي مجموعة من الشهادات الموثقة التالية:':'My application is supported by the following documented certificates:');
+  validCertificates.forEach(c=>p.push(certificateEvidence(c.info,lang,{ownerName:d.name})));
+  if(d.future)p.push(ar?`${d.future}. ولهذا أنظر إلى هذه الفرصة باعتبارها خطوة ضمن خطة طويلة المدى، وليست هدفًا منفصلًا.`:`${d.future}. I therefore see this opportunity as one step in a long-term plan rather than an isolated goal.`);
+  return p;
+}
 function factual(label,value,lang){if(!clean(value))return'';return lang==='ar'?`${label}: ${clean(value)}.`:`${label}: ${clean(value)}.`}
 const expansions={ar:[
   'أتعامل مع هذه الخطوة بوصفها مسارًا للتعلم المنظم وبناء معرفة يمكن تطبيقها بمسؤولية، لا مجرد محطة قصيرة أو عنوان يضاف إلى الملف.',
@@ -46,7 +66,7 @@ function rewriteBrief(value,kind,lang){
   const lead={about:'My background and core motivation center on',reason:'This choice is driven by',future:'My long-term objective is to',value:'The value I can contribute is grounded in'}[kind]||'The information provided reflects';return `${lead} ${core}`;
 }
 function rewrittenData(d,lang){return{...d,current:rewriteBrief(d.current,'current',lang),about:rewriteBrief(d.about,'about',lang),whyField:rewriteBrief(d.whyField,'reason',lang),whyCountry:rewriteBrief(d.whyCountry,'reason',lang),whyCity:rewriteBrief(d.whyCity,'reason',lang),whyProgram:rewriteBrief(d.whyProgram,'reason',lang),whyCompany:rewriteBrief(d.whyCompany,'reason',lang),relevantExperience:rewriteBrief(d.relevantExperience,'about',lang),employerValue:rewriteBrief(d.employerValue,'value',lang),future:rewriteBrief(d.future,'future',lang)}}
-function build(){const d=collect(),lang=d.lang==='ar'?'ar':'en';if(mode==='manual'){if(!clean(d.manualText))throw new Error('MANUAL');return split(d.manualText)}if(!clean(d.name)||!clean(d.target))throw new Error('REQUIRED');const refined=rewrittenData(d,lang);return fit(buildCore(refined,lang),Math.max(300,+d.wordTarget||750),lang,d.name)}
+function build(){const d=collect(),lang=d.lang==='ar'?'ar':'en';if(mode==='manual'){if(!clean(d.manualText))throw new Error('MANUAL');return split(d.manualText)}if(!clean(d.name)||!clean(d.target))throw new Error('REQUIRED');const refined=rewrittenData(d,lang);return fit(buildPolishedCore(refined,lang),Math.max(300,+d.wordTarget||750),lang,d.name)}
 function update(parts=[]){const d=collect(),lang=d.lang==='ar'?'ar':'en',box=$('letterText');box.innerHTML='';(parts.length?parts:[lang==='ar'?'أدخل الاسم والتخصص ليظهر الخطاب هنا.':'Enter your name and target field to build the letter.']).forEach(x=>{const p=document.createElement('p');p.textContent=x;box.appendChild(p)});const letter=$('letter');letter.dir=lang==='ar'?'rtl':'ltr';letter.className=`letter letter-template-${d.template||'academic'}`;letter.dataset.multipage='true';$('letterTitle').textContent=lang==='ar'?(purpose==='study'?'خطاب دافع دراسي':'خطاب تقديم وظيفي'):(purpose==='study'?'Motivation Letter':'Cover Letter');$('letterMeta').textContent=[d.name,d.program,d.target].map(clean).filter(Boolean).join(' · ');const count=words(parts.join(' '));$('counter').textContent=count?`${count} ${lang==='ar'?'كلمة':'words'} · ${lang==='ar'?'نحو':'about'} ${Math.max(1,Math.ceil(count/450))} ${lang==='ar'?'صفحة':'page(s)'}`:'';document.querySelectorAll('[data-motivation-template]').forEach(b=>b.classList.toggle('is-active',b.dataset.motivationTemplate===d.template));window.ShadratFitA4Preview?.()}
 function draft(){renderCertificates();try{if(mode==='manual')update(clean($('manualText').value)?split($('manualText').value):[]);else if(clean($('name').value)&&clean($('target').value))update(build());else update([])}catch{update([])}saveLocal()}
 function generate({silent=false}={}){try{const p=build();update(p);saveLocal();if(!silent)status(`تم تجهيز الخطاب من معلوماتك الفعلية في ${words(p.join(' '))} كلمة.`,'success');return p.join('\n\n')}catch(e){if(!silent)status(e.message==='MANUAL'?'اكتب نص الخطاب أولًا.':'اكتب الاسم والتخصص المستهدف على الأقل.','error');return''}}
