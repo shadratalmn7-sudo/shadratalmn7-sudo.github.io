@@ -1,0 +1,89 @@
+name: visual-logo-check
+
+on:
+  push:
+    paths:
+      - '.github/workflows/visual-logo-check.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-logo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Wait for public Pages and verify asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://shadratalmn7-sudo.github.io/'
+          ok=0
+          for i in $(seq 1 36); do
+            html="$(curl -LfsS "${URL}?visual-logo-check=${GITHUB_SHA}" || true)"
+            if printf '%s' "$html" | grep -q 'assets/shazarat-logo.svg'; then
+              ok=1
+              break
+            fi
+            sleep 5
+          done
+          test "$ok" = 1
+          curl -LfsS -o /tmp/logo.svg "${URL}assets/shazarat-logo.svg?visual-logo-check=${GITHUB_SHA}"
+          grep -q '<svg' /tmp/logo.svg
+          test "$(wc -c </tmp/logo.svg)" -gt 50000
+
+      - name: Install Selenium
+        run: python3 -m pip install --quiet selenium
+
+      - name: Render in Chrome at laptop and mobile sizes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, time
+          from selenium import webdriver
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.support.ui import WebDriverWait
+
+          URL = 'https://shadratalmn7-sudo.github.io/?visual-logo-check='
+          results = []
+          for name, width, height in [('laptop', 1440, 900), ('mobile', 390, 844)]:
+              opts = Options()
+              opts.add_argument('--headless=new')
+              opts.add_argument('--no-sandbox')
+              opts.add_argument('--disable-dev-shm-usage')
+              opts.add_argument(f'--window-size={width},{height}')
+              opts.add_argument('--force-device-scale-factor=1')
+              driver = webdriver.Chrome(options=opts)
+              try:
+                  driver.get(URL + str(int(time.time() * 1000)))
+                  WebDriverWait(driver, 25).until(lambda d: d.execute_script('return document.readyState') == 'complete')
+                  img = WebDriverWait(driver, 25).until(lambda d: d.find_element(By.CSS_SELECTOR, '.site-header .brand-logo'))
+                  WebDriverWait(driver, 25).until(lambda d: d.execute_script('return arguments[0].complete && arguments[0].naturalWidth > 0', img))
+                  displayed = img.is_displayed()
+                  rect = img.rect
+                  natural = driver.execute_script('return [arguments[0].naturalWidth, arguments[0].naturalHeight]', img)
+                  opacity = driver.execute_script('return getComputedStyle(arguments[0]).opacity', img)
+                  visibility = driver.execute_script('return getComputedStyle(arguments[0]).visibility', img)
+                  display = driver.execute_script('return getComputedStyle(arguments[0]).display', img)
+                  assert displayed, f'{name}: logo not displayed'
+                  assert rect['width'] >= 120 and rect['height'] >= 20, f'{name}: bad logo rect {rect}'
+                  assert natural[0] > 0 and natural[1] > 0, f'{name}: image failed to load'
+                  assert visibility == 'visible' and display != 'none' and float(opacity) > 0, f'{name}: hidden by CSS'
+                  driver.save_screenshot(f'{name}.png')
+                  results.append({'viewport': name, 'size': [width, height], 'displayed': displayed, 'rect': rect, 'natural': natural, 'opacity': opacity, 'visibility': visibility, 'display': display, 'src': img.get_attribute('src')})
+              finally:
+                  driver.quit()
+          with open('visual-logo-report.json', 'w', encoding='utf-8') as f:
+              json.dump(results, f, ensure_ascii=False, indent=2)
+          print(json.dumps(results, ensure_ascii=False))
+          PY
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-logo-check
+          path: |
+            laptop.png
+            mobile.png
+            visual-logo-report.json
+          if-no-files-found: error
