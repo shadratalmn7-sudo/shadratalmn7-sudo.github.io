@@ -1,0 +1,135 @@
+name: replace-site-logo-source
+
+on:
+  push:
+    paths:
+      - '.github/workflows/replace-site-logo-source.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  replace-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Replace every displayed old logo reference with the new blue logo
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+
+          old = 'assets/shazarat-logo.svg'
+          new = 'assets/shazarat-logo-blue.png?v=20260905b'
+          out = subprocess.check_output(['git','grep','-l','-z',old,'--',':!.github/*'])
+          files = [Path(p.decode()) for p in out.split(b'\0') if p]
+          if not files:
+              raise SystemExit('No old-logo references found outside .github')
+          changed=[]
+          for p in files:
+              try:
+                  text=p.read_text(encoding='utf-8')
+              except UnicodeDecodeError:
+                  continue
+              if old in text:
+                  p.write_text(text.replace(old,new),encoding='utf-8')
+                  changed.append(str(p))
+          print('Changed files:')
+          print('\n'.join(changed))
+          if not changed:
+              raise SystemExit('No text references changed')
+          PY
+
+          test -f assets/shazarat-logo-blue.png
+          git grep -n 'assets/shazarat-logo.svg' -- ':!.github/*' && exit 1 || true
+          git grep -n 'assets/shazarat-logo-blue.png?v=20260905b' -- ':!.github/*'
+          git rm -f assets/shazarat-logo.svg
+
+          git config user.name 'shadratalmn7-sudo'
+          git config user.email 'shadrat.almn7@gmail.com'
+          git add -A
+          git commit -m 'Replace displayed site logo source with new blue logo'
+          git push origin HEAD:main
+          echo "NEW_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Wait until GitHub Pages serves the new logo source
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL='https://shadratalmn7-sudo.github.io/'
+          ok=0
+          for i in $(seq 1 72); do
+            html="$(curl -LfsS "${URL}?logo-source=${NEW_SHA}-${i}" || true)"
+            if printf '%s' "$html" | grep -q 'assets/shazarat-logo-blue.png?v=20260905b' && ! printf '%s' "$html" | grep -q 'assets/shazarat-logo.svg'; then
+              ok=1
+              break
+            fi
+            sleep 5
+          done
+          test "$ok" = 1
+          curl -LfsS -o /tmp/new-logo.png "${URL}assets/shazarat-logo-blue.png?v=20260905b&sha=${NEW_SHA}"
+          test "$(wc -c </tmp/new-logo.png)" -gt 10000
+
+      - name: Install Selenium
+        run: python3 -m pip install --quiet selenium
+
+      - name: Verify public Chrome mobile and laptop never load old logo
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, time
+          from selenium import webdriver
+          from selenium.webdriver.common.by import By
+          from selenium.webdriver.chrome.options import Options
+          from selenium.webdriver.support.ui import WebDriverWait
+
+          results=[]
+          base='https://shadratalmn7-sudo.github.io/?logo-source-check='
+          for name,w,h in [('laptop',1440,900),('mobile',390,844)]:
+              opts=Options()
+              opts.add_argument('--headless=new')
+              opts.add_argument('--no-sandbox')
+              opts.add_argument('--disable-dev-shm-usage')
+              opts.add_argument('--disable-cache')
+              opts.add_argument(f'--window-size={w},{h}')
+              driver=webdriver.Chrome(options=opts)
+              try:
+                  driver.get(base+str(int(time.time()*1000)))
+                  WebDriverWait(driver,25).until(lambda d:d.execute_script('return document.readyState')=='complete')
+                  imgs=driver.find_elements(By.CSS_SELECTOR,'.brand-logo,.footer-logo')
+                  assert imgs, f'{name}: no logo elements found'
+                  checked=[]
+                  for img in imgs:
+                      WebDriverWait(driver,25).until(lambda d,el=img:d.execute_script('return arguments[0].complete && arguments[0].naturalWidth>0',el))
+                      src=img.get_attribute('src') or ''
+                      assert 'shazarat-logo-blue.png' in src, f'{name}: non-new logo src: {src}'
+                      assert 'shazarat-logo.svg' not in src, f'{name}: old logo src still used: {src}'
+                      checked.append({'src':src,'displayed':img.is_displayed(),'rect':img.rect})
+                  resources=driver.execute_script("return performance.getEntriesByType('resource').map(e=>e.name)")
+                  old=[r for r in resources if 'shazarat-logo.svg' in r]
+                  assert not old, f'{name}: browser requested old logo: {old}'
+                  driver.save_screenshot(f'logo-{name}.png')
+                  results.append({'viewport':name,'checked':checked,'oldLogoRequests':old})
+              finally:
+                  driver.quit()
+          with open('logo-source-report.json','w',encoding='utf-8') as f:
+              json.dump(results,f,ensure_ascii=False,indent=2)
+          print(json.dumps(results,ensure_ascii=False))
+          PY
+
+      - name: Upload verification proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: new-logo-source-proof
+          path: |
+            logo-laptop.png
+            logo-mobile.png
+            logo-source-report.json
+          if-no-files-found: error
