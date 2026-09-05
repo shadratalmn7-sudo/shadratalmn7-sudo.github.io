@@ -30,7 +30,7 @@ function applyAppearance(data={}){
   const customColor=level>=20&&/^#[0-9a-f]{6}$/i.test(prefs.customNameColor||'')?prefs.customNameColor:'';
   const accent=level>=16&&/^#[0-9a-f]{6}$/i.test(prefs.accent||'')?prefs.accent:'#2563eb';
   const avatarData=typeof prefs.avatarDataUrl==='string'&&prefs.avatarDataUrl.startsWith('data:image/')?prefs.avatarDataUrl:'';
-  cover.classList.remove('theme-sky','theme-ocean','theme-midnight','theme-premium','theme-elite');
+  cover.classList.remove('theme-sky','theme-ocean','theme-midnight','theme-nebula','theme-anime-dusk','theme-luminous-tree','theme-premium','theme-elite');
   if(theme!=='default')cover.classList.add(`theme-${theme}`);
   cover.style.setProperty('--student-accent',accent);
   avatar.className='student-avatar'+(frame!=='none'?` frame-${frame}`:'');
