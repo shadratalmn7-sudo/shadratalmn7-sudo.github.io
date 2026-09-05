@@ -1,0 +1,3 @@
+import{logStudentActivity}from'./student-artifacts.js?v=1';
+const area=document.querySelector('#active-tool-area'),from=document.querySelector('#convert-from'),to=document.querySelector('#convert-to');
+if(area){let last='';const observer=new MutationObserver(async()=>{const state=area.querySelector('[data-status]')?.textContent?.trim()||'';if(!/^تم التحويل/.test(state))return;const signature=`${from?.value||''}->${to?.value||''}:${state}`;if(signature===last)return;last=signature;await logStudentActivity('document_conversion','استخدم أداة تحويل المستندات',{from:from?.value||'',to:to?.value||'',result:'success'});setTimeout(()=>{last=''},4000)});observer.observe(area,{subtree:true,childList:true,characterData:true,attributes:true})}
