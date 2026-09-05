@@ -32,10 +32,11 @@
       const available=Math.max(220,wrap.clientWidth-28);
       const scale=Math.min(1,available/pageWidth);
       wrap.style.setProperty('--a4-preview-scale',String(scale));
-      const pageHeight=page.offsetHeight||1123;
+      const multiPage=page.dataset.multipage==='true';
+      const pageHeight=multiPage?Math.max(page.offsetHeight,page.scrollHeight,1123):(page.offsetHeight||1123);
       const top=window.matchMedia('(max-width:520px)').matches?40:44;
       wrap.style.height=`${Math.ceil(top+pageHeight*scale+14)}px`;
-      const overflow=page.scrollHeight>page.clientHeight+3;
+      const overflow=!multiPage&&page.scrollHeight>page.clientHeight+3;
       wrap.classList.toggle('is-a4-overflow',overflow);
     });
   };
