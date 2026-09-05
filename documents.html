@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="nav-universal.css?v=156">
   <link rel="stylesheet" href="section-pages.css?v=1">
   <link rel="stylesheet" href="documents.css?v=80">
+  <style>.student-tool-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:22px}.student-tool-card{display:block;border:1px solid #dbeafe;border-radius:24px;padding:20px;background:linear-gradient(145deg,#fff,#f6f9ff);box-shadow:var(--shadow-sm)}.student-tool-card span{font-size:30px}.student-tool-card h2{margin:6px 0 4px}.student-tool-card p{margin:0;color:var(--muted)}.student-tool-card b{display:inline-block;margin-top:12px;color:var(--primary)}@media(max-width:680px){.student-tool-cards{grid-template-columns:1fr}}</style>
 </head>
 <body>
   <header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div></header>
@@ -17,12 +18,16 @@
       <div class="container">
         <span class="eyebrow">أدوات تجهيز الملف</span>
         <h1>مستنداتي</h1>
-        <p class="lead">اختر نوع الملف من القائمة الأولى، ثم اختر النوع المطلوب من القائمة الثانية. إذا كان التحويل شغال تظهر أداة الرفع، وإذا لم يعمل بعد يظهر قريبًا.</p>
+        <p class="lead">حوّل ملفاتك، أنشئ CV، أو جهّز Motivation Letter من نفس قسم أدوات الطالب.</p>
         <div class="docs-privacy"><b>خصوصية مهمة:</b><span>الملفات تُعالج داخل متصفحك ولا تُحفظ في شذرات. حتى الإدارة لا تستطيع الوصول إلى الملفات المرفقة أو الناتجة.</span></div>
       </div>
     </section>
     <section class="section docs-section">
       <div class="container">
+        <div class="student-tool-cards">
+          <a class="student-tool-card" href="cv-builder.html"><span>📄</span><h2>منشئ CV</h2><p>عبّ بياناتك واختر قالبًا وشاهد السيرة مباشرة ثم احفظها PDF.</p><b>ابدأ إنشاء السيرة ←</b></a>
+          <a class="student-tool-card" href="motivation-letter.html"><span>✍️</span><h2>منشئ Motivation Letter</h2><p>ارفع شهاداتك، أضف معلوماتك وإنجازاتك، ثم جهّز خطاب دافع مبنيًا عليها.</p><b>ابدأ تجهيز الخطاب ←</b></a>
+        </div>
         <article class="converter-box" aria-label="مربع تحويل المستندات">
           <div class="converter-head"><div><span class="eyebrow">تحويل مباشر</span><h2>اختر التحويل المطلوب</h2></div><p>القوائم لا تتركك فاضي: شغال الآن أو قريبًا.</p></div>
           <div class="from-to-grid"><label class="field"><span>من</span><select id="convert-from" aria-label="نوع الملف الأصلي"></select></label><button class="swap-btn" id="swap-conversion" type="button" aria-label="عكس التحويل">↔</button><label class="field"><span>إلى</span><select id="convert-to" aria-label="نوع الملف المطلوب"></select></label></div>
@@ -32,7 +37,7 @@
       </div>
     </section>
   </main>
-  <footer class="site-footer"><div class="container footer-grid"><div><img class="footer-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><p>أدوات ومعلومات تساعد الطالب على تجهيز ملفه الدراسي دون ضمان القبول.</p></div><div><b>الأدوات</b><a href="documents.html">مستنداتي</a><a href="scholarships.html">المنح</a><a href="currency.html">تحويل العملات</a></div><div><b>المعلومات</b><a href="privacy.html">الخصوصية</a><a href="terms.html">الشروط</a></div></div></footer>
+  <footer class="site-footer"><div class="container footer-grid"><div><img class="footer-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><p>أدوات ومعلومات تساعد الطالب على تجهيز ملفه الدراسي دون ضمان القبول.</p></div><div><b>الأدوات</b><a href="documents.html">مستنداتي</a><a href="cv-builder.html">منشئ CV</a><a href="motivation-letter.html">Motivation Letter</a><a href="currency.html">تحويل العملات</a></div><div><b>المعلومات</b><a href="privacy.html">الخصوصية</a><a href="terms.html">الشروط</a></div></div></footer>
   <script src="nav-universal.js?v=156"></script>
   <script type="module" src="documents.js?v=81"></script>
 </body>
