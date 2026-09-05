@@ -9,7 +9,7 @@ const localStyle=document.createElement('style');localStyle.textContent=`
 `;document.head.appendChild(localStyle);
 
 const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),main=document.querySelector('.admin-main');
-let users=[],items=[],mode='missions';
+let users=[],items=[],mode='missions',recipientSelection=new Set();
 
 main.innerHTML=`<div class="admin-title"><div><span class="eyebrow">نظام التحفيز</span><h1>XP والمهمات والجوائز</h1></div></div><div class="admin-live-note"><b>من هنا تتحكم فعليًا:</b> في الجوائز تقدر تختار الجميع أو أكثر من طالب في نفس المرة. جوائز الجميع والجوائز الفردية تظهر في أقسام منفصلة ويمكن حذف أي واحدة في أي وقت.</div><div class="admin-workspace"><div class="admin-toolbar"><div class="admin-tabs"><button class="active" data-mode="missions">المهمات</button><button data-mode="rewards">الجوائز</button></div><div class="admin-toolbar-actions"><button class="btn primary" id="add-item">إضافة مهمة</button></div></div><section class="admin-form-panel" id="item-editor" hidden><h2 id="editor-title">إضافة مهمة</h2><form id="item-form"><input type="hidden" name="id"><div class="admin-form-grid"><label>العنوان*<input name="title" required minlength="3"></label><label data-mission-only>XP للمهمة<input name="xp" type="number" min="0" max="2000" value="0"></label><label class="wide">الوصف أو تفاصيل المكافأة<textarea name="description" required></textarea></label><label>الجمهور<select name="targetType"><option value="all">جميع الطلاب</option><option value="user">طلاب محددون</option></select></label><label class="wide" id="recipients-field">الطلاب المحددون<input class="admin-recipient-search" id="recipient-search" type="search" placeholder="ابحث بالاسم أو البريد"><span class="admin-recipient-list" id="recipient-list"></span><small class="muted">يمكنك تحديد أكثر من حساب في نفس المرة.</small></label><label data-mission-only>طريقة التحقق<select name="verificationType"><option value="system">يرصدها النظام</option><option value="admin">تعتمدها الإدارة</option></select></label><label data-mission-only>العدد المطلوب<input name="requiredCount" type="number" min="1" value="1"></label><label>تاريخ البداية<input name="startDate" type="date"></label><label>تاريخ النهاية<input name="endDate" type="date"></label><label>حالة النشر<select name="publishStatus"><option value="draft">مسودة</option><option value="published">منشورة</option><option value="disabled">معطلة</option><option value="archived">مؤرشفة</option></select></label><label class="wide">الشروط أو الملاحظات<textarea name="terms"></textarea></label></div><p class="admin-status"></p><div class="admin-form-actions"><button class="btn primary" type="submit">حفظ ونشر حسب الحالة</button><button class="btn outline" type="button" data-close>إلغاء</button></div></form></section><div id="items-view"></div></div>`;
 
@@ -18,13 +18,14 @@ const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'
 const userById=id=>users.find(u=>u.uid===id)||null;
 const userName=id=>{const u=userById(id);return u?.fullName||u?.username||u?.email||'طالب'};
 const formatDate=x=>{const raw=x.startDate||x.createdAt;if(!raw)return'—';const d=raw?.toDate?.()||(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(String(raw))?new Date(`${raw}T12:00:00`):new Date(raw));return Number.isNaN(d.getTime())?'—':new Intl.DateTimeFormat('ar-SA',{dateStyle:'medium'}).format(d)};
-const selectedUserIds=()=>[...recipientList.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.value);
+const selectedUserIds=()=>[...recipientSelection];
 
-function fillUsers(selected=[]){
-  const wanted=new Set(selected.filter(Boolean));
+function fillUsers(){
+  const wanted=recipientSelection;
   const q=(recipientSearch.value||'').trim().toLowerCase();
   const rows=users.filter(u=>!q||`${u.fullName||''} ${u.username||''} ${u.email||''}`.toLowerCase().includes(q));
   recipientList.innerHTML=rows.length?rows.map(u=>`<label class="admin-recipient-option"><input type="checkbox" value="${esc(u.uid)}" ${wanted.has(u.uid)?'checked':''}><span><b>${esc(u.fullName||u.username||'طالب')}</b><small style="display:block">${esc(u.email||u.username||'')}</small></span></label>`).join(''):'<span class="muted">لا توجد نتائج.</span>';
+  recipientList.querySelectorAll('input[type="checkbox"]').forEach(box=>box.addEventListener('change',()=>{box.checked?recipientSelection.add(box.value):recipientSelection.delete(box.value)}));
 }
 
 function renderMissionTable(){
@@ -53,7 +54,7 @@ function updateRecipientVisibility(){const show=form.targetType.value==='user';r
 function open(item={}){
   form.reset();form.xp.value=0;form.requiredCount.value=1;form.id.value=item.id||'';
   for(const [k,v] of Object.entries(item)){if(form.elements[k]&&k!=='targetUserId')form.elements[k].value=v??''}
-  recipientSearch.value='';fillUsers(item.targetUserId?[item.targetUserId]:[]);updateRecipientVisibility();
+  recipientSearch.value='';recipientSelection=new Set(item.targetUserId?[item.targetUserId]:[]);fillUsers();updateRecipientVisibility();
   editor.hidden=false;document.querySelector('#editor-title').textContent=item.id?'تعديل العنصر':`إضافة ${mode==='missions'?'مهمة':'مكافأة'}`;
   document.querySelectorAll('[data-mission-only]').forEach(x=>x.hidden=mode!=='missions');
   editor.scrollIntoView({behavior:'smooth',block:'start'});
@@ -66,7 +67,7 @@ async function clearPersonalNotifications(item){
 async function syncBroadcast(item){
   await clearAnnouncement(item);
   if(item.publishStatus!=='published'||item.targetType!=='all')return;
-  await setDoc(doc(db,'announcements',`${mode}-${item.id}`),{title:mode==='missions'?'مهمة جديدة لجميع الطلاب':'مكافأة جديدة لجميع الطلاب',body:`${item.title}${mode==='missions'&&item.xp?` — ${item.xp} XP`:''}`,publishStatus:'published',source:mode,referenceId:item.id,createdAt:item.createdAt||serverTimestamp(),updatedAt:serverTimestamp()});
+  await setDoc(doc(db,'announcements',`${mode}-${item.id}`),{title:mode==='missions'?'مهمة جديدة لجميع الطلاب':'مكافأة جديدة لجميع الطلاب',body:`${item.title}${mode==='missions'&&item.xp?` — ${item.xp} XP`:''}`,publishStatus:'published',source:mode,referenceId:item.id,createdAt:item.createdAt||serverTimestamp(),updatedAt:serverTimestamp(),sourceTargetType:'all'});
 }
 async function notifyPersonal(item){
   if(item.publishStatus!=='published'||item.targetType!=='user'||!item.targetUserId)return;
@@ -86,7 +87,7 @@ async function load(){
 
 document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',async()=>{document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x===b));mode=b.dataset.mode;add.textContent=mode==='missions'?'إضافة مهمة':'إضافة مكافأة';editor.hidden=true;await load()}));
 add.addEventListener('click',()=>open());form.querySelector('[data-close]').addEventListener('click',()=>editor.hidden=true);form.targetType.addEventListener('change',updateRecipientVisibility);
-recipientSearch.addEventListener('input',()=>{const selected=selectedUserIds();fillUsers(selected)});
+recipientSearch.addEventListener('input',fillUsers);
 
 form.addEventListener('submit',async e=>{
   e.preventDefault();
