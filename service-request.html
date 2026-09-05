@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="nav-universal.css?v=155">
   <link rel="stylesheet" href="section-pages.css?v=1">
   <style>
-    .request-wrap{max-width:900px;margin:auto}.request-card{border:1px solid var(--line);border-radius:28px;background:var(--card);padding:24px;box-shadow:0 16px 42px #17352b0b}.selected-service{display:grid;gap:6px;margin-bottom:18px;padding:16px;border-radius:20px;background:#eef6f1;border:1px solid #c7dacd}.selected-service b{color:#176b4b}.request-form{display:grid;gap:15px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:grid;gap:7px}.field span{font-weight:900;font-size:13px}.field input,.field select,.field textarea{width:100%;border:1px solid #d8cebe;border-radius:15px;background:#fff;padding:13px;font:inherit;color:var(--ink)}.field textarea{min-height:130px;resize:vertical}.full{grid-column:1/-1}.request-note{padding:14px;border-radius:16px;background:#fff8e7;border:1px solid #d9c99d;color:#5f4b24;font-size:13px}.success-box{display:none;margin-top:14px;padding:14px;border-radius:16px;background:#eef6f1;color:#176b4b;font-weight:900;line-height:1.8}.success-box.show{display:block}.success-box.error{background:#fff1ef;color:#9f2f2f}.request-form button[disabled]{opacity:.65;cursor:wait}@media(max-width:700px){.form-grid{grid-template-columns:1fr}.request-card{padding:18px;border-radius:22px}}
+    .request-wrap{max-width:900px;margin:auto}.request-card{border:1px solid var(--line);border-radius:28px;background:var(--card);padding:24px;box-shadow:0 16px 42px #17352b0b}.selected-service{display:grid;gap:6px;margin-bottom:18px;padding:16px;border-radius:20px;background:#eef6f1;border:1px solid #c7dacd}.selected-service b{color:#176b4b}.level-reward-hint{display:none;margin-top:4px;padding:9px 11px;border-radius:12px;background:#eff6ff;color:#1748b5;font-size:12px;font-weight:900}.level-reward-hint.show{display:block}.request-form{display:grid;gap:15px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:grid;gap:7px}.field span{font-weight:900;font-size:13px}.field input,.field select,.field textarea{width:100%;border:1px solid #d8cebe;border-radius:15px;background:#fff;padding:13px;font:inherit;color:var(--ink)}.field textarea{min-height:130px;resize:vertical}.full{grid-column:1/-1}.request-note{padding:14px;border-radius:16px;background:#fff8e7;border:1px solid #d9c99d;color:#5f4b24;font-size:13px}.success-box{display:none;margin-top:14px;padding:14px;border-radius:16px;background:#eef6f1;color:#176b4b;font-weight:900;line-height:1.8}.success-box.show{display:block}.success-box.error{background:#fff1ef;color:#9f2f2f}.request-form button[disabled]{opacity:.65;cursor:wait}@media(max-width:700px){.form-grid{grid-template-columns:1fr}.request-card{padding:18px;border-radius:22px}}
   </style>
 </head>
 <body>
@@ -19,7 +19,7 @@
   <main>
     <section class="page-hero compact-hero"><div class="container request-wrap"><span class="eyebrow">طلب خدمة</span><h1>عبّي بياناتك عشان نتواصل معك</h1><p class="lead">اكتب بياناتك ووسيلة التواصل. عند الإرسال يُسجّل الطلب داخل إدارة شذرات، ثم يفتح بريد جاهز لإرساله للمسؤولين.</p></div></section>
     <section class="section"><div class="container request-wrap"><article class="request-card">
-      <div class="selected-service"><span>الخدمة المختارة</span><b id="service-name">خدمة من شذرات</b><small id="service-price" class="muted"></small></div>
+      <div class="selected-service"><span>الخدمة المختارة</span><b id="service-name">خدمة من شذرات</b><small id="service-price" class="muted"></small><div class="level-reward-hint" id="level-reward-hint"></div></div>
       <form class="request-form" id="request-form">
         <div class="form-grid">
           <label class="field"><span>الاسم الكامل</span><input id="student-name" required maxlength="120" placeholder="اكتب اسمك"></label>
@@ -38,12 +38,13 @@
   </main>
   <footer class="site-footer"><div class="container footer-grid"><div><b>شذرات للمنح</b><p>نموذج طلب خدمة واضح وسهل.</p></div><div><b>المنصة</b><a href="services.html">الخدمات</a><a href="offers.html">العروض</a></div><div><b>المعلومات</b><a href="about.html">من نحن</a><a href="privacy.html">الخصوصية</a></div></div></footer>
   <script src="nav-universal.js?v=153"></script>
-  <script src="account-gate.js?v=1"></script>
+  <script src="account-gate.js?v=2"></script>
   <script type="module">
     import { getApp, getApps, initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
-    import { getAuth } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
-    import { addDoc, collection, getFirestore, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
+    import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, serverTimestamp, where } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
     import { firebaseConfig } from './firebase-config.js';
+    import { levelFromXp } from './level-system.js?v=2';
 
     const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -54,7 +55,9 @@
     const form = document.querySelector('#request-form');
     const submit = document.querySelector('#submit-request');
     const box = document.querySelector('#success-box');
+    const rewardHint = document.querySelector('#level-reward-hint');
     const recipients = '7ruahmed@mail.ru,7ruafarat@mail.ru';
+    const LEVEL15_REWARD = 'level15-discount15';
 
     document.querySelector('#service-name').textContent = service;
     document.querySelector('#service-price').textContent = price ? `السعر / الحالة: ${price}` : '';
@@ -64,6 +67,47 @@
       box.classList.add('show');
       box.classList.toggle('error',error);
     };
+    const parsedAmount = () => {
+      const match = String(price).match(/\d+(?:\.\d+)?/);
+      return match ? Number(match[0]) : 0;
+    };
+    const money = value => Number(value||0).toFixed(Number(value||0)%1 ? 2 : 0);
+
+    async function rewardState(user, amount=parsedAmount()) {
+      if (!user || !(amount > 0)) return { eligible:false, percent:0, level:1, used:false, amount };
+      try {
+        const [userSnap, ordersSnap] = await Promise.all([
+          getDoc(doc(db,'users',user.uid)),
+          getDocs(query(collection(db,'orders'),where('userId','==',user.uid)))
+        ]);
+        const level = levelFromXp(userSnap.data()?.xp || 0);
+        const used = ordersSnap.docs.some(d => {
+          const row = d.data() || {};
+          return row.rewardCode === LEVEL15_REWARD && row.status !== 'canceled';
+        });
+        if (level < 15 || used) return { eligible:false, percent:0, level, used, amount };
+        const discountedAmount = Math.round(amount * .85 * 100) / 100;
+        return { eligible:true, percent:15, level, used:false, amount:discountedAmount, originalAmount:amount, rewardCode:LEVEL15_REWARD };
+      } catch (error) {
+        console.warn('[Shadrat] reward check unavailable', error);
+        return { eligible:false, percent:0, level:1, used:false, amount };
+      }
+    }
+
+    async function refreshRewardHint(user) {
+      if (!rewardHint) return;
+      const amount = parsedAmount();
+      if (!(amount > 0)) { rewardHint.classList.remove('show'); return; }
+      const reward = await rewardState(user,amount);
+      if (reward.eligible) {
+        rewardHint.textContent = `🎟️ مكافأة Level 15 متاحة: سيُطبّق خصم 15% تلقائيًا على هذا الطلب (${money(amount)} ← ${money(reward.amount)}).`;
+        rewardHint.classList.add('show');
+      } else if (reward.level >= 15 && reward.used) {
+        rewardHint.textContent = '✓ مكافأة خصم Level 15 استُخدمت سابقًا.';
+        rewardHint.classList.add('show');
+      } else rewardHint.classList.remove('show');
+    }
+    onAuthStateChanged(auth,user=>{ if(user) refreshRewardHint(user); });
 
     form.addEventListener('submit', async event => {
       event.preventDefault();
@@ -79,10 +123,12 @@
         currentCountry: document.querySelector('#current-country').value.trim(),
         requestDetails: document.querySelector('#request-details').value.trim()
       };
-      const amountMatch = String(price).match(/\d+(?:\.\d+)?/);
-      const amount = amountMatch ? Number(amountMatch[0]) : 0;
+      const originalAmount = parsedAmount();
       const user = auth.currentUser;
+      const reward = await rewardState(user,originalAmount);
+      const amount = reward.eligible ? reward.amount : originalAmount;
       const userEmail = values.contactMethod === 'بريد إلكتروني' ? values.contactValue : (user?.email || '');
+      const rewardText = reward.eligible ? `Level 15 — خصم 15% (${money(originalAmount)} ← ${money(amount)})` : '';
 
       const order = {
         source: 'service_request_email',
@@ -97,7 +143,7 @@
         currentCountry: values.currentCountry,
         requestDetails: values.requestDetails,
         serviceTitle: service,
-        servicePriceText: price,
+        servicePriceText: reward.eligible ? `${price} | بعد مكافأة Level 15: ${money(amount)}` : price,
         amount,
         currency: price.includes('₽') ? 'RUB' : 'USD',
         paymentStatus: 'not_paid',
@@ -106,10 +152,18 @@
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
+      if (reward.eligible) Object.assign(order, {
+        rewardCode: reward.rewardCode,
+        rewardLevel: 15,
+        discountPercent: 15,
+        originalAmount
+      });
 
       const mailData = {
         الخدمة: service,
-        السعر: price,
+        السعر_الأصلي: price,
+        المكافأة: rewardText || 'لا توجد مكافأة مطبقة',
+        السعر_بعد_المكافأة: amount || price,
         الاسم: values.name,
         العمر: values.age,
         الجنسية: values.nationality,
@@ -124,7 +178,7 @@
       try {
         const ref = await addDoc(collection(db,'orders'), order);
         localStorage.setItem('shadrat_last_service_order_id', ref.id);
-        show(`تم تسجيل الطلب في الإدارة برقم ${ref.id.slice(0,8).toUpperCase()}. يتم الآن فتح البريد لإرساله للمسؤولين.`);
+        show(`تم تسجيل الطلب في الإدارة برقم ${ref.id.slice(0,8).toUpperCase()}.${reward.eligible?' تم تطبيق مكافأة Level 15 وخصم 15% على هذا الطلب.':''} يتم الآن فتح البريد لإرساله للمسؤولين.`);
         setTimeout(() => {
           location.href = `mailto:${recipients}?subject=${encodeURIComponent('طلب خدمة من شذرات - ' + service)}&body=${encodeURIComponent(body + `\n\nرقم الطلب الداخلي: ${ref.id}`)}`;
         }, 250);
