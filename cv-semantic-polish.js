@@ -6,7 +6,7 @@ const hasArabic=v=>/[\u0600-\u06ff]/.test(String(v||''));
 const fields=[
   {key:'cyber',ar:'الأمن السيبراني',en:'Cybersecurity',re:/cyber|cybersecurity|information security|امن سيبر|أمن سيبر|الامن السيبر|الأمن السيبر|امن المعلومات|أمن المعلومات/i},
   {key:'cs',ar:'علوم الحاسب',en:'Computer Science',re:/computer science|علوم الحاسب|علوم الكمبيوتر/i},
-  {key:'programming',ar:'البرمجة وتطوير البرمجيات',en:'Software Development',re:/programming|coding|software development|برمج|تطوير برمج/i},
+  {key:'programming',ar:'تطوير البرمجيات',en:'Software Development',re:/programming|coding|software development|برمج|تطوير برمج/i},
   {key:'ai',ar:'الذكاء الاصطناعي',en:'Artificial Intelligence',re:/artificial intelligence|machine learning|\bai\b|ذكاء اصطناعي|تعلم آلي/i},
   {key:'data',ar:'علوم وتحليل البيانات',en:'Data Science and Analytics',re:/data science|data analysis|analytics|علوم البيانات|تحليل البيانات/i},
   {key:'network',ar:'الشبكات',en:'Computer Networking',re:/network|networking|شبكات/i},
@@ -32,187 +32,160 @@ const skillCatalog=[
   {ar:'البحث',en:'Research',re:/research|بحث/i},
   {ar:'اللغة الإنجليزية',en:'English',re:/english|انجليزي|إنجليزي|اللغة الإنجليزية/i}
 ];
-function fieldInfo(role=''){
-  const r=clean(role);return fields.find(x=>x.re.test(r))||{key:'other',ar:hasArabic(r)?r:'المجال المستهدف',en:hasArabic(r)?'the intended field':r||'the intended field'}
-}
-function fieldName(role,lang){const f=fieldInfo(role);return lang==='ar'?f.ar:f.en}
+const focusCatalog={
+  cyber:{ar:['حماية الأنظمة','أمن الشبكات','تحليل المخاطر','الممارسات الأمنية'],en:['Systems Security','Network Security','Risk Analysis','Security Practices']},
+  cs:{ar:['حل المشكلات الحاسوبية','الخوارزميات','الأنظمة البرمجية','التفكير التحليلي'],en:['Computational Problem Solving','Algorithms','Software Systems','Analytical Thinking']},
+  programming:{ar:['تصميم البرمجيات','منطق البرمجة','بناء التطبيقات','اختبار الحلول'],en:['Software Design','Programming Logic','Application Development','Solution Testing']},
+  ai:{ar:['التعلم الآلي','معالجة البيانات','النمذجة','التفكير التحليلي'],en:['Machine Learning','Data Processing','Modeling','Analytical Thinking']},
+  data:{ar:['تحليل البيانات','تنظيم البيانات','الاستنتاج','التصور البياني'],en:['Data Analysis','Data Organization','Inference','Data Visualization']},
+  network:{ar:['بنية الشبكات','الاتصال','التوجيه','أمن الشبكات'],en:['Network Architecture','Connectivity','Routing','Network Security']},
+  it:{ar:['أنظمة المعلومات','الدعم التقني','إدارة الأنظمة','البنية الرقمية'],en:['Information Systems','Technical Support','Systems Administration','Digital Infrastructure']},
+  business:{ar:['التحليل الإداري','التخطيط','العمليات','اتخاذ القرار'],en:['Business Analysis','Planning','Operations','Decision Making']},
+  accounting:{ar:['التقارير المالية','التحليل المالي','الدقة','تنظيم السجلات'],en:['Financial Reporting','Financial Analysis','Accuracy','Record Management']},
+  engineering:{ar:['حل المشكلات','التصميم','التحليل','التطبيق العملي'],en:['Problem Solving','Design','Analysis','Practical Application']},
+  medicine:{ar:['العلوم الصحية','التعلم السريري','الدقة','المسؤولية المهنية'],en:['Health Sciences','Clinical Learning','Accuracy','Professional Responsibility']},
+  marketing:{ar:['سلوك الجمهور','المحتوى','التحليل','التواصل'],en:['Audience Behavior','Content','Analytics','Communication']},
+  other:{ar:['التعلم المنظم','التفكير التحليلي','التطبيق العملي','التطوير المستمر'],en:['Structured Learning','Analytical Thinking','Practical Application','Continuous Development']}
+};
+function fieldInfo(role=''){const r=clean(role);return fields.find(x=>x.re.test(r))||{key:'other',ar:hasArabic(r)?r:'المجال المستهدف',en:hasArabic(r)?'the intended field':r||'the intended field'}}
 function academicState(text=''){
   const t=clean(text);return{
-    highSchoolGraduate:/خريج.{0,35}(ثان|ثانوية)|خلصت.{0,30}(ثان|ثانوية)|انتهيت.{0,30}(ثان|ثانوية)|اكملت.{0,30}(ثان|ثانوية)|أكملت.{0,30}(ثان|ثانوية)|completed.{0,35}high school|high school graduate|secondary school graduate/i.test(t),
-    highSchoolStudent:/طالب.{0,28}(ثان|ثانوية)|high school student|secondary school student/i.test(t),
-    bachelorApplicant:/اقدم.{0,35}بكالوريوس|أقدم.{0,35}بكالوريوس|مقدم.{0,35}بكالوريوس|متقدم.{0,35}بكالوريوس|بقدم.{0,35}بكالوريوس|applying.{0,40}bachelor|bachelor.?s applicant|seeking.{0,32}bachelor/i.test(t),
-    bachelorStudent:/طالب.{0,32}بكالوريوس|ادرس.{0,32}بكالوريوس|أدرس.{0,32}بكالوريوس|bachelor.?s student|undergraduate student/i.test(t),
-    bachelorGraduate:/خريج.{0,32}بكالوريوس|حاصل.{0,32}بكالوريوس|انهيت.{0,32}بكالوريوس|أنهيت.{0,32}بكالوريوس|bachelor.?s graduate|bachelor.?s degree holder|completed.{0,32}bachelor/i.test(t),
-    masterApplicant:/اقدم.{0,32}ماجستير|أقدم.{0,32}ماجستير|متقدم.{0,32}ماجستير|applying.{0,40}master|master.?s applicant/i.test(t),
-    masterStudent:/طالب.{0,32}ماجستير|ادرس.{0,32}ماجستير|أدرس.{0,32}ماجستير|master.?s student/i.test(t),
-    masterGraduate:/خريج.{0,32}ماجستير|حاصل.{0,32}ماجستير|master.?s graduate|master.?s degree holder/i.test(t)
+    hsDone:/خريج.{0,35}(ثان|ثانوية)|خلصت.{0,30}(ثان|ثانوية)|انتهيت.{0,30}(ثان|ثانوية)|اكملت.{0,30}(ثان|ثانوية)|أكملت.{0,30}(ثان|ثانوية)|completed.{0,35}high school|high school graduate|secondary school graduate/i.test(t),
+    hsNow:/طالب.{0,28}(ثان|ثانوية)|high school student|secondary school student/i.test(t),
+    bachelorApply:/اقدم.{0,35}بكالوريوس|أقدم.{0,35}بكالوريوس|مقدم.{0,35}بكالوريوس|متقدم.{0,35}بكالوريوس|بقدم.{0,35}بكالوريوس|applying.{0,40}bachelor|bachelor.?s applicant|seeking.{0,32}bachelor/i.test(t),
+    bachelorNow:/طالب.{0,32}بكالوريوس|ادرس.{0,32}بكالوريوس|أدرس.{0,32}بكالوريوس|bachelor.?s student|undergraduate student/i.test(t),
+    bachelorDone:/خريج.{0,32}بكالوريوس|حاصل.{0,32}بكالوريوس|انهيت.{0,32}بكالوريوس|أنهيت.{0,32}بكالوريوس|bachelor.?s graduate|bachelor.?s degree holder|completed.{0,32}bachelor/i.test(t),
+    masterApply:/اقدم.{0,32}ماجستير|أقدم.{0,32}ماجستير|متقدم.{0,32}ماجستير|applying.{0,40}master|master.?s applicant/i.test(t),
+    masterNow:/طالب.{0,32}ماجستير|ادرس.{0,32}ماجستير|أدرس.{0,32}ماجستير|master.?s student/i.test(t)
   }
 }
-function professionalState(text=''){
-  const t=clean(text),years=(t.match(/(?:خبرة|خبرتي|اشتغلت|عملت|experience|worked)[^\d]{0,35}(\d{1,2})\s*(?:سنوات|سنة|عام|years?|yrs?)/i)||t.match(/(\d{1,2})\s*(?:سنوات|سنة|عام)\s*(?:خبرة|عمل)/i)||[])[1]||'';
-  return{employed:/موظف|اعمل|أعمل|اشتغل|أشتغل|currently work|currently employed|working as|employed as/i.test(t),jobSeeker:/ابحث عن عمل|أبحث عن عمل|ابحث عن وظيفة|أبحث عن وظيفة|باحث عن عمل|looking for (?:a )?job|seeking (?:a )?(?:job|role|position|opportunity)|open to work/i.test(t),experienced:/خبرة|خبرتي|اشتغلت|عملت|worked|experience/i.test(t),internship:/تدريب تعاوني|متدرب|تدريب عملي|internship|intern\b|trainee/i.test(t),years:Number(years||0)}
-}
+function professionalState(text=''){const t=clean(text);return{active:/موظف|اعمل|أعمل|اشتغل|أشتغل|خبرة|عملت|worked|experience|currently employed|working as/i.test(t),jobSeeker:/ابحث عن عمل|أبحث عن عمل|باحث عن عمل|looking for (?:a )?job|seeking (?:a )?(?:job|role|position)/i.test(t)}}
 function extractGpa(text=''){const m=String(text).match(/(?:معدل|gpa|grade|score)\s*[:：-]?\s*(\d{1,3}(?:\.\d+)?\s*%?)/i)||String(text).match(/\b(\d{2,3}(?:\.\d+)\s*%)\b/);return m?.[1]?.replace(/\s/g,'')||''}
 function extractYear(text=''){const years=[...String(text).matchAll(/\b(19\d{2}|20\d{2})\b/g)].map(m=>m[1]);return years.at(-1)||''}
 function extractInstitution(text=''){
-  const t=clean(text),ar=t.match(/((?:ثانوية|مدرسة|جامعة|كلية|معهد)\s+[^،.;]{2,90})/i),en=t.match(/((?:high school|secondary school|university|college|institute)\s+[^,.;]{2,90})/i),m=ar||en;if(!m)return'';
+  const t=clean(text),m=t.match(/((?:ثانوية|مدرسة|جامعة|كلية|معهد|high school|secondary school|university|college|institute)\s+[^،,.;]{2,90})/i);if(!m)return'';
   return clean(m[1].split(/\s+(?:بمعدل|معدل|عام|سنة|في عام|وتقدير|ومقدم|ومتقدم|with|gpa|grade|year|applying)\b/i)[0])
 }
-function normalizeSkills(values,lang){
-  const out=[];for(const raw of values){const x=clean(raw);if(!x)continue;const hit=skillCatalog.find(s=>s.re.test(x));out.push(hit?(lang==='ar'?hit.ar:hit.en):(hasArabic(x)&&lang==='en'?'Related technical knowledge':x))}return uniq(out)
-}
-function formalLanguage(raw,lang){
-  return uniq(String(raw||'').split(/[|،,;\n]+/).map(clean).filter(Boolean).map(x=>{
-    if(lang==='ar'){
-      if(/العربي|arabic/i.test(x))return /أم|native/i.test(x)?'العربية — لغة أم':'العربية';
-      if(/english|انجليزي|إنجليزي/i.test(x))return /b2/i.test(x)?'الإنجليزية — B2':'الإنجليزية';
-      if(/russian|روسي/i.test(x))return /b1/i.test(x)?'الروسية — B1':'الروسية';
-    }else{
-      if(/العربي|arabic/i.test(x))return /أم|native/i.test(x)?'Arabic — Native':'Arabic';
-      if(/english|انجليزي|إنجليزي/i.test(x))return /b2/i.test(x)?'English — B2':'English';
-      if(/russian|روسي/i.test(x))return /b1/i.test(x)?'Russian — B1':'Russian';
-    }return x
-  })).join(' | ')
-}
+function normalizeSkills(values,lang){const out=[];for(const raw of values){const x=clean(raw);if(!x)continue;const hit=skillCatalog.find(s=>s.re.test(x));out.push(hit?(lang==='ar'?hit.ar:hit.en):(hasArabic(x)&&lang==='en'?'Related Knowledge':x))}return uniq(out)}
+function formalLanguage(raw,lang){return uniq(String(raw||'').split(/[|،,;\n]+/).map(clean).filter(Boolean).map(x=>{if(lang==='ar'){if(/العربي|arabic/i.test(x))return /أم|native/i.test(x)?'العربية — لغة أم':'العربية';if(/english|انجليزي|إنجليزي/i.test(x))return /b2/i.test(x)?'الإنجليزية — B2':'الإنجليزية';if(/russian|روسي/i.test(x))return /b1/i.test(x)?'الروسية — B1':'الروسية'}else{if(/العربي|arabic/i.test(x))return /أم|native/i.test(x)?'Arabic — Native':'Arabic';if(/english|انجليزي|إنجليزي/i.test(x))return /b2/i.test(x)?'English — B2':'English';if(/russian|روسي/i.test(x))return /b1/i.test(x)?'Russian — B1':'Russian'}return x})).join(' | ')}
 function headline(lang,state,pState,field){
   if(lang==='ar'){
-    if(state.highSchoolGraduate&&state.bachelorApplicant)return `خريج ثانوية يستعد لبدء دراسة البكالوريوس في ${field}`;
-    if(state.highSchoolGraduate)return `خريج ثانوية يركز على بناء مسار أكاديمي في ${field}`;
-    if(state.highSchoolStudent)return `طالب ثانوي يستعد للدراسة الجامعية في ${field}`;
-    if(state.bachelorStudent)return `طالب بكالوريوس يطوّر مساره في ${field}`;
-    if(state.bachelorGraduate&&state.masterApplicant)return `خريج بكالوريوس يستعد للدراسات العليا في ${field}`;
-    if(state.bachelorGraduate)return `خريج بكالوريوس ذو توجه مهني في ${field}`;
-    if(state.masterStudent)return `طالب ماجستير في ${field}`;
-    if(pState.employed||pState.experienced)return `ملف مهني موجه إلى ${field}`;
-    return `ملف أكاديمي موجه إلى ${field}`
+    if(state.hsDone&&state.bachelorApply)return `مرشح جامعي في مسار ${field}`;
+    if(state.hsDone)return `مسار أكاديمي ناشئ في ${field}`;
+    if(state.hsNow)return `استعداد مبكر للتخصص الجامعي في ${field}`;
+    if(state.bachelorNow)return `مسار جامعي قيد التطوير في ${field}`;
+    if(state.bachelorDone&&state.masterApply)return `انتقال إلى الدراسات العليا في ${field}`;
+    if(state.bachelorDone)return `توجه أكاديمي ومهني في ${field}`;
+    if(state.masterNow)return `مسار دراسات عليا في ${field}`;
+    if(pState.active)return `توجه مهني متخصص في ${field}`;
+    return `توجه أكاديمي نحو ${field}`
   }
-  if(state.highSchoolGraduate&&state.bachelorApplicant)return `High School Graduate Preparing for Bachelor's Study in ${field}`;
-  if(state.highSchoolGraduate)return `High School Graduate Building an Academic Path in ${field}`;
-  if(state.highSchoolStudent)return `High School Student Preparing for University Study in ${field}`;
-  if(state.bachelorStudent)return `Bachelor's Student Developing a Path in ${field}`;
-  if(state.bachelorGraduate&&state.masterApplicant)return `Bachelor's Graduate Preparing for Master's Study in ${field}`;
-  if(state.bachelorGraduate)return `Bachelor's Graduate Focused on ${field}`;
-  if(state.masterStudent)return `Master's Student in ${field}`;
-  if(pState.employed||pState.experienced)return `Professional Profile Focused on ${field}`;
-  return `Academic Profile Focused on ${field}`
+  if(state.hsDone&&state.bachelorApply)return `University Candidate | ${field}`;
+  if(state.hsDone)return `Emerging Academic Path | ${field}`;
+  if(state.hsNow)return `Early University Preparation | ${field}`;
+  if(state.bachelorNow)return `Developing Undergraduate Path | ${field}`;
+  if(state.bachelorDone&&state.masterApply)return `Graduate Study Transition | ${field}`;
+  if(state.bachelorDone)return `Academic & Professional Direction | ${field}`;
+  if(state.masterNow)return `Graduate Academic Path | ${field}`;
+  if(pState.active)return `Professional Direction | ${field}`;
+  return `Academic Direction | ${field}`
 }
 function summaryText(lang,state,pState,field,{certificateCount,skills,educationKnown,experienceKnown}){
   const focus=skills.slice(0,5).join(lang==='ar'?'، ':', '),parts=[];
   if(lang==='ar'){
-    if(state.highSchoolGraduate&&state.bachelorApplicant)parts.push(`يمثل هذا الملف طالبًا أنهى المرحلة الثانوية ويستعد للانتقال إلى التعليم الجامعي عبر مسار بكالوريوس مرتبط بـ ${field}.`);
-    else if(state.highSchoolGraduate)parts.push(`يعكس هذا الملف خلفية تعليمية مكتملة في المرحلة الثانوية مع توجه واضح نحو مواصلة الدراسة في ${field}.`);
-    else if(state.bachelorStudent)parts.push(`يعرض هذا الملف مسار طالب بكالوريوس يعمل على توسيع معارفه الأكاديمية والتطبيقية في ${field}.`);
-    else if(state.bachelorGraduate&&state.masterApplicant)parts.push(`يعرض هذا الملف خلفية بكالوريوس مكتملة مع استعداد للانتقال إلى الدراسات العليا في ${field}.`);
-    else if(pState.employed||pState.experienced)parts.push(`يعرض هذا الملف خلفية مهنية تتجه إلى تطوير الخبرة والقدرات ذات الصلة بـ ${field}.`);
-    else parts.push(`يعرض هذا الملف توجهًا أكاديميًا منظمًا نحو ${field} بالاعتماد على المعلومات الموثقة التي أُدخلت في السيرة.`);
-    if(educationKnown)parts.push('تمت صياغة الخلفية التعليمية بصورة تبرز المرحلة الحالية والانتقال المنطقي إلى الخطوة الأكاديمية التالية بدل تكرار وصف المستخدم بصيغته الأصلية.');
-    if(certificateCount)parts.push(`يدعم هذا المسار سجل من ${certificateCount===1?'شهادة أو إنجاز موثق':'الشهادات والإنجازات الموثقة'} يعكس الاستمرار في التعلم خارج المتطلبات الأساسية.`);
-    if(focus)parts.push(`وتتركز مجالات المعرفة المذكورة أو المستخرجة من الشهادات حول ${focus}، بما يمنح الملف اتجاهًا أكثر اتساقًا مع الهدف المستقبلي.`);
-    if(experienceKnown)parts.push('كما يضم الملف أنشطة أو خبرات عملية أعيدت صياغتها لتوضيح القيمة التي أضافتها إلى الاستعداد الأكاديمي أو المهني.');
-    parts.push('يهدف هذا العرض إلى تقديم صورة مهنية متماسكة وقابلة للمراجعة السريعة، مع الاعتماد على الحقائق المتوفرة فقط دون إضافة خبرة أو إنجاز غير مذكور.');
+    if(state.hsDone&&state.bachelorApply)parts.push(`ينطلق هذا الملف من مرحلة تعليم ما قبل الجامعة مكتملة، مع استعداد واضح لبدء تعليم جامعي متخصص يرتبط بـ ${field}.`);
+    else if(state.hsDone)parts.push(`يبني صاحب الملف خطوته الأكاديمية التالية على تعليم ما قبل الجامعة مكتمل وتوجه محدد نحو ${field}.`);
+    else if(state.bachelorNow)parts.push(`يركز المسار الحالي على توسيع الأساس الجامعي وتطوير الاستعداد النظري والتطبيقي المرتبط بـ ${field}.`);
+    else if(state.bachelorDone&&state.masterApply)parts.push(`تستند المرحلة المقبلة إلى مؤهل جامعي مكتمل مع توجه نحو تعميق التخصص من خلال الدراسات العليا في ${field}.`);
+    else if(pState.active)parts.push(`يعرض الملف خبرة أو نشاطًا مهنيًا ضمن مسار يسعى إلى زيادة التخصص والفاعلية في ${field}.`);
+    else parts.push(`يعرض الملف اتجاهًا دراسيًا منظمًا نحو ${field} بالاعتماد على الوقائع المتاحة في البيانات المدخلة.`);
+    if(educationKnown)parts.push('تم تحويل المعلومات التعليمية إلى صورة توضح التسلسل الأكاديمي والاستعداد للمرحلة التالية من دون إعادة استخدام التعبير الأصلي للطالب.');
+    if(certificateCount)parts.push(`يوجد كذلك رصيد موثق من ${certificateCount===1?'إنجاز تدريبي أو شهادة':'الإنجازات التدريبية والشهادات'} يدعم صورة التعلم المستمر خارج المتطلبات الدراسية الأساسية.`);
+    if(focus)parts.push(`وتظهر في الملف مجالات معرفة مرتبطة بـ ${focus}، وهو ما يساعد على ربط عناصر السيرة بهدف واحد واضح بدل توزيعها كمعلومات منفصلة.`);
+    if(experienceKnown)parts.push('أعيدت قراءة الأنشطة والخبرات من زاوية القيمة التي أضافتها إلى الاستعداد الأكاديمي أو العملي، وليس من زاوية وصف الحدث حرفيًا.');
+    parts.push('النتيجة النهائية مصممة لتكون مهنية، مترابطة، وسريعة القراءة، مع الالتزام بالحقائق التي قدمها صاحب الملف فقط.');
   }else{
-    if(state.highSchoolGraduate&&state.bachelorApplicant)parts.push(`This profile represents a high school graduate preparing to transition into university through a Bachelor's pathway related to ${field}.`);
-    else if(state.highSchoolGraduate)parts.push(`This profile reflects completed secondary education and a clear intention to continue academic development in ${field}.`);
-    else if(state.bachelorStudent)parts.push(`This profile presents a Bachelor's student building stronger academic and practical foundations in ${field}.`);
-    else if(state.bachelorGraduate&&state.masterApplicant)parts.push(`This profile presents a completed Bachelor's background and preparation for graduate study in ${field}.`);
-    else if(pState.employed||pState.experienced)parts.push(`This profile presents professional experience directed toward further development in ${field}.`);
-    else parts.push(`This profile presents a structured academic direction toward ${field}, based only on the information documented in the CV.`);
-    if(educationKnown)parts.push('The educational background has been rewritten to emphasize academic stage, progression, and readiness for the next step rather than repeating the applicant’s original wording.');
-    if(certificateCount)parts.push(`The profile is supported by ${certificateCount===1?'a documented certificate or achievement':'documented certificates and achievements'} that demonstrate continued learning beyond core requirements.`);
-    if(focus)parts.push(`The documented areas of focus include ${focus}, giving the profile a clearer connection to the intended direction.`);
-    if(experienceKnown)parts.push('Projects and activities are presented in professional language that emphasizes their contribution to academic or career readiness.');
-    parts.push('The result is designed to be concise, professional, and evidence-based, without introducing experience or achievements that were not provided.');
+    if(state.hsDone&&state.bachelorApply)parts.push(`This profile begins from completed pre-university education and a clear transition toward specialized university study connected to ${field}.`);
+    else if(state.hsDone)parts.push(`The next academic step is built on completed pre-university education and a defined direction toward ${field}.`);
+    else if(state.bachelorNow)parts.push(`The current pathway is focused on strengthening undergraduate foundations and building applied readiness in ${field}.`);
+    else if(state.bachelorDone&&state.masterApply)parts.push(`The next stage builds on a completed university qualification and a plan to deepen specialization through graduate study in ${field}.`);
+    else if(pState.active)parts.push(`The profile reflects professional activity within a path aimed at greater specialization and effectiveness in ${field}.`);
+    else parts.push(`The profile presents a structured academic direction toward ${field}, based on the factual information available in the form.`);
+    if(educationKnown)parts.push('Educational details are converted into a clear academic progression and next-stage objective rather than repeating the applicant’s original wording.');
+    if(certificateCount)parts.push(`The record also includes ${certificateCount===1?'a documented certificate or training achievement':'documented certificates and training achievements'} that support continued learning beyond core requirements.`);
+    if(focus)parts.push(`Documented areas of knowledge include ${focus}, helping connect the different elements of the CV to one coherent objective.`);
+    if(experienceKnown)parts.push('Activities and experience are interpreted by the value they add to academic or professional readiness rather than described word-for-word.');
+    parts.push('The final presentation is designed to be professional, coherent, and easy to review while remaining limited to facts supplied by the applicant.');
   }
   return parts.join(' ')
 }
 function educationItems(data,lang,state,field){
   const text=clean(`${data.education||''} ${data.summary||''}`),gpa=extractGpa(text),year=extractYear(text),institution=extractInstitution(text),out=[];
   if(lang==='ar'){
-    if(state.highSchoolGraduate)out.push(`${institution||'المرحلة الثانوية'} — أتم الدراسة بنجاح${gpa?` بمعدل ${gpa}`:''}${year?`، عام ${year}`:''}.`);
-    else if(state.highSchoolStudent)out.push(`${institution||'المرحلة الثانوية'} — دراسة ثانوية قيد الإكمال${gpa?` بمعدل حالي ${gpa}`:''}.`);
-    if(state.bachelorApplicant)out.push(`الهدف الأكاديمي الحالي: الالتحاق ببرنامج بكالوريوس في ${field} والانتقال إلى دراسة جامعية متخصصة.`);
-    else if(state.bachelorStudent)out.push(`الدراسة الجامعية الحالية: مسار بكالوريوس مرتبط بـ ${field} مع التركيز على بناء أساس أكاديمي وتطبيقي متين.`);
-    else if(state.bachelorGraduate)out.push(`المؤهل الجامعي: درجة بكالوريوس مكتملة، مع توجيه المرحلة التالية نحو ${field}.`);
-    if(state.masterApplicant)out.push(`الهدف الأكاديمي التالي: الالتحاق ببرنامج ماجستير يوسّع التخصص والخبرة في ${field}.`);
-    else if(state.masterStudent)out.push(`الدراسات العليا: برنامج ماجستير قيد الدراسة في ${field}.`);
-    if(out.length)out.push(`اتجاه التطوير الأكاديمي: تعزيز المعرفة النظرية وربطها بالتطبيق العملي بما يخدم التخصص المستهدف.`);
-    if(!out.length&&clean(data.education))out.push(`خلفية تعليمية تمهّد للمرحلة الأكاديمية التالية في ${field}.`);
+    if(state.hsDone)out.push(`${institution||'التعليم ما قبل الجامعي'} — مرحلة مكتملة${gpa?` بنتيجة نهائية ${gpa}`:''}${year?`، ${year}`:''}.`);
+    else if(state.hsNow)out.push(`${institution||'التعليم ما قبل الجامعي'} — مرحلة تعليمية مستمرة${gpa?` بنتيجة حالية ${gpa}`:''}.`);
+    if(state.bachelorApply)out.push(`المرحلة التالية المخطط لها: بدء برنامج جامعي من مستوى البكالوريوس في ${field}.`);
+    else if(state.bachelorNow)out.push(`المرحلة الحالية: دراسة جامعية من مستوى البكالوريوس ضمن مسار متصل بـ ${field}.`);
+    else if(state.bachelorDone)out.push(`المؤهل الجامعي السابق: درجة بكالوريوس مكتملة، مع توجيه الخطوة التالية نحو ${field}.`);
+    if(state.masterApply)out.push(`التطور الأكاديمي المستهدف: الانتقال إلى دراسة ماجستير تعمق المعرفة في ${field}.`);
+    else if(state.masterNow)out.push(`الدراسات العليا: مسار ماجستير قيد الدراسة في ${field}.`);
+    if(out.length)out.push('منهج التطوير: بناء قاعدة نظرية قوية ثم تحويلها تدريجيًا إلى تعلم تطبيقي ومخرجات قابلة للتقييم.');
+    if(!out.length&&clean(data.education))out.push(`خلفية تعليمية تمثل قاعدة للانتقال إلى مرحلة أكثر تخصصًا في ${field}.`);
   }else{
-    if(state.highSchoolGraduate)out.push(`${institution||'Secondary Education'} — successfully completed${gpa?` with a final grade of ${gpa}`:''}${year?` in ${year}`:''}.`);
-    else if(state.highSchoolStudent)out.push(`${institution||'Secondary Education'} — currently in progress${gpa?` with a current grade of ${gpa}`:''}.`);
-    if(state.bachelorApplicant)out.push(`Current academic objective: admission to a Bachelor's program in ${field} and transition into specialized university study.`);
-    else if(state.bachelorStudent)out.push(`Current university stage: Bachelor's-level study related to ${field}, with emphasis on strong academic and practical foundations.`);
-    else if(state.bachelorGraduate)out.push(`University qualification: completed Bachelor's degree with the next stage directed toward ${field}.`);
-    if(state.masterApplicant)out.push(`Next academic objective: admission to a Master's program that deepens specialization in ${field}.`);
-    else if(state.masterStudent)out.push(`Graduate study: Master's program currently in progress in ${field}.`);
-    if(out.length)out.push(`Academic development focus: strengthening theoretical knowledge and connecting it with practical application in the intended field.`);
-    if(!out.length&&clean(data.education))out.push(`Educational background supporting the next academic stage in ${field}.`);
+    if(state.hsDone)out.push(`${institution||'Pre-University Education'} — completed${gpa?` with a final result of ${gpa}`:''}${year?` in ${year}`:''}.`);
+    else if(state.hsNow)out.push(`${institution||'Pre-University Education'} — currently in progress${gpa?` with a current result of ${gpa}`:''}.`);
+    if(state.bachelorApply)out.push(`Planned next stage: entry into a Bachelor's-level university program in ${field}.`);
+    else if(state.bachelorNow)out.push(`Current stage: Bachelor's-level university study within a pathway connected to ${field}.`);
+    else if(state.bachelorDone)out.push(`Previous university qualification: completed Bachelor's degree, with the next step directed toward ${field}.`);
+    if(state.masterApply)out.push(`Targeted academic development: transition into Master's-level study to deepen knowledge in ${field}.`);
+    else if(state.masterNow)out.push(`Graduate education: Master's-level study currently in progress in ${field}.`);
+    if(out.length)out.push('Development approach: establish strong theoretical foundations and progressively convert them into applied learning and measurable outputs.');
+    if(!out.length&&clean(data.education))out.push(`Educational background providing a foundation for a more specialized stage in ${field}.`);
   }
   return uniq(out)
 }
 function experienceCategory(line=''){
-  const t=clean(line);
-  if(/موقع|منصة|web|website|frontend|backend|html|css/i.test(t))return'web';
-  if(/python|بايثون|program|coding|برمج|software/i.test(t))return'code';
-  if(/تطوع|volunteer|community service/i.test(t))return'volunteer';
-  if(/مسابقة|أولمبياد|competition|olympiad|hackathon/i.test(t))return'competition';
-  if(/بحث|research|report|تقرير/i.test(t))return'research';
-  if(/تدريب|intern|training|course project/i.test(t))return'training';
-  if(/عمل|وظيفة|موظف|worked|job|employment/i.test(t))return'work';
-  return'activity'
+  const t=clean(line);if(/موقع|منصة|web|website|frontend|backend|html|css/i.test(t))return'web';if(/python|بايثون|program|coding|برمج|software/i.test(t))return'code';if(/تطوع|volunteer|community service/i.test(t))return'volunteer';if(/مسابقة|أولمبياد|competition|olympiad|hackathon/i.test(t))return'competition';if(/بحث|research|report|تقرير/i.test(t))return'research';if(/تدريب|intern|training/i.test(t))return'training';if(/عمل|وظيفة|موظف|worked|job|employment/i.test(t))return'work';return'activity'
 }
 function experienceItems(data,lang,field){
   const rows=rawLines(data.experience),cats=uniq(rows.map(experienceCategory)),out=[];
   for(const c of cats){
     if(lang==='ar'){
-      if(c==='web')out.push('طوّر مشروعًا أو منصة رقمية، ما أتاح تطبيق مهارات تنظيم المحتوى وبناء تجربة استخدام عملية ضمن بيئة ويب.');
-      else if(c==='code')out.push('طبّق مفاهيم برمجية في أنشطة عملية أو مشروعات شخصية، مع التركيز على تحويل المعرفة النظرية إلى مخرجات قابلة للاستخدام.');
-      else if(c==='volunteer')out.push('شارك في نشاط تطوعي عزز الانضباط والعمل مع الآخرين وتحمل المسؤولية خارج الإطار الدراسي المباشر.');
-      else if(c==='competition')out.push('شارك في نشاط تنافسي أو أكاديمي ساعد على تطوير الاستعداد لحل المشكلات والعمل تحت متطلبات محددة.');
-      else if(c==='research')out.push('مارس جمع المعلومات وتحليلها وتنظيمها ضمن نشاط بحثي أو تقريري، بما يدعم القدرة على التعامل المنهجي مع المصادر.');
-      else if(c==='training')out.push('استفاد من تجربة تدريبية عملية لتوسيع المعرفة وربط التعلم بالمهارات المطلوبة في بيئة تطبيقية.');
-      else if(c==='work')out.push('اكتسب خبرة عملية دعمت الالتزام بالمسؤوليات والتعامل مع متطلبات العمل بصورة منظمة.');
-      else out.push('شارك في نشاط عملي أو خارج المنهج أسهم في تطوير الجدية والتنظيم والاستعداد للمرحلة الأكاديمية أو المهنية التالية.');
+      if(c==='web')out.push('نفّذ تجربة رقمية عملية عززت فهمه لتنظيم المحتوى وبناء واجهات قابلة للاستخدام ضمن بيئة الويب.');
+      else if(c==='code')out.push('حوّل مفاهيم برمجية إلى تطبيقات عملية، بما يدعم التفكير المنطقي والقدرة على بناء حلول تقنية قابلة للتطوير.');
+      else if(c==='volunteer')out.push('أسهم في نشاط تطوعي أضاف خبرة في الالتزام والعمل مع الآخرين وتحمل المسؤولية خارج السياق الدراسي المباشر.');
+      else if(c==='competition')out.push('خاض تجربة تنافسية أو أكاديمية دعمت سرعة التحليل وحل المشكلات ضمن متطلبات ووقت محددين.');
+      else if(c==='research')out.push('مارس جمع المعلومات وتقييمها وتنظيم النتائج في سياق بحثي أو تقريري يدعم العمل المنهجي مع المصادر.');
+      else if(c==='training')out.push('استخدم تجربة تدريبية لتقريب المعرفة النظرية من بيئة تطبيقية وتحديد الجوانب التي تحتاج إلى تطوير إضافي.');
+      else if(c==='work')out.push('كوّن خبرة عملية ساعدت على رفع مستوى الانضباط وتنظيم المسؤوليات والتعامل مع متطلبات العمل.');
+      else out.push('شارك في نشاط خارج المتطلبات الأساسية أضاف عنصرًا من المبادرة والتنظيم والاستعداد للمرحلة التالية.');
     }else{
-      if(c==='web')out.push('Developed a digital or web-based project, applying content organization and practical user-experience considerations in a real implementation context.');
-      else if(c==='code')out.push('Applied programming concepts through hands-on or personal projects, translating theoretical learning into usable outputs.');
-      else if(c==='volunteer')out.push('Participated in volunteer activity that strengthened responsibility, teamwork, and engagement beyond formal academic requirements.');
-      else if(c==='competition')out.push('Took part in an academic or competitive activity that supported problem-solving and performance under defined requirements.');
-      else if(c==='research')out.push('Practiced information gathering, analysis, and structured reporting through research-oriented activity.');
-      else if(c==='training')out.push('Used practical training to expand knowledge and connect academic learning with applied skills.');
-      else if(c==='work')out.push('Gained practical experience that strengthened reliability, organization, and responsibility in a work setting.');
-      else out.push('Participated in a practical or extracurricular activity that contributed to organization, initiative, and readiness for the next academic or professional stage.');
+      if(c==='web')out.push('Completed a practical digital experience that strengthened understanding of content organization and usable web interfaces.');
+      else if(c==='code')out.push('Converted programming concepts into practical outputs, supporting logical thinking and the development of adaptable technical solutions.');
+      else if(c==='volunteer')out.push('Contributed to volunteer activity that strengthened responsibility, collaboration, and engagement beyond formal academic requirements.');
+      else if(c==='competition')out.push('Participated in a competitive or academic setting that supported analysis and problem-solving under defined requirements and time constraints.');
+      else if(c==='research')out.push('Practiced gathering, evaluating, and organizing information in a research-oriented or reporting context.');
+      else if(c==='training')out.push('Used a training experience to connect theoretical learning with practical context and identify areas for further development.');
+      else if(c==='work')out.push('Built practical experience that strengthened reliability, organization, and the management of work responsibilities.');
+      else out.push('Participated in an extracurricular or practical activity that added initiative, organization, and readiness for the next stage.');
     }
   }
   if(!out.length){
     if(lang==='ar'){
-      out.push(`يركز التطوير الحالي على بناء أساس متدرج في ${field} قبل الانتقال إلى متطلبات أكثر تخصصًا.`);
-      out.push('يتم دعم هذا المسار بالتعلم الذاتي والشهادات أو المهارات الموثقة الموجودة في الملف، مع تجنب إدراج خبرة عملية غير مثبتة.');
-      out.push('الأولوية في المرحلة الحالية هي تحويل المعرفة المكتسبة إلى تطبيقات ومشروعات عملية قابلة للعرض والتقييم مستقبلاً.');
+      out.push(`يركز التطوير الحالي على تأسيس معرفة متدرجة في ${field} قبل الانتقال إلى موضوعات أكثر تخصصًا.`);
+      out.push('يعتمد المسار في مرحلته الحالية على التعلم المنظم والشهادات أو المعرفة الموثقة في الملف بدل تقديم خبرة عملية غير موجودة.');
+      out.push('الخطوة التطويرية التالية هي تحويل المعرفة إلى مشروعات وتمارين تطبيقية يمكن عرضها وقياس تقدمها بوضوح.');
     }else{
-      out.push(`Current development is focused on building a progressive foundation in ${field} before moving into more specialized requirements.`);
-      out.push('This direction is supported by documented learning, certificates, and skills in the profile without presenting unverified work experience.');
-      out.push('The present priority is to convert acquired knowledge into practical projects and evidence that can be evaluated in future academic or professional applications.');
+      out.push(`Current development is focused on establishing progressive knowledge in ${field} before moving into more specialized topics.`);
+      out.push('At this stage, the pathway relies on structured learning and documented certificates or knowledge rather than presenting work experience that has not been provided.');
+      out.push('The next development step is to convert knowledge into practical projects and exercises with visible, measurable outcomes.');
     }
   }
   return uniq(out).slice(0,5)
 }
-function developmentAdditions(lang,field,skills,certificateCount){
-  const focus=skills.slice(0,5).join(lang==='ar'?'، ':', '),out=[];
-  if(lang==='ar'){
-    out.push(`اتجاه الملف: بناء مسار متماسك في ${field} يجمع بين الاستعداد الأكاديمي والتعلم التطبيقي.`);
-    if(focus)out.push(`مجالات التركيز الحالية: ${focus}، مع ترتيبها بما يخدم التخصص المستهدف بدل عرضها كعناصر منفصلة.`);
-    if(certificateCount)out.push('تعكس الشهادات المرفقة اهتمامًا بالتعلم المنظم والاستمرار في تطوير المعرفة خارج الدراسة الأساسية.');
-  }else{
-    out.push(`Profile direction: building a coherent path in ${field} that combines academic preparation with applied learning.`);
-    if(focus)out.push(`Current focus areas include ${focus}, organized around the intended field rather than presented as disconnected keywords.`);
-    if(certificateCount)out.push('The documented certificates reflect structured learning and continued development beyond core academic requirements.');
-  }
-  return out
-}
+function targetFocus(field,lang,skills){const base=focusCatalog[field.key]||focusCatalog.other,fromField=lang==='ar'?base.ar:base.en;return uniq([...skills,...fromField]).slice(0,8)}
+function developmentAdditions(lang,fieldName,skills,certificateCount){const focus=skills.slice(0,5).join(lang==='ar'?'، ':', '),out=[];if(lang==='ar'){out.push(`اتجاه الملف: بناء مسار متماسك في ${fieldName} يجمع بين الاستعداد الأكاديمي والتعلم التطبيقي.`);if(focus)out.push(`مجالات التركيز الحالية: ${focus}، مرتبة بما يخدم الاتجاه المستهدف بدل ظهورها كعناصر منفصلة.`);if(certificateCount)out.push('يوضح سجل الشهادات استمرارًا في التعلم المنظم وتوسيع المعرفة خارج الدراسة الأساسية.')}else{out.push(`Profile direction: building a coherent pathway in ${fieldName} that combines academic preparation with applied learning.`);if(focus)out.push(`Current focus areas include ${focus}, organized around the intended direction rather than shown as disconnected items.`);if(certificateCount)out.push('The certificate record demonstrates structured learning and continued development beyond core academic requirements.')}return out}
 export function buildSemanticCv(data,{certificateCount=0,skills=[]}={}){
-  const lang=data.lang==='ar'?'ar':'en',allText=[data.summary,data.education,data.experience,data.role].map(clean).join(' '),state=academicState(allText),pState=professionalState(allText),field=fieldName(data.role,lang),normalizedSkills=normalizeSkills(skills,lang),education=educationItems(data,lang,state,field),experience=experienceItems(data,lang,field),supplement=developmentAdditions(lang,field,normalizedSkills,certificateCount);
-  const summary=summaryText(lang,state,pState,field,{certificateCount,skills:normalizedSkills,educationKnown:!!clean(data.education),experienceKnown:rawLines(data.experience).length>0});
-  const experienceTitle=rawLines(data.experience).length?(lang==='ar'?'الخبرات والمشاريع والأنشطة':'EXPERIENCE, PROJECTS & ACTIVITIES'):(lang==='ar'?'التطوير الأكاديمي والاستعداد':'ACADEMIC DEVELOPMENT & READINESS');
-  return{headline:headline(lang,state,pState,field),summary,education:uniq([...education,...supplement.slice(0,2)]),experience:uniq([...experience,...supplement.slice(2)]),experienceTitle,skills:normalizedSkills,languages:formalLanguage(data.languages,lang),mode:(pState.employed||pState.experienced)&&!(state.highSchoolStudent||state.bachelorStudent||state.bachelorApplicant||state.masterApplicant)?'professional':'academic'}
+  const lang=data.lang==='ar'?'ar':'en',allText=[data.summary,data.education,data.experience,data.role].map(clean).join(' '),state=academicState(allText),pState=professionalState(allText),field=fieldInfo(data.role),fieldLabel=lang==='ar'?field.ar:field.en,normalizedSkills=normalizeSkills(skills,lang),focus=targetFocus(field,lang,normalizedSkills),education=educationItems(data,lang,state,fieldLabel),experience=experienceItems(data,lang,fieldLabel),supplement=developmentAdditions(lang,fieldLabel,focus,certificateCount),summary=summaryText(lang,state,pState,fieldLabel,{certificateCount,skills:focus,educationKnown:!!clean(data.education),experienceKnown:rawLines(data.experience).length>0}),experienceTitle=rawLines(data.experience).length?(lang==='ar'?'الخبرات والمشاريع والأنشطة':'EXPERIENCE, PROJECTS & ACTIVITIES'):(lang==='ar'?'التطوير الأكاديمي والاستعداد':'ACADEMIC DEVELOPMENT & READINESS');
+  return{headline:headline(lang,state,pState,fieldLabel),summary,education:uniq([...education,...supplement.slice(0,2)]),experience:uniq([...experience,...supplement.slice(2)]),experienceTitle,skills:normalizedSkills,focus,languages:formalLanguage(data.languages,lang),mode:pState.active&&!state.hsNow&&!state.bachelorNow&&!state.bachelorApply&&!state.masterApply?'professional':'academic'}
 }
