@@ -72,16 +72,15 @@
   const report=(label,error)=>console.warn(`[Shadrat] ${label}`,error),load=(path,label=path)=>import(path).catch(error=>report(label,error)),onIdle=callback=>('requestIdleCallback'in window?requestIdleCallback(callback,{timeout:1800}):setTimeout(callback,900));
   const publicModules=async()=>{
     const routes={
-      'index.html':async()=>{await load('./homepage-fixes.js?v=11','homepage setup');await load('./homepage-live.js?v=12','homepage data');await load('./homepage-student-tools.js?v=1','student builders')},
-      'scholarships.html':()=>Promise.all([load('./scholarships-live.js?v=20260902full','scholarships'),load('./scholarship-favorites.js?v=11','favorites')]),
-      'documents.html':()=>Promise.all([load('./documents.js?v=81','documents tools'),load('./student-activity.js?v=1','document activity')]),
-      'services.html':async()=>{await load('./public-commerce-live.js?v=21','services');await load('./services-tools.js?v=1','free student tools')},
-      'offers.html':()=>load('./public-commerce-live.js?v=21','offers'),
-      'contact.html':()=>load('./contact-live.js?v=11','contact'),
+      'index.html':async()=>{await load('./homepage-fixes.js?v=21','homepage fixes');load('./homepage-live.js?v=21','homepage live')},
+      'scholarships.html':()=>Promise.all([load('./scholarships-live.js?v=15','scholarships'),load('./scholarship-favorites.js?v=11','favorites')]),
+      'scholarship.html':()=>Promise.all([load('./scholarship-detail.js?v=16','scholarship detail'),load('./scholarship-detail-live.js?v=10','live scholarship')]),
+      'services.html':()=>load('./public-commerce-live.js?v=12','services'),
+      'offers.html':()=>load('./public-commerce-live.js?v=12','offers'),
       'profile.html':()=>Promise.all([load('./scholarship-favorites.js?v=11','favorites'),load('./profile-artifacts.js?v=1','saved files')])
     };
     await routes[page]?.();
-    onIdle(()=>{if(!['login.html','register.html'].includes(page))load('./nav-auth.js?v=103','navigation account state');load('./analytics.js?v=10','analytics');if(!['login.html','register.html','terms.html','privacy.html'].includes(page))load('./notifications-live.js?v=12','notifications');load('./ads.js?v=1','ads')});
+    onIdle(()=>{if(!['login.html','register.html'].includes(page))load('./nav-auth.js?v=103','navigation account state');load('./analytics.js?v=10','analytics');if(!['login.html','register.html','terms.html','privacy.html'].includes(page))load('./notifications-live.js?v=12','notifications');load('./ads.js?v=2','ads')});
   };
   const adminModules=async()=>{try{const{requireAdmin}=await import('./admin-access.js?v=12');const session=await requireAdmin();if(page==='admin-community.html'){location.replace('admin-analytics.html');return}document.body.dataset.role=session.role;root.classList.remove('admin-pending');await load('./admin-navigation.js?v=19','admin navigation');load('./admin-mobile.js?v=11','admin mobile navigation');load('./admin-alert-badges.js?v=10','admin alerts');const routes={'admin-analytics.html':'./admin-analytics.js?v=10','admin-homepage.html':'./admin-live-data.js?v=10','admin-scholarships.html':'./scholarships-admin.js?v=10','admin-users.html':'./admin-users.js?v=10','admin-student.html':'./admin-student.js?v=11','admin-staff.html':'./admin-staff.js?v=10','admin-gamification.html':'./admin-gamification.js?v=10','admin-services.html':'./admin-commerce.js?v=21','admin-offers.html':'./admin-commerce.js?v=21','admin-orders.html':'./admin-orders.js?v=11','admin-messages.html':'./admin-messages.js?v=11','admin-announcements.html':'./admin-announcements.js?v=22'};if(routes[page])await load(routes[page],page)}catch(error){report('admin access denied',error);location.replace(`login.html?next=${encodeURIComponent(page)}`)}};
   if(isAdmin)adminModules();else publicModules();
