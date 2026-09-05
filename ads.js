@@ -33,8 +33,11 @@
 
   const style = document.createElement('style');
   style.textContent = `
-    .shadrat-auto-ad{display:flex;justify-content:center;align-items:center;overflow:hidden;margin-inline:auto;box-sizing:border-box;max-width:100%}
+    .shadrat-auto-ad{position:relative;display:flex;justify-content:center;align-items:center;overflow:hidden;margin-inline:auto;box-sizing:border-box;max-width:100%}
     .shadrat-auto-ad iframe{border:0;display:block;max-width:none;background:transparent}
+    .shadrat-ad-close{position:absolute;top:5px;right:5px;z-index:20;width:28px;height:28px;display:grid;place-items:center;padding:0;border:1px solid rgba(15,23,42,.18);border-radius:999px;background:rgba(255,255,255,.94);color:#0f172a;font:700 20px/1 Arial,sans-serif;cursor:pointer;box-shadow:0 2px 8px rgba(15,23,42,.18)}
+    .shadrat-ad-close:hover{background:#fff}
+    .shadrat-ad-close:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
     .shadrat-ad-bar{width:100%;min-height:54px;margin:8px auto 12px;padding:3px 0;background:rgba(248,251,255,.72);border-block:1px solid rgba(29,78,216,.08)}
     .shadrat-ad-bar iframe{transform-origin:center top}
     .shadrat-ad-mid{margin:14px auto;opacity:.92;background:rgba(248,251,255,.5);border-block-color:rgba(29,78,216,.06)}
@@ -55,6 +58,17 @@
     const wrap = document.createElement('div');
     wrap.className = `shadrat-auto-ad ${extraClass}`;
     wrap.setAttribute('aria-label','إعلان');
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'shadrat-ad-close';
+    close.setAttribute('aria-label','إغلاق الإعلان');
+    close.title = 'إغلاق الإعلان';
+    close.textContent = '×';
+    close.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      wrap.remove();
+    });
     const frame = document.createElement('iframe');
     frame.width = String(width);
     frame.height = String(height);
@@ -62,7 +76,7 @@
     frame.loading = extraClass.includes('shadrat-ad-top') ? 'eager' : 'lazy';
     frame.title = 'إعلان';
     frame.srcdoc = `<!doctype html><html><body style="margin:0;overflow:hidden;display:flex;justify-content:center;align-items:flex-start"><script>atOptions={'key':'${key}','format':'iframe','height':${height},'width':${width},'params':{}};<\/script><script src="https://www.highrevenueformat.com/${key}/invoke.js"><\/script></body></html>`;
-    wrap.appendChild(frame);
+    wrap.append(close, frame);
     if (extraClass.includes('shadrat-ad-bar')) {
       const resize = () => {
         const available = Math.max(1, wrap.clientWidth - 10);
