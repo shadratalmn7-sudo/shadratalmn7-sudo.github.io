@@ -109,13 +109,17 @@
     clickStyle.textContent = `
       .shadrat-click-interstitial{position:fixed;inset:0;z-index:2147482000;display:grid;place-items:center;padding:18px;background:rgba(3,12,28,.72);backdrop-filter:blur(5px)}
       .shadrat-click-interstitial[hidden]{display:none!important}
-      .shadrat-click-card{width:min(420px,calc(100vw - 28px));max-height:calc(100vh - 28px);overflow:auto;border:1px solid rgba(255,255,255,.2);border-radius:22px;background:#fff;color:#0f172a;box-shadow:0 28px 80px rgba(2,8,23,.42);padding:14px;text-align:center}
-      .shadrat-click-label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;color:#64748b;font:700 12px/1.4 Tahoma,Arial,sans-serif}
+      .shadrat-click-card{position:relative;width:min(420px,calc(100vw - 28px));max-height:calc(100vh - 28px);overflow:auto;border:1px solid rgba(255,255,255,.2);border-radius:22px;background:#fff;color:#0f172a;box-shadow:0 28px 80px rgba(2,8,23,.42);padding:14px;text-align:center}
+      .shadrat-click-close{position:sticky;top:0;float:right;z-index:2147483000;width:40px;height:40px;display:grid;place-items:center;margin:0 0 -40px auto;padding:0;border:1px solid #cbd5e1;border-radius:999px;background:#fff;color:#0f172a;font:900 27px/1 Arial,sans-serif;cursor:pointer;box-shadow:0 5px 16px rgba(15,23,42,.2);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+      .shadrat-click-close:hover{background:#f8fafc}
+      .shadrat-click-close:active{transform:scale(.94)}
+      .shadrat-click-close:focus-visible{outline:3px solid #2563eb;outline-offset:2px}
+      .shadrat-click-label{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:40px;padding-right:48px;margin-bottom:9px;color:#64748b;font:700 12px/1.4 Tahoma,Arial,sans-serif}
       .shadrat-click-ad{min-height:300px;margin:0 auto 12px;background:#f8fbff;border:1px solid rgba(29,78,216,.08);border-radius:16px}
       .shadrat-click-continue{width:100%;border:0;border-radius:13px;padding:11px 14px;background:#1d4ed8;color:#fff;font:800 14px/1.4 Tahoma,Arial,sans-serif;cursor:pointer}
       .shadrat-click-continue:disabled{opacity:.55;cursor:wait}
       .shadrat-click-note{margin:8px 0 0;color:#64748b;font:12px/1.55 Tahoma,Arial,sans-serif}
-      @media(max-width:520px){.shadrat-click-interstitial{padding:10px}.shadrat-click-card{width:calc(100vw - 20px);border-radius:18px;padding:11px}}
+      @media(max-width:520px){.shadrat-click-interstitial{padding:10px}.shadrat-click-card{width:calc(100vw - 20px);border-radius:18px;padding:11px}.shadrat-click-close{width:42px;height:42px;font-size:28px}.shadrat-click-label{min-height:42px;padding-right:50px}}
     `;
     document.head.appendChild(clickStyle);
 
@@ -138,6 +142,12 @@
       const card = document.createElement('div');
       card.className = 'shadrat-click-card';
       card.innerHTML = '<div class="shadrat-click-label"><span>إعلان</span><span>شذرات للمنح</span></div>';
+      const close = document.createElement('button');
+      close.type = 'button';
+      close.className = 'shadrat-click-close';
+      close.setAttribute('aria-label','إغلاق الإعلان');
+      close.title = 'إغلاق الإعلان';
+      close.textContent = '×';
       const ad = makeAd(FOOTER_KEY,160,300,'shadrat-click-ad');
       const button = document.createElement('button');
       button.type = 'button';
@@ -147,6 +157,7 @@
       const note = document.createElement('p');
       note.className = 'shadrat-click-note';
       note.textContent = 'يظهر هذا الإعلان بشكل خفيف بعد كل 20 تفاعل داخل الموقع.';
+      card.prepend(close);
       card.append(ad, button, note);
       overlay.appendChild(card);
       document.body.appendChild(overlay);
@@ -154,29 +165,33 @@
       document.body.style.overflow = 'hidden';
 
       let finished = false;
+      let unlock = null;
+      let onKey = null;
       const finish = () => {
         if (finished) return;
         finished = true;
+        if (unlock) clearTimeout(unlock);
+        if (onKey) document.removeEventListener('keydown', onKey);
         overlay.remove();
         document.body.style.overflow = oldOverflow;
         if (nextUrl) location.href = nextUrl;
       };
-      const unlock = setTimeout(() => {
+      unlock = setTimeout(() => {
         button.disabled = false;
         button.textContent = nextUrl ? 'متابعة إلى الصفحة' : 'متابعة';
-        try { button.focus({preventScroll:true}); } catch {}
       }, 1200);
-      button.addEventListener('click', () => {
-        clearTimeout(unlock);
+      close.addEventListener('click', event => {
+        event.preventDefault();
+        event.stopPropagation();
         finish();
       });
-      const onKey = event => {
-        if (event.key !== 'Escape' || button.disabled) return;
-        document.removeEventListener('keydown', onKey);
-        clearTimeout(unlock);
+      button.addEventListener('click', () => finish());
+      onKey = event => {
+        if (event.key !== 'Escape') return;
         finish();
       };
       document.addEventListener('keydown', onKey);
+      try { close.focus({preventScroll:true}); } catch {}
     }
 
     document.addEventListener('click', event => {
