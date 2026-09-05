@@ -1,25 +1,68 @@
 (()=>{
-if(window.__shadratProfileLayoutV4)return;window.__shadratProfileLayoutV4=true;
-const GROUPS={overview:['overview'],'student-info':['student-info'],level:['level','rewards'],artifacts:['favorites','documents','artifacts'],orders:['orders','support']},LEGACY={favorites:'artifacts',documents:'artifacts',rewards:'level',support:'orders'};let current='overview',sync=false,editorModule=null;
-const svg=p=>`<svg class="profile-main-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="${p}"/></svg>`;
-const ICONS={home:svg('M4 10.8 12 4l8 6.8v8.7h-5.4v-5.8H9.4v5.8H4v-8.7Z'),account:svg('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20c.8-3.6 3.1-5.5 7-5.5s6.2 1.9 7 5.5'),progress:svg('M5 18V9m7 9V5m7 13v-6M3 20h18'),files:svg('M3.5 7.5h6l1.8 2H20v9.5H3.5V7.5Zm0 0V5h6l1.5 2.5'),orders:svg('M6 4h12v16H6V4Zm3 4h6M9 12h6M9 16h4')};
-function mainOf(id){return LEGACY[id]||id}
-function styles(){if(document.querySelector('#profile-layout-v4-style'))return;const s=document.createElement('style');s.id='profile-layout-v4-style';s.textContent=`
-.student-cover{position:relative}.profile-cover-edit{position:absolute;left:18px;top:18px;z-index:8;width:45px;height:45px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.48);border-radius:14px;background:rgba(255,255,255,.16);color:#fff;box-shadow:0 8px 22px rgba(15,23,42,.15);backdrop-filter:blur(8px);cursor:pointer}.profile-cover-edit:hover{background:rgba(255,255,255,.26)}.profile-cover-edit:active{transform:scale(.96)}.profile-cover-edit svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.profile-tabs{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px!important;overflow:visible!important;padding:7px 0 16px!important}.profile-tabs>.profile-tab-wrap{display:block!important;position:relative;min-width:0}.profile-tabs>button,.profile-tabs>.profile-tab-wrap>button{width:100%;min-height:67px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;white-space:normal!important;border:1px solid #d8e3f2!important;border-radius:18px!important;background:#fff!important;color:#28548d!important;padding:9px 7px!important;font:800 13px/1.25 Tahoma,Arial,sans-serif!important;box-shadow:0 6px 18px rgba(15,23,42,.045);cursor:pointer}.profile-tabs>button.is-active,.profile-tabs>.profile-tab-wrap>button.is-active{background:linear-gradient(145deg,#2563eb,#3b82f6)!important;color:#fff!important;border-color:#2563eb!important;box-shadow:0 10px 24px rgba(37,99,235,.22)!important}.profile-main-icon{width:22px;height:22px;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.profile-tabs .student-badge{top:-6px!important;left:-5px!important;z-index:4}
-.profile-group-heading{display:none;align-items:center;justify-content:space-between;gap:14px;padding:15px 17px;margin:2px 0 12px;border:1px solid #dbe7f5;border-radius:18px;background:linear-gradient(135deg,#fbfdff,#f2f7ff)}.profile-group-heading.is-active{display:flex}.profile-group-heading h2{margin:0;font-size:19px;color:#173d75}.profile-group-heading p{margin:4px 0 0;color:#6b7f9b;font-size:12px}.profile-group-chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.profile-group-chip{padding:6px 9px;border:1px solid #cfdef3;border-radius:999px;background:#fff;color:#315b91;font-size:11px;font-weight:800}.profile-section-caption{display:none;align-items:center;gap:8px;margin:18px 2px 9px;color:#334e73;font-size:13px;font-weight:900}.profile-section-caption:before{content:'';width:7px;height:7px;border-radius:50%;background:#2563eb;box-shadow:0 0 0 5px #eaf2ff}#student-profile-editor{display:none!important}
-@media(max-width:700px){.profile-tabs{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}.profile-tabs>.profile-tab-wrap.profile-tab-wide-mobile{grid-column:1/-1}.profile-tabs>button,.profile-tabs>.profile-tab-wrap>button{min-height:61px;font-size:13px!important;border-radius:16px!important}.profile-cover-edit{left:14px;top:14px;width:42px;height:42px}.profile-group-heading{align-items:flex-start;flex-direction:column}.profile-group-chips{justify-content:flex-start}}
-`;document.head.appendChild(s)}
-function buildTabs(){const n=document.querySelector('.profile-tabs');if(!n||document.body.dataset.profileMode==='owner')return;n.innerHTML=`<button class="is-active" data-profile-tab="overview" type="button">${ICONS.home}<span>الرئيسية</span></button><button data-profile-tab="student-info" type="button">${ICONS.account}<span>حسابي</span></button><button data-profile-tab="level" type="button">${ICONS.progress}<span>تقدمي</span></button><span class="profile-tab-wrap"><button data-profile-tab="artifacts" type="button">${ICONS.files}<span>ملفاتي</span></button><b class="student-badge" data-favorite-count hidden>0</b></span><span class="profile-tab-wrap profile-tab-wide-mobile"><button data-profile-tab="orders" type="button">${ICONS.orders}<span>طلباتي</span></button><b class="student-badge" data-support-badge hidden>0</b></span>`}
-function headings(){if(document.querySelector('[data-profile-group-heading]'))return;[{main:'student-info',anchor:'[data-profile-panel="student-info"]',title:'حسابي',desc:'معلومات حسابك للعرض فقط. للتعديل استخدم القلم في البطاقة بالأعلى.',chips:['بياناتي','الصورة','التخصيص']},{main:'level',anchor:'[data-profile-panel="level"]',title:'تقدمي',desc:'مستواك، المهمات والجوائز.',chips:['المستويات','المهمات','الجوائز']},{main:'artifacts',anchor:'[data-profile-panel="favorites"]',title:'ملفاتي',desc:'كل ما حفظته أو أنشأته في شذرات.',chips:['المنح المحفوظة','المستندات','CV و Motivation']},{main:'orders',anchor:'[data-profile-panel="orders"]',title:'طلباتي',desc:'الخدمات والردود المرتبطة بحسابك.',chips:['طلبات الخدمات','ردود الإدارة']}].forEach(c=>{const a=document.querySelector(c.anchor);if(!a)return;const h=document.createElement('section');h.className='profile-group-heading';h.dataset.profileGroupHeading=c.main;h.innerHTML=`<div><h2>${c.title}</h2><p>${c.desc}</p></div><div class="profile-group-chips">${c.chips.map(x=>`<span class="profile-group-chip">${x}</span>`).join('')}</div>`;a.before(h)})}
-function captions(){[['level','المستوى وخط التقدم'],['missions','المهمات المتاحة'],['rewards','الجوائز والتخصيصات'],['favorites','المنح المحفوظة'],['documents','المستندات والأدوات'],['artifacts','CV و Motivation المحفوظة'],['orders','طلبات الخدمات'],['support','رسائل الإدارة والدعم']].forEach(([id,label])=>{const p=id==='level'?document.querySelector('#level'):id==='missions'?document.querySelector('#missions'):id==='rewards'?document.querySelector('#rewards'):document.querySelector(`[data-profile-panel="${id}"]`);if(!p||document.querySelector(`[data-profile-caption="${id}"]`))return;const c=document.createElement('div');c.className='profile-section-caption';c.dataset.profileCaption=id;c.textContent=label;p.before(c)})}
-function activate(req,{scroll=false,sub=''}={}){if(document.body.dataset.profileMode==='owner')return;const m=mainOf(req);if(!GROUPS[m])return;current=m;sync=true;document.querySelectorAll('.profile-tabs [data-profile-tab]').forEach(b=>b.classList.toggle('is-active',b.dataset.profileTab===m));document.querySelectorAll('.profile-panel').forEach(p=>p.classList.remove('is-active'));GROUPS[m].forEach(x=>document.querySelectorAll(`[data-profile-panel="${x}"]`).forEach(p=>p.classList.add('is-active')));document.querySelectorAll('[data-profile-group-heading]').forEach(h=>h.classList.toggle('is-active',h.dataset.profileGroupHeading===m));document.querySelectorAll('.profile-section-caption').forEach(c=>c.style.display=mainOf(c.dataset.profileCaption)===m?'flex':'none');sync=false;if(scroll){const t=sub?document.querySelector(`[data-profile-panel="${sub}"]`):document.querySelector(`[data-profile-group-heading="${m}"]`)||document.querySelector(`[data-profile-panel="${GROUPS[m][0]}"]`);setTimeout(()=>t?.scrollIntoView({behavior:'smooth',block:'start'}),30)}}
-async function openEditor(){try{editorModule=editorModule||await import('./profile-edit-deep.js?v=1');await editorModule.openProfileEditor()}catch(e){console.error('[Shadrat] profile editor',e)}}
-function pencil(){const cover=document.querySelector('.student-cover');if(!cover||cover.querySelector('.profile-cover-edit')||document.body.dataset.profileMode==='owner')return;const b=document.createElement('button');b.type='button';b.className='profile-cover-edit';b.title='تعديل حسابي';b.setAttribute('aria-label','تعديل حسابي');b.innerHTML='<svg viewBox="0 0 24 24" fill="none"><path d="M4.5 19.5 8 18.8 18.2 8.6a2.2 2.2 0 0 0-3.1-3.1L4.9 15.7l-.4 3.8ZM13.8 6.8l3.4 3.4"/></svg>';b.onclick=openEditor;cover.appendChild(b)}
-function cleanupLegacyEditor(){document.querySelector('#student-profile-editor')?.remove();const old=document.querySelector('.dashboard-actions [data-open-profile-tab="student-info"]');if(old){old.hidden=true;old.setAttribute('aria-hidden','true')}}
-function remap(){document.querySelectorAll('[data-open-profile-tab]').forEach(el=>{const o=el.dataset.openProfileTab||'',m=mainOf(o);if(m!==o){el.dataset.profileOriginalTarget=o;el.dataset.openProfileTab=m}})}
-function wire(){document.addEventListener('click',e=>{const t=e.target.closest('.profile-tabs [data-profile-tab]');if(t){e.preventDefault();e.stopImmediatePropagation();activate(t.dataset.profileTab,{scroll:true});return}const q=e.target.closest('[data-open-profile-tab]');if(q&&GROUPS[mainOf(q.dataset.openProfileTab)]){e.preventDefault();e.stopImmediatePropagation();activate(q.dataset.openProfileTab,{scroll:true,sub:q.dataset.profileOriginalTarget||''})}},true)}
-function observe(){const r=document.querySelector('.container.grid')||document.body;new MutationObserver(()=>{cleanupLegacyEditor();pencil();remap();if(sync||document.body.dataset.profileMode==='owner')return;const a=[...document.querySelectorAll('.profile-panel.is-active')].map(x=>x.dataset.profilePanel).find(Boolean),m=mainOf(a);if(m&&GROUPS[m]&&m!==current)activate(m)}).observe(r,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-profile-mode']})}
-function init(){styles();buildTabs();headings();captions();cleanupLegacyEditor();remap();pencil();wire();observe();activate('overview')}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+  if(window.__shadratProfileLayoutV6)return;
+  window.__shadratProfileLayoutV6=true;
+
+  const GROUPS={
+    overview:['overview'],
+    'student-info':['student-info'],
+    level:['level','rewards'],
+    artifacts:['favorites','documents','artifacts'],
+    orders:['orders','support']
+  };
+  const LEGACY={favorites:'artifacts',documents:'artifacts',rewards:'level',support:'orders'};
+  let current='overview';
+
+  function mainOf(id=''){return LEGACY[id]||id}
+
+  function activate(request,{scroll=false,sub=''}={}){
+    if(document.body.dataset.profileMode==='owner')return;
+    const main=mainOf(request);
+    if(!GROUPS[main])return;
+    current=main;
+
+    document.querySelectorAll('.profile-tabs [data-profile-tab]').forEach(button=>{
+      const active=button.dataset.profileTab===main;
+      button.classList.toggle('is-active',active);
+      button.setAttribute('aria-current',active?'page':'false');
+    });
+
+    document.querySelectorAll('.profile-panel').forEach(panel=>panel.classList.remove('is-active'));
+    GROUPS[main].forEach(id=>{
+      document.querySelectorAll(`[data-profile-panel="${id}"]`).forEach(panel=>panel.classList.add('is-active'));
+    });
+
+    if(scroll){
+      const target=sub
+        ? document.querySelector(`[data-profile-panel="${sub}"]`)
+        : document.querySelector(`[data-profile-panel="${GROUPS[main][0]}"]`);
+      setTimeout(()=>target?.scrollIntoView({behavior:'smooth',block:'start'}),20);
+    }
+  }
+
+  function wire(){
+    document.addEventListener('click',event=>{
+      const tab=event.target.closest('.profile-tabs [data-profile-tab]');
+      if(tab){
+        event.preventDefault();
+        activate(tab.dataset.profileTab,{scroll:true});
+        return;
+      }
+
+      const shortcut=event.target.closest('[data-open-profile-tab]');
+      if(!shortcut)return;
+      const requested=shortcut.dataset.openProfileTab||'';
+      const main=mainOf(requested);
+      if(!GROUPS[main])return;
+      event.preventDefault();
+      activate(main,{scroll:true,sub:requested!==main?requested:''});
+    });
+  }
+
+  function init(){
+    wire();
+    activate(current);
+  }
+
+  window.ShadratProfileNav={open:(id,options={})=>activate(id,{scroll:true,...options}),activate};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
