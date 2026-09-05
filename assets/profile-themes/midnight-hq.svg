@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1800 600" preserveAspectRatio="xMidYMid slice">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#030712"/><stop offset=".55" stop-color="#101b40"/><stop offset="1" stop-color="#18305c"/></linearGradient>
+<linearGradient id="lake" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0b1f3f"/><stop offset="1" stop-color="#020712"/></linearGradient>
+<radialGradient id="halo"><stop stop-color="#dbeafe" stop-opacity=".45"/><stop offset="1" stop-color="#93c5fd" stop-opacity="0"/></radialGradient>
+<filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+<pattern id="stars" width="150" height="110" patternUnits="userSpaceOnUse"><circle cx="18" cy="16" r="1.1" fill="#fff"/><circle cx="86" cy="36" r="1.4" fill="#c7d2fe"/><circle cx="132" cy="82" r=".9" fill="#fff"/><circle cx="52" cy="92" r="1.8" fill="#93c5fd"/></pattern>
+</defs>
+<rect width="1800" height="600" fill="url(#sky)"/><rect width="1800" height="360" fill="url(#stars)" opacity=".8"/>
+<circle cx="280" cy="150" r="130" fill="url(#halo)" filter="url(#soft)"/><circle cx="280" cy="150" r="67" fill="#e8f2ff"/><circle cx="309" cy="126" r="67" fill="#0a1330"/>
+<path d="M0 395 185 262l96 69 145-152 162 159 112-102 172 164 147-118 146 116 175-154 190 152 138-111 132 110v205H0Z" fill="#081123"/>
+<path d="M0 430 210 332l103 63 145-102 170 113 152-74 165 99 176-84 160 78 190-93 142 67 187-71v272H0Z" fill="#0d1d35"/>
+<rect y="430" width="1800" height="170" fill="url(#lake)"/>
+<path d="M0 463c240-18 424 14 622 4 220-12 383-32 606-5 197 24 364 19 572 0" fill="none" stroke="#7aa2d8" stroke-opacity=".2" stroke-width="5"/>
+<path d="M90 520c156-12 268 3 398 0M870 540c180-14 315 4 478-2M1380 498c108-8 210 1 320-3" fill="none" stroke="#8fb7e8" stroke-opacity=".16" stroke-width="4"/>
+<path d="M244 430 280 207l36 223Z" fill="#d6e6ff" opacity=".1" filter="url(#soft)"/>
+<g fill="#050a16"><path d="M118 448l42-112 42 112zM176 448l56-146 56 146zM1540 445l48-126 48 126zM1605 445l60-157 60 157z"/></g>
+</svg>
