@@ -159,7 +159,7 @@ service cloud.firestore {
         && request.resource.data.publishStatus in ['draft','published','disabled','archived']
         && request.resource.data.targetType in ['all','user']
         && safeText(request.resource.data.title, 3, 160);
-      allow delete: if adminRole();
+      allow delete: if ownerOnly();
     }
 
     // ملف عام منفصل وآمن: لا يحتوي بريدًا أو جوالًا أو مستندات أو طلبات أو رسائل.
@@ -170,16 +170,9 @@ service cloud.firestore {
           'uid','fullName','username','avatarKey','level','xp','studyLevel','badges','achievements','completedTasks','expertise','verifiedExpert','verifiedAccepted','visible','updatedAt'
         ])
         && request.resource.data.uid == uid
-        && safeText(request.resource.data.fullName, 3, 80)
-        && request.resource.data.fullName == getAfter(/databases/$(database)/documents/users/$(uid)).data.fullName
         && request.resource.data.username == getAfter(/databases/$(database)/documents/users/$(uid)).data.username
-        && request.resource.data.avatarKey == getAfter(/databases/$(database)/documents/users/$(uid)).data.avatarKey
         && request.resource.data.xp == getAfter(/databases/$(database)/documents/users/$(uid)).data.xp
-        && request.resource.data.level is int && request.resource.data.level >= 1 && request.resource.data.level <= 21
-        && request.resource.data.studyLevel is string && request.resource.data.studyLevel.size() <= 80
-        && request.resource.data.badges is list && request.resource.data.badges.size() <= 3
-        && request.resource.data.achievements is list && request.resource.data.achievements.size() <= 16
-        && request.resource.data.completedTasks is list && request.resource.data.completedTasks.size() <= 16
+        && request.resource.data.level == getAfter(/databases/$(database)/documents/users/$(uid)).data.level
         && request.resource.data.visible is bool;
       allow update: if adminRole();
       allow delete: if own(uid) || adminRole();
