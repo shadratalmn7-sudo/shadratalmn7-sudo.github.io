@@ -11,14 +11,22 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: Bump nav CSS version everywhere
+      - name: Bust changed front-end asset caches
         run: |
           python3 - <<'PY'
           from pathlib import Path
           changed=[]
-          for p in Path('.').rglob('*.html'):
+          for p in list(Path('.').rglob('*.html')) + list(Path('.').rglob('*.js')):
               s=p.read_text(encoding='utf-8')
-              ns=s.replace('nav-universal.css?v=159','nav-universal.css?v=160')
+              ns=s
+              ns=ns.replace('nav-universal.css?v=159','nav-universal.css?v=160')
+              ns=ns.replace('./level-system.js?v=2','./level-system.js?v=4')
+              ns=ns.replace('./level-system.js?v=3','./level-system.js?v=4')
+              ns=ns.replace('profile-core.js?v=12','profile-core.js?v=13')
+              ns=ns.replace('profile-gamification-live.js?v=10','profile-gamification-live.js?v=11')
+              ns=ns.replace('profile-edit-deep.js?v=5','profile-edit-deep.js?v=6')
+              ns=ns.replace("./profile-edit-deep.js?v=2","./profile-edit-deep.js?v=6")
+              ns=ns.replace('student-profile.js?v=4','student-profile.js?v=5')
               if ns!=s:
                   p.write_text(ns,encoding='utf-8')
                   changed.append(str(p))
@@ -31,5 +39,5 @@ jobs:
           git config user.name 'shadratalmn7-sudo'
           git config user.email 'shadrat.almn7@gmail.com'
           git add -A
-          git commit -m 'Bust cache for corrected Shadrat header size'
+          git commit -m 'Bust cache for profile theme and card fixes'
           git push
