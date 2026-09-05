@@ -30,12 +30,11 @@ const access = {
   'admin-homepage.html': ['owner', 'admin', 'editor'],
   'admin-orders.html': ['owner', 'admin', 'support'],
   'admin-messages.html': ['owner', 'admin', 'support'],
-  'admin-community.html': ['owner', 'admin', 'communityModerator'],
   'admin-gamification.html': ['owner', 'admin'],
   'admin-announcements.html': ['owner', 'admin'],
   'admin-security.html': ['owner', 'admin'],
   'admin-revenue.html': ['owner', 'admin'],
-  'admin-analytics.html': ['owner', 'admin', 'support', 'editor', 'communityModerator']
+  'admin-analytics.html': ['owner', 'admin', 'support', 'editor']
 };
 
 function waitForUser(milliseconds = 12000) {
