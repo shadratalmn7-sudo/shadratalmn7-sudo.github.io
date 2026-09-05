@@ -2,7 +2,7 @@ import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2
 import{getAuth}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import{deleteDoc,doc,getDoc,getFirestore,serverTimestamp,updateDoc,writeBatch}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import{firebaseConfig}from'./firebase-config.js';
-import{PROFILE_BADGES,PROFILE_FRAMES,PROFILE_NAME_COLORS,PROFILE_THEMES,levelFromXp}from'./level-system.js?v=4';
+import{PROFILE_BADGES,PROFILE_FRAMES,PROFILE_NAME_COLORS,PROFILE_THEMES,levelFromXp}from'./level-system.js?v=5';
 
 const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),PREF_PREFIX='shadrat-profile-v2:';
 const states=new WeakMap(),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),clean=v=>String(v||'').trim().toLowerCase().replace(/^@/,''),same=(a,b)=>String(a??'')===String(b??'');

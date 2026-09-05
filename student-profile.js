@@ -2,7 +2,7 @@ import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2
 import{doc,getDoc,getFirestore}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import{firebaseConfig}from'./firebase-config.js';
 import{levelBadge}from'./level-badges.js?v=2';
-import{levelFromXp,levelLabel}from'./level-system.js?v=4';
+import{levelFromXp,levelLabel}from'./level-system.js?v=5';
 const PREF_PREFIX='shadrat-profile-v2:';
 const app=getApps().length?getApp():initializeApp(firebaseConfig),db=getFirestore(app),root=document.querySelector('#public-profile'),uid=new URLSearchParams(location.search).get('uid');
 const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

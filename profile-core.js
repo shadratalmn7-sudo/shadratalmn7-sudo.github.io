@@ -2,7 +2,7 @@ import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2
 import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import{doc,getDoc,getFirestore}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import{firebaseConfig}from'./firebase-config.js';
-import{PROFILE_BADGES,PROFILE_FRAMES,PROFILE_NAME_COLORS,PROFILE_THEMES,levelFromXp}from'./level-system.js?v=4';
+import{PROFILE_BADGES,PROFILE_FRAMES,PROFILE_NAME_COLORS,PROFILE_THEMES,levelFromXp}from'./level-system.js?v=5';
 
 const OWNER_EMAIL='shadrat.almn7@gmail.com',AUTH_SESSION_KEY='shadrat_auth_session',CACHE_PREFIX='shadrat-profile-cache-v3:',PREF_PREFIX='shadrat-profile-v2:';
 const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),tasks=new Map();
