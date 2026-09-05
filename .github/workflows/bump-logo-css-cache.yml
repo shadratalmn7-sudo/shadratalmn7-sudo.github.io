@@ -4,8 +4,10 @@ on:
     paths:
       - '.github/workflows/bump-logo-css-cache.yml'
       - 'nav-universal.css'
+      - 'level-system.js'
       - 'profile-core.js'
       - 'profile-edit-deep.js'
+      - 'profile-settings.js'
       - 'profile-art-themes.css'
       - 'assets/profile-themes/**'
 jobs:
@@ -24,16 +26,22 @@ jobs:
               s=p.read_text(encoding='utf-8')
               ns=s
               ns=ns.replace('nav-universal.css?v=159','nav-universal.css?v=160')
-              ns=ns.replace('./level-system.js?v=2','./level-system.js?v=4')
-              ns=ns.replace('./level-system.js?v=3','./level-system.js?v=4')
-              ns=ns.replace('profile-core.js?v=12','profile-core.js?v=15')
-              ns=ns.replace('profile-core.js?v=13','profile-core.js?v=15')
-              ns=ns.replace('profile-core.js?v=14','profile-core.js?v=15')
-              ns=ns.replace('profile-gamification-live.js?v=10','profile-gamification-live.js?v=11')
+              ns=ns.replace('./level-system.js?v=2','./level-system.js?v=5')
+              ns=ns.replace('./level-system.js?v=3','./level-system.js?v=5')
+              ns=ns.replace('./level-system.js?v=4','./level-system.js?v=5')
+              ns=ns.replace('profile-core.js?v=12','profile-core.js?v=16')
+              ns=ns.replace('profile-core.js?v=13','profile-core.js?v=16')
+              ns=ns.replace('profile-core.js?v=14','profile-core.js?v=16')
+              ns=ns.replace('profile-core.js?v=15','profile-core.js?v=16')
+              ns=ns.replace('profile-gamification-live.js?v=10','profile-gamification-live.js?v=12')
+              ns=ns.replace('profile-gamification-live.js?v=11','profile-gamification-live.js?v=12')
+              ns=ns.replace('profile-settings.js?v=1','profile-settings.js?v=2')
               ns=ns.replace('profile-edit-deep.js?v=5','profile-edit-deep.js?v=7')
               ns=ns.replace('profile-edit-deep.js?v=6','profile-edit-deep.js?v=7')
               ns=ns.replace("./profile-edit-deep.js?v=2","./profile-edit-deep.js?v=7")
-              ns=ns.replace('profile-art-themes.css?v=3','profile-art-themes.css?v=4')
+              ns=ns.replace('profile-art-themes.css?v=3','profile-art-themes.css?v=6')
+              ns=ns.replace('profile-art-themes.css?v=4','profile-art-themes.css?v=6')
+              ns=ns.replace('profile-art-themes.css?v=5','profile-art-themes.css?v=6')
               ns=ns.replace('student-profile.js?v=4','student-profile.js?v=5')
               ns=ns.replace('nav-universal.js?v=158','nav-universal.js?v=159')
               ns=ns.replace("./notifications-live.js?v=12","./notifications-live.js?v=13")
@@ -50,5 +58,5 @@ jobs:
           git config user.name 'shadratalmn7-sudo'
           git config user.email 'shadrat.almn7@gmail.com'
           git add -A
-          git commit -m 'Align profile completion percentage'
+          git commit -m 'Bust cache for new profile themes'
           git push
