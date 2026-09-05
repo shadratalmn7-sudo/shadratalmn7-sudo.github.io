@@ -1,4 +1,4 @@
-import{downloadNodePdf,getArtifact,safeFilename,saveArtifact,waitForUser}from'./student-artifacts.js?v=1';
+import{downloadNodePdf,getArtifact,safeFilename,saveArtifact,waitForUser}from'./student-artifacts-a4.js?v=1';
 
 const $=id=>document.getElementById(id);
 const fields=['artifactName','name','current','program','target','whyField','whyProgram','future','achievements','lang','tone','template','manualText'];
