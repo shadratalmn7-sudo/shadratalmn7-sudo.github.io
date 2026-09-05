@@ -33,6 +33,9 @@ export const MOTIVATION_TEMPLATE_LEVELS={executive:5,editorial:5,creative:10,tec
 
 export const PROFILE_THEMES=[
  {id:'default',label:'شذرات الأزرق',level:1},
+ {id:'nebula',label:'Nebula — فضاء',level:1},
+ {id:'anime-dusk',label:'Anime Dusk — غروب',level:1},
+ {id:'luminous-tree',label:'Luminous Tree — الشجرة',level:1},
  {id:'sky',label:'Sky',level:2},
  {id:'ocean',label:'Ocean',level:6},
  {id:'midnight',label:'Midnight',level:12},
@@ -79,3 +82,9 @@ export function rewardForLevel(level){return LEVEL_REWARDS.find(r=>r.level===Num
 export function templateRequiredLevel(kind,id){const map=kind==='cv'?CV_TEMPLATE_LEVELS:MOTIVATION_TEMPLATE_LEVELS;return Number(map[id]||1)}
 export function isTemplateUnlocked(kind,id,level){return Number(level||1)>=templateRequiredLevel(kind,id)}
 export function artifactSaveLimit(level){return Number(level||1)>=14?8:3}
+
+if(typeof document!=='undefined'&&!document.querySelector('link[data-profile-art-themes]')){
+ const link=document.createElement('link');
+ link.rel='stylesheet';link.href='./profile-art-themes.css?v=1';link.dataset.profileArtThemes='1';
+ document.head.appendChild(link);
+}
