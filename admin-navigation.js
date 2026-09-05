@@ -8,7 +8,7 @@ if(!window.__shadratAdminNavigationReady){
   };
   const groups=[
     {title:'المتابعة والتشغيل',items:[
-      {href:'admin-analytics.html',label:'مركز المراقبة',desc:'ملخص الإدارة والتنبيهات',icon:'dashboard',roles:['owner','admin','support','editor','communityModerator']},
+      {href:'admin-analytics.html',label:'مركز المراقبة',desc:'ملخص الإدارة والتنبيهات',icon:'dashboard',roles:['owner','admin','support','editor']},
       {href:'admin-messages.html',label:'الإيميل والرسائل',desc:'الاستفسارات والشكاوى والبلاغات',icon:'mail',roles:['owner','admin','support']},
       {href:'admin-orders.html',label:'الطلبات',desc:'طلبات الخدمات والعروض',icon:'orders',roles:['owner','admin','support']}
     ]},
