@@ -1,0 +1,23 @@
+name: test-firestore-profile-rules
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'firestore.rules'
+      - 'firebase.json'
+      - 'scripts/test-profile-rules.mjs'
+      - '.github/workflows/test-firestore-profile-rules.yml'
+  workflow_dispatch:
+jobs:
+  profile-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Firebase test tooling
+        run: npm install --no-save firebase@12.2.1 @firebase/rules-unit-testing firebase-tools
+      - name: Compile and test Firestore rules
+        run: npx firebase emulators:exec --only firestore --project demo-shazarat-profile "node scripts/test-profile-rules.mjs"
