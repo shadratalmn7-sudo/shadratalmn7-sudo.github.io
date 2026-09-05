@@ -1,4 +1,4 @@
-import * as base from './student-artifacts.js?v=2';
+import * as base from './student-artifacts.js?v=3';
 
 export const auth=base.auth;
 export const db=base.db;
@@ -207,16 +207,7 @@ function openPrintFallback(node){
 }
 
 export async function downloadNodePdf(node,filename){
-  if(!node)throw new Error('PDF_NODE_MISSING');
-  ensureBuilderCss();
-  const cover=document.createElement('div');cover.setAttribute('role','status');cover.setAttribute('aria-live','polite');cover.textContent='جاري تجهيز ملف PDF…';cover.style.cssText='position:fixed;inset:0;z-index:2147483646;display:grid;place-items:center;background:rgba(248,251,255,.98);color:#1d4ed8;font:800 16px Tahoma,Arial,sans-serif;text-align:center;padding:24px;';
-  const oldHtmlOverflow=document.documentElement.style.overflow,oldBodyOverflow=document.body.style.overflow;document.documentElement.style.overflow='hidden';document.body.style.overflow='hidden';document.body.appendChild(cover);
-  try{
-    const blob=await makePdfBlob(node);saveBlob(blob,filename);return{method:'download'};
-  }catch(error){
-    console.error('[Shadrat] direct PDF export failed',error);cover.textContent='تعذر التنزيل المباشر، سيتم فتح نافذة الحفظ/الطباعة كخيار احتياطي…';await wait(250);
-    try{openPrintFallback(node);return{method:'print',fallback:true,error}}catch(fallbackError){console.error('[Shadrat] print fallback failed',fallbackError);throw error}
-  }finally{cover.remove();document.documentElement.style.overflow=oldHtmlOverflow;document.body.style.overflow=oldBodyOverflow}
+  return base.downloadNodePdf(node,filename);
 }
 
 export async function downloadArtifactPdf(artifact){
