@@ -1,9 +1,9 @@
 export const VISIBLE_LEVEL_MAX=20;
 export const FUTURE_LEVEL_LABEL='21+';
-export const XP_SYSTEM_MAX=9000;
-// Cumulative XP needed to enter each visible level. Level 21+ begins at 1770 XP.
-// The remaining XP capacity stays reserved for Levels 21-100 when those stages are designed.
-export const LEVEL_THRESHOLDS=[0,50,110,175,245,320,400,485,575,670,770,870,970,1070,1170,1270,1370,1470,1570,1670,1770];
+export const XP_SYSTEM_MAX=1000000;
+// إجمالي XP التراكمي المطلوب لدخول كل مستوى.
+// Level 20 يبدأ عند 19,950 XP، ومرحلة 21+ تبدأ عند 22,150 XP ولا تُكشف قبل الوصول إلى Level 20.
+export const LEVEL_THRESHOLDS=[0,300,650,1050,1525,2075,2700,3400,4200,5100,6100,7200,8400,9700,11100,12600,14250,16050,17950,19950,22150];
 
 export const LEVEL_REWARDS=[
  {level:1,icon:'🎓',title:'طالب شذرات',description:'بدء رحلة المستويات وفتح شارة طالب شذرات.',type:'badge'},
@@ -72,7 +72,7 @@ export function nextLevelInfo(value=0){
  const xp=Math.min(XP_SYSTEM_MAX,Math.max(0,Number(value)||0)),level=levelFromXp(xp);
  if(level>VISIBLE_LEVEL_MAX)return{level,label:FUTURE_LEVEL_LABEL,start:LEVEL_THRESHOLDS[VISIBLE_LEVEL_MAX],target:null,current:0,needed:0,remaining:0,percent:100,xp};
  const start=LEVEL_THRESHOLDS[level-1]||0,target=LEVEL_THRESHOLDS[level]||start,needed=Math.max(1,target-start),current=Math.max(0,xp-start);
- return{level,label:String(level),start,target,current,needed,remaining:Math.max(0,target-xp),percent:Math.min(100,Math.max(0,Math.round(current/needed*100))),xp};
+ return{level,label:String(level),start,target,current,needed,remaining:Math.max(0,target-xp),percent:Math.min(100,Math.max(0,Math.floor(current/needed*100))),xp};
 }
 export function journeyProgress(value=0){const info=nextLevelInfo(value);if(info.level>VISIBLE_LEVEL_MAX)return 100;return Math.min(100,Math.max(0,((info.level-1)+(info.percent/100))/VISIBLE_LEVEL_MAX*100))}
 export function rewardForLevel(level){return LEVEL_REWARDS.find(r=>r.level===Number(level))||null}
