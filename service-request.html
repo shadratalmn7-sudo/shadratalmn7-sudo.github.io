@@ -1,194 +1,30 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>طلب خدمة | شذرات للمنح</title>
-  <meta name="description" content="نموذج طلب خدمة من شذرات للمنح يحتوي على بيانات الطالب ووسيلة التواصل والجنسية ومعلومات الطلب.">
-  <link rel="stylesheet" href="site.css?v=21">
-  <link rel="stylesheet" href="site-polish.css?v=1">
-  <link rel="stylesheet" href="logo.css?v=11">
-  <link rel="stylesheet" href="nav-universal.css?v=155">
-  <link rel="stylesheet" href="section-pages.css?v=1">
-  <style>
-    .request-wrap{max-width:900px;margin:auto}.request-card{border:1px solid var(--line);border-radius:28px;background:var(--card);padding:24px;box-shadow:0 16px 42px #17352b0b}.selected-service{display:grid;gap:6px;margin-bottom:18px;padding:16px;border-radius:20px;background:#eef6f1;border:1px solid #c7dacd}.selected-service b{color:#176b4b}.level-reward-hint{display:none;margin-top:4px;padding:9px 11px;border-radius:12px;background:#eff6ff;color:#1748b5;font-size:12px;font-weight:900}.level-reward-hint.show{display:block}.request-form{display:grid;gap:15px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:grid;gap:7px}.field span{font-weight:900;font-size:13px}.field input,.field select,.field textarea{width:100%;border:1px solid #d8cebe;border-radius:15px;background:#fff;padding:13px;font:inherit;color:var(--ink)}.field textarea{min-height:130px;resize:vertical}.full{grid-column:1/-1}.request-note{padding:14px;border-radius:16px;background:#fff8e7;border:1px solid #d9c99d;color:#5f4b24;font-size:13px}.success-box{display:none;margin-top:14px;padding:14px;border-radius:16px;background:#eef6f1;color:#176b4b;font-weight:900;line-height:1.8}.success-box.show{display:block}.success-box.error{background:#fff1ef;color:#9f2f2f}.request-form button[disabled]{opacity:.65;cursor:wait}@media(max-width:700px){.form-grid{grid-template-columns:1fr}.request-card{padding:18px;border-radius:22px}}
-  </style>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>طلب خدمة | شذرات للمنح</title><meta name="description" content="أرسل طلب خدمة وتابع حالته مباشرة من مركز طلباتك في شذرات للمنح.">
+<link rel="stylesheet" href="site.css?v=21"><link rel="stylesheet" href="site-polish.css?v=1"><link rel="stylesheet" href="logo.css?v=11"><link rel="stylesheet" href="nav-universal.css?v=155"><link rel="stylesheet" href="section-pages.css?v=1">
+<style>.request-wrap{max-width:900px;margin:auto}.request-card{border:1px solid var(--line);border-radius:28px;background:var(--card);padding:24px;box-shadow:0 16px 42px #17352b0b}.selected-service{display:grid;gap:6px;margin-bottom:18px;padding:16px;border-radius:20px;background:#eef5ff;border:1px solid #c7daf7}.selected-service b{color:#174f83}.level-reward-hint{display:none;margin-top:4px;padding:9px 11px;border-radius:12px;background:#eff6ff;color:#1748b5;font-size:12px;font-weight:900}.level-reward-hint.show{display:block}.request-form{display:grid;gap:15px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:grid;gap:7px}.field span{font-weight:900;font-size:13px}.field input,.field select,.field textarea{width:100%;border:1px solid #d4dfec;border-radius:15px;background:#fff;padding:13px;font:inherit;color:var(--ink)}.field textarea{min-height:130px;resize:vertical}.full{grid-column:1/-1}.request-note{padding:14px;border-radius:16px;background:#fff8e7;border:1px solid #e2d3a8;color:#5f4b24;font-size:13px}.success-box{display:none;margin-top:14px;padding:16px;border-radius:16px;background:#eef8f2;color:#176b4b;font-weight:800;line-height:1.8}.success-box.show{display:block}.success-box.error{background:#fff1ef;color:#9f2f2f}.success-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.request-form button[disabled]{opacity:.65;cursor:wait}@media(max-width:700px){.form-grid{grid-template-columns:1fr}.request-card{padding:18px;border-radius:22px}}</style>
 </head>
 <body>
-  <header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div></header>
-  <main>
-    <section class="page-hero compact-hero"><div class="container request-wrap"><span class="eyebrow">طلب خدمة</span><h1>عبّي بياناتك عشان نتواصل معك</h1><p class="lead">اكتب بياناتك ووسيلة التواصل. عند الإرسال يُسجّل الطلب داخل إدارة شذرات، ثم يفتح بريد جاهز لإرساله للمسؤولين.</p></div></section>
-    <section class="section"><div class="container request-wrap"><article class="request-card">
-      <div class="selected-service"><span>الخدمة المختارة</span><b id="service-name">خدمة من شذرات</b><small id="service-price" class="muted"></small><div class="level-reward-hint" id="level-reward-hint"></div></div>
-      <form class="request-form" id="request-form">
-        <div class="form-grid">
-          <label class="field"><span>الاسم الكامل</span><input id="student-name" required maxlength="120" placeholder="اكتب اسمك"></label>
-          <label class="field"><span>العمر</span><input id="student-age" type="number" min="12" max="80" required placeholder="مثال: 18"></label>
-          <label class="field"><span>الجنسية</span><select id="nationality" required><option value="">اختر الجنسية</option><option>يمني</option><option>مصري</option><option>سعودي</option><option>أخرى</option></select></label>
-          <label class="field"><span>وسيلة التواصل</span><select id="contact-method" required><option>واتساب</option><option>تليجرام</option><option>رقم جوال</option><option>بريد إلكتروني</option></select></label>
-          <label class="field"><span>رقم الجوال أو التليجرام أو البريد</span><input id="contact-value" required maxlength="200" placeholder="مثال: @username أو رقمك أو بريدك"></label>
-          <label class="field"><span>الدولة الحالية</span><input id="current-country" maxlength="100" placeholder="مثال: السعودية"></label>
-          <label class="field full"><span>معلومات الطلب</span><textarea id="request-details" maxlength="5000" placeholder="اكتب تفاصيل طلبك، التخصص، الدولة، المرحلة الدراسية، والموعد إذا عندك"></textarea></label>
-        </div>
-        <div class="request-note">لا ترسل صور جواز أو شهادة من هنا. بعد مراجعة الطلب سنخبرك بطريقة آمنة لإرسال المستندات إذا احتجناها.</div>
-        <button class="btn primary" id="submit-request" type="submit">تسجيل الطلب وإرساله</button>
-        <div class="success-box" id="success-box" aria-live="polite"></div>
-      </form>
-    </article></div></section>
-  </main>
-  <footer class="site-footer"><div class="container footer-grid"><div><b>شذرات للمنح</b><p>نموذج طلب خدمة واضح وسهل.</p></div><div><b>المنصة</b><a href="services.html">الخدمات</a><a href="offers.html">العروض</a></div><div><b>المعلومات</b><a href="about.html">من نحن</a><a href="privacy.html">الخصوصية</a></div></div></footer>
-  <script src="nav-universal.js?v=153"></script>
-  <script src="account-gate.js?v=2"></script>
-  <script type="module">
-    import { getApp, getApps, initializeApp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
-    import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, serverTimestamp, where } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
-    import { firebaseConfig } from './firebase-config.js';
-    import { levelFromXp } from './level-system.js?v=2';
-
-    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const params = new URLSearchParams(location.search);
-    const service = params.get('service') || 'خدمة من شذرات';
-    const price = params.get('price') || '';
-    const form = document.querySelector('#request-form');
-    const submit = document.querySelector('#submit-request');
-    const box = document.querySelector('#success-box');
-    const rewardHint = document.querySelector('#level-reward-hint');
-    const recipients = '7ruahmed@mail.ru,7ruafarat@mail.ru';
-    const LEVEL15_REWARD = 'level15-discount15';
-
-    document.querySelector('#service-name').textContent = service;
-    document.querySelector('#service-price').textContent = price ? `السعر / الحالة: ${price}` : '';
-
-    const show = (message,error=false) => {
-      box.textContent = message;
-      box.classList.add('show');
-      box.classList.toggle('error',error);
-    };
-    const parsedAmount = () => {
-      const match = String(price).match(/\d+(?:\.\d+)?/);
-      return match ? Number(match[0]) : 0;
-    };
-    const money = value => Number(value||0).toFixed(Number(value||0)%1 ? 2 : 0);
-
-    async function rewardState(user, amount=parsedAmount()) {
-      if (!user || !(amount > 0)) return { eligible:false, percent:0, level:1, used:false, amount };
-      try {
-        const [userSnap, ordersSnap] = await Promise.all([
-          getDoc(doc(db,'users',user.uid)),
-          getDocs(query(collection(db,'orders'),where('userId','==',user.uid)))
-        ]);
-        const level = levelFromXp(userSnap.data()?.xp || 0);
-        const used = ordersSnap.docs.some(d => {
-          const row = d.data() || {};
-          return row.rewardCode === LEVEL15_REWARD && row.status !== 'canceled';
-        });
-        if (level < 15 || used) return { eligible:false, percent:0, level, used, amount };
-        const discountedAmount = Math.round(amount * .85 * 100) / 100;
-        return { eligible:true, percent:15, level, used:false, amount:discountedAmount, originalAmount:amount, rewardCode:LEVEL15_REWARD };
-      } catch (error) {
-        console.warn('[Shadrat] reward check unavailable', error);
-        return { eligible:false, percent:0, level:1, used:false, amount };
-      }
-    }
-
-    async function refreshRewardHint(user) {
-      if (!rewardHint) return;
-      const amount = parsedAmount();
-      if (!(amount > 0)) { rewardHint.classList.remove('show'); return; }
-      const reward = await rewardState(user,amount);
-      if (reward.eligible) {
-        rewardHint.textContent = `🎟️ مكافأة Level 15 متاحة: سيُطبّق خصم 15% تلقائيًا على هذا الطلب (${money(amount)} ← ${money(reward.amount)}).`;
-        rewardHint.classList.add('show');
-      } else if (reward.level >= 15 && reward.used) {
-        rewardHint.textContent = '✓ مكافأة خصم Level 15 استُخدمت سابقًا.';
-        rewardHint.classList.add('show');
-      } else rewardHint.classList.remove('show');
-    }
-    onAuthStateChanged(auth,user=>{ if(user) refreshRewardHint(user); });
-
-    form.addEventListener('submit', async event => {
-      event.preventDefault();
-      submit.disabled = true;
-      submit.textContent = 'جاري تسجيل الطلب…';
-
-      const values = {
-        name: document.querySelector('#student-name').value.trim(),
-        age: Number(document.querySelector('#student-age').value),
-        nationality: document.querySelector('#nationality').value,
-        contactMethod: document.querySelector('#contact-method').value,
-        contactValue: document.querySelector('#contact-value').value.trim(),
-        currentCountry: document.querySelector('#current-country').value.trim(),
-        requestDetails: document.querySelector('#request-details').value.trim()
-      };
-      const originalAmount = parsedAmount();
-      const user = auth.currentUser;
-      const reward = await rewardState(user,originalAmount);
-      const amount = reward.eligible ? reward.amount : originalAmount;
-      const userEmail = values.contactMethod === 'بريد إلكتروني' ? values.contactValue : (user?.email || '');
-      const rewardText = reward.eligible ? `Level 15 — خصم 15% (${money(originalAmount)} ← ${money(amount)})` : '';
-
-      const order = {
-        source: 'service_request_email',
-        submissionChannel: 'email+admin',
-        userId: user?.uid || null,
-        userName: values.name,
-        userEmail,
-        age: values.age,
-        nationality: values.nationality,
-        contactMethod: values.contactMethod,
-        contactValue: values.contactValue,
-        currentCountry: values.currentCountry,
-        requestDetails: values.requestDetails,
-        serviceTitle: service,
-        servicePriceText: reward.eligible ? `${price} | بعد مكافأة Level 15: ${money(amount)}` : price,
-        amount,
-        currency: price.includes('₽') ? 'RUB' : 'USD',
-        paymentStatus: 'not_paid',
-        status: 'created',
-        adminRecipients: recipients,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      };
-      if (reward.eligible) Object.assign(order, {
-        rewardCode: reward.rewardCode,
-        rewardLevel: 15,
-        discountPercent: 15,
-        originalAmount
-      });
-
-      const mailData = {
-        الخدمة: service,
-        السعر_الأصلي: price,
-        المكافأة: rewardText || 'لا توجد مكافأة مطبقة',
-        السعر_بعد_المكافأة: amount || price,
-        الاسم: values.name,
-        العمر: values.age,
-        الجنسية: values.nationality,
-        وسيلة_التواصل: values.contactMethod,
-        بيانات_التواصل: values.contactValue,
-        الدولة_الحالية: values.currentCountry,
-        تفاصيل_الطلب: values.requestDetails
-      };
-      const body = Object.entries(mailData).map(([k,v]) => `${k}: ${v || '-'}`).join('\n');
-      localStorage.setItem('shadrat_last_service_request', body);
-
-      try {
-        const ref = await addDoc(collection(db,'orders'), order);
-        localStorage.setItem('shadrat_last_service_order_id', ref.id);
-        show(`تم تسجيل الطلب في الإدارة برقم ${ref.id.slice(0,8).toUpperCase()}.${reward.eligible?' تم تطبيق مكافأة Level 15 وخصم 15% على هذا الطلب.':''} يتم الآن فتح البريد لإرساله للمسؤولين.`);
-        setTimeout(() => {
-          location.href = `mailto:${recipients}?subject=${encodeURIComponent('طلب خدمة من شذرات - ' + service)}&body=${encodeURIComponent(body + `\n\nرقم الطلب الداخلي: ${ref.id}`)}`;
-        }, 250);
-      } catch (error) {
-        console.error('[Shadrat] order logging failed', error);
-        show('تعذر تسجيل الطلب داخل الإدارة، لذلك لم نعتبر العملية مكتملة. يمكنك المحاولة مرة أخرى بعد تحديث الصفحة.', true);
-        submit.disabled = false;
-        submit.textContent = 'إعادة محاولة تسجيل الطلب';
-      }
-    });
-  </script>
-</body>
-</html>
+<header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"></a></div></header>
+<main><section class="page-hero compact-hero"><div class="container request-wrap"><span class="eyebrow">طلب خدمة</span><h1>أرسل طلبك وتابعه من حسابك</h1><p class="lead">بعد إرسال الطلب يُسجّل مباشرة في إدارة شذرات، وإذا كنت مسجلًا تتابع كل تحديث من قسم «طلباتي» بدون بريد أو خطوات إضافية.</p></div></section>
+<section class="section"><div class="container request-wrap"><article class="request-card"><div class="selected-service"><span>الخدمة المختارة</span><b id="service-name">خدمة من شذرات</b><small id="service-price" class="muted"></small><div class="level-reward-hint" id="level-reward-hint"></div></div>
+<form class="request-form" id="request-form"><div class="form-grid"><label class="field"><span>الاسم الكامل</span><input id="student-name" required maxlength="120" placeholder="اكتب اسمك"></label><label class="field"><span>العمر</span><input id="student-age" type="number" min="12" max="80" required placeholder="مثال: 18"></label><label class="field"><span>الجنسية</span><select id="nationality" required><option value="">اختر الجنسية</option><option>يمني</option><option>مصري</option><option>سعودي</option><option>أخرى</option></select></label><label class="field"><span>وسيلة التواصل</span><select id="contact-method" required><option>واتساب</option><option>تليجرام</option><option>رقم جوال</option><option>بريد إلكتروني</option></select></label><label class="field"><span>رقم الجوال أو التليجرام أو البريد</span><input id="contact-value" required maxlength="200" placeholder="مثال: @username أو رقمك أو بريدك"></label><label class="field"><span>الدولة الحالية</span><input id="current-country" maxlength="100" placeholder="مثال: السعودية"></label><label class="field full"><span>معلومات الطلب</span><textarea id="request-details" maxlength="5000" placeholder="اكتب ما تحتاجه بالتحديد"></textarea></label></div><div class="request-note">لا ترسل صور جواز أو شهادة من هنا. إذا احتجنا مستندًا سيظهر لك ذلك في حالة الطلب ورسالة الفريق.</div><button class="btn primary" id="submit-request" type="submit">إرسال الطلب</button><div class="success-box" id="success-box" aria-live="polite"></div></form>
+</article></div></section></main>
+<footer class="site-footer"><div class="container footer-grid"><div><b>شذرات للمنح</b><p>طلبات خدمات واضحة وقابلة للمتابعة.</p></div><div><b>المنصة</b><a href="services.html">الخدمات</a><a href="profile.html#orders">طلباتي</a></div><div><b>المعلومات</b><a href="about.html">من نحن</a><a href="privacy.html">الخصوصية</a></div></div></footer>
+<script src="nav-universal.js?v=157"></script><script src="account-gate.js?v=2"></script>
+<script type="module">
+import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
+import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
+import{addDoc,collection,doc,getDoc,getDocs,getFirestore,query,serverTimestamp,where}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+import{firebaseConfig}from'./firebase-config.js';import{levelFromXp}from'./level-system.js?v=2';
+const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),params=new URLSearchParams(location.search),service=params.get('service')||'خدمة من شذرات',price=params.get('price')||'',form=document.querySelector('#request-form'),submit=document.querySelector('#submit-request'),box=document.querySelector('#success-box'),rewardHint=document.querySelector('#level-reward-hint'),LEVEL15_REWARD='level15-discount15';
+document.querySelector('#service-name').textContent=service;document.querySelector('#service-price').textContent=price?`السعر / الحالة: ${price}`:'';
+const parsedAmount=()=>{const m=String(price).match(/\d+(?:\.\d+)?/);return m?Number(m[0]):0},money=v=>Number(v||0).toFixed(Number(v||0)%1?2:0);
+function show(message,error=false,orderId='',logged=false){box.classList.add('show');box.classList.toggle('error',error);box.innerHTML=`<div>${message}</div>${!error?`<div class="success-actions">${logged?'<a class="btn primary" href="profile.html#orders">فتح مركز طلباتي</a>':''}<a class="btn outline" href="services.html">العودة للخدمات</a></div>`:''}`;if(orderId)box.dataset.orderId=orderId}
+async function rewardState(user,amount=parsedAmount()){if(!user||!(amount>0))return{eligible:false,percent:0,level:1,used:false,amount};try{const[userSnap,ordersSnap]=await Promise.all([getDoc(doc(db,'users',user.uid)),getDocs(query(collection(db,'orders'),where('userId','==',user.uid)))]),level=levelFromXp(userSnap.data()?.xp||0),used=ordersSnap.docs.some(d=>{const r=d.data()||{};return r.rewardCode===LEVEL15_REWARD&&r.status!=='canceled'});if(level<15||used)return{eligible:false,percent:0,level,used,amount};return{eligible:true,percent:15,level,used:false,amount:Math.round(amount*.85*100)/100,originalAmount:amount,rewardCode:LEVEL15_REWARD}}catch(e){console.warn('[Shadrat] reward check',e);return{eligible:false,percent:0,level:1,used:false,amount}}}
+async function fill(user){if(!user)return;try{const s=await getDoc(doc(db,'users',user.uid)),d=s.data()||{};if(d.fullName)document.querySelector('#student-name').value=d.fullName;if(d.age)document.querySelector('#student-age').value=d.age;if(d.nationality)document.querySelector('#nationality').value=[...document.querySelector('#nationality').options].some(o=>o.value===d.nationality)?d.nationality:'أخرى';if(d.currentCountry)document.querySelector('#current-country').value=d.currentCountry;if(d.contactMethod)document.querySelector('#contact-method').value=d.contactMethod;if(d.contactValue)document.querySelector('#contact-value').value=d.contactValue;const r=await rewardState(user);if(r.eligible){rewardHint.textContent=`🎟️ مكافأة Level 15: خصم 15% تلقائيًا (${money(r.originalAmount)} ← ${money(r.amount)}).`;rewardHint.classList.add('show')}}catch(e){console.warn('[Shadrat] request prefill',e)}}
+onAuthStateChanged(auth,fill);
+form.addEventListener('submit',async event=>{event.preventDefault();submit.disabled=true;submit.textContent='جاري تسجيل الطلب…';const values={name:document.querySelector('#student-name').value.trim(),age:Number(document.querySelector('#student-age').value),nationality:document.querySelector('#nationality').value,contactMethod:document.querySelector('#contact-method').value,contactValue:document.querySelector('#contact-value').value.trim(),currentCountry:document.querySelector('#current-country').value.trim(),requestDetails:document.querySelector('#request-details').value.trim()},user=auth.currentUser,originalAmount=parsedAmount(),reward=await rewardState(user,originalAmount),amount=reward.eligible?reward.amount:originalAmount,userEmail=values.contactMethod==='بريد إلكتروني'?values.contactValue:(user?.email||'');const order={source:'service_request_email',submissionChannel:'email+admin',userId:user?.uid||null,userName:values.name,userEmail,age:values.age,nationality:values.nationality,contactMethod:values.contactMethod,contactValue:values.contactValue,currentCountry:values.currentCountry,requestDetails:values.requestDetails,serviceTitle:service,servicePriceText:reward.eligible?`${price} | بعد مكافأة Level 15: ${money(amount)}`:price,amount,currency:price.includes('₽')?'RUB':'USD',paymentStatus:'not_paid',status:'created',adminRecipients:'shadrat.almn7@gmail.com',createdAt:serverTimestamp(),updatedAt:serverTimestamp()};if(reward.eligible)Object.assign(order,{rewardCode:reward.rewardCode,rewardLevel:15,discountPercent:15,originalAmount});try{const ref=await addDoc(collection(db,'orders'),order);localStorage.setItem('shadrat_last_service_order_id',ref.id);show(`تم استلام طلبك برقم <b>#${ref.id.slice(0,8).toUpperCase()}</b>.${user?' تقدر تتابع حالته الآن من مركز طلباتك.':' سيتواصل معك فريق شذرات عبر وسيلة التواصل التي أدخلتها.'}`,false,ref.id,!!user);form.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=true)}catch(error){console.error('[Shadrat] order logging failed',error);show('تعذر تسجيل الطلب الآن. لم نعتبر العملية مكتملة؛ جرّب مرة أخرى.',true);submit.disabled=false;submit.textContent='إعادة محاولة إرسال الطلب'}});
+</script></body></html>
