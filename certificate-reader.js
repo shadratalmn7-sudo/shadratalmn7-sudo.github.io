@@ -61,24 +61,28 @@ export function describeCertificate(info,lang='en',{kind='cv',target=''}={}){
   if(lang==='ar'){const first=course?`شهادة «${course}»${issuer?` من ${issuer}`:''}${date?` بتاريخ ${date}`:''}.`:`شهادة موثقة${issuer?` صادرة من ${issuer}`:''}${date?` بتاريخ ${date}`:''}.`,second=skillText?`وترتبط بياناتها بـ ${skillText}.`:'';return kind==='letter'?[first,second,target?`ويتقاطع محتواها مع المسار المستهدف في ${target}.`:null].filter(Boolean).join(' '):[first,second].filter(Boolean).join(' ')}
   const first=course?`Certificate: “${course}”${issuer?` — ${issuer}`:''}${date?` (${date})`:''}.`:`Documented certificate${issuer?` — ${issuer}`:''}${date?` (${date})`:''}.`,second=skillText?`Documented subject areas: ${skillText}.`:'';return kind==='letter'?[first,second,target?`Its documented content overlaps with the intended path in ${target}.`:null].filter(Boolean).join(' '):[first,second].filter(Boolean).join(' ')
 }
-export function certificateEvidence(info,lang='en'){
-  if(!info)return'';
-  const known=new Set([info.title,info.course,info.issuer,info.date,info.credential].filter(Boolean).map(cleanKey));
-  const details=usefulLines(info.fullText||info.excerpt||'').filter(line=>{
-    const key=cleanKey(line);return !known.has(key)&&!boilerplate.test(line)&&!/(verify|signature|credential url|copyright|www\.|https?:|توقيع|تحقق)/i.test(line);
-  }).slice(0,4);
-  const skills=skillLabels(info,lang);
+function removeOwner(value,ownerName=''){
+  let text=normalize(value);const owner=normalize(ownerName);if(!text||!owner)return text;
+  const escaped=owner.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');text=text.replace(new RegExp(escaped,'ig'),'').replace(/\s{2,}/g,' ').trim();
+  const tokens=cleanKey(owner).split(' ').filter(x=>x.length>2),candidate=cleanKey(text);if(tokens.length>=2&&tokens.filter(x=>candidate.includes(x)).length>=Math.min(2,tokens.length)&&text.length<90)return'';return text;
+}
+export function certificateLabel(info,ownerName='',lang='en'){
+  if(!info)return lang==='ar'?'شهادة موثقة':'Documented certificate';
+  const course=removeOwner(info.course,ownerName),title=removeOwner(info.title,ownerName),generic=/^(certificate|certificate of completion|شهادة|شهادة إتمام|شهادة حضور)$/i;
+  const looksLikeEnglishName=x=>/^[A-Z][a-z'’-]+(?:\s+[A-Z][a-z'’-]+){1,4}$/.test(x||'')&&!courseSignal.test(x)&&!taxonomy.some(t=>t.re.test(x));
+  return[course,title].find(x=>x&&!generic.test(x)&&!looksLikeEnglishName(x))||(lang==='ar'?'شهادة موثقة':'Documented certificate');
+}
+export function certificateEvidence(info,lang='en',{ownerName=''}={}){
+  if(!info)return'';const owner=ownerName||(typeof document!=='undefined'?document.getElementById('name')?.value||'':''),course=certificateLabel(info,owner,lang),issuer=removeOwner(info.issuer,owner),date=removeOwner(info.date,owner),credential=removeOwner(info.credential,owner),skills=skillLabels(info,lang);
   if(lang==='ar')return[
-    describeCertificate(info,'ar'),
-    skills.length?`المجالات المثبتة في نص الشهادة: ${skills.join('، ')}.`:'',
-    details.length?`تفاصيل إضافية مستخرجة من الوثيقة: ${details.join('؛ ')}.`:'',
-    info.credential?`رقم الاعتماد: ${info.credential}.`:''
+    `«${course}»${issuer?` — صادرة عن ${issuer}`:''}${date?`، بتاريخ ${date}`:''} .`.replace(/\s+\./,'.'),
+    skills.length?`المجالات المرتبطة بالشهادة: ${skills.join('، ')}.`:'',
+    credential?`رقم الاعتماد: ${credential}.`:''
   ].filter(Boolean).join(' ');
   return[
-    describeCertificate(info,'en'),
-    skills.length?`Verified subject areas in the certificate text: ${skills.join(', ')}.`:'',
-    details.length?`Additional document details: ${details.join('; ')}.`:'',
-    info.credential?`Credential ID: ${info.credential}.`:''
+    `“${course}”${issuer?` — issued by ${issuer}`:''}${date?` (${date})`:''} .`.replace(/\s+\./,'.'),
+    skills.length?`Related subject areas: ${skills.join(', ')}.`:'',
+    credential?`Credential ID: ${credential}.`:''
   ].filter(Boolean).join(' ');
 }
 export function compactCertificate(info,lang='en'){if(!info)return'';const skills=skillLabels(info,lang);if(lang==='ar')return[info.course||info.title,info.issuer&&`— ${info.issuer}`,info.date&&`(${info.date})`,skills.length&&`— ${skills.join('، ')}`].filter(Boolean).join(' ');return[info.course||info.title,info.issuer&&`— ${info.issuer}`,info.date&&`(${info.date})`,skills.length&&`— ${skills.join(', ')}`].filter(Boolean).join(' ')}
