@@ -1,7 +1,9 @@
 export const VISIBLE_LEVEL_MAX=20;
 export const FUTURE_LEVEL_LABEL='21+';
-// Cumulative XP needed to enter each level. Index 0 = Level 1, index 20 = Level 21+.
-export const LEVEL_THRESHOLDS=[0,100,230,390,580,800,1050,1330,1640,1980,2350,2750,3180,3640,4130,4650,5200,5780,6390,7030,7700];
+export const XP_SYSTEM_MAX=9000;
+// Cumulative XP needed to enter each visible level. Level 21+ begins at 1770 XP.
+// The remaining XP capacity stays reserved for Levels 21-100 when those stages are designed.
+export const LEVEL_THRESHOLDS=[0,50,110,175,245,320,400,485,575,670,770,870,970,1070,1170,1270,1370,1470,1570,1670,1770];
 
 export const LEVEL_REWARDS=[
  {level:1,icon:'🎓',title:'طالب شذرات',description:'بدء رحلة المستويات وفتح شارة طالب شذرات.',type:'badge'},
@@ -61,13 +63,13 @@ export const PROFILE_BADGES=[
 ];
 
 export function levelFromXp(value=0){
- const xp=Math.max(0,Number(value)||0);let level=1;
+ const xp=Math.min(XP_SYSTEM_MAX,Math.max(0,Number(value)||0));let level=1;
  for(let i=0;i<LEVEL_THRESHOLDS.length;i++)if(xp>=LEVEL_THRESHOLDS[i])level=i+1;
  return Math.min(VISIBLE_LEVEL_MAX+1,level);
 }
 export function levelLabel(level){return Number(level)>VISIBLE_LEVEL_MAX?FUTURE_LEVEL_LABEL:String(Math.max(1,Number(level)||1))}
 export function nextLevelInfo(value=0){
- const xp=Math.max(0,Number(value)||0),level=levelFromXp(xp);
+ const xp=Math.min(XP_SYSTEM_MAX,Math.max(0,Number(value)||0)),level=levelFromXp(xp);
  if(level>VISIBLE_LEVEL_MAX)return{level,label:FUTURE_LEVEL_LABEL,start:LEVEL_THRESHOLDS[VISIBLE_LEVEL_MAX],target:null,current:0,needed:0,remaining:0,percent:100,xp};
  const start=LEVEL_THRESHOLDS[level-1]||0,target=LEVEL_THRESHOLDS[level]||start,needed=Math.max(1,target-start),current=Math.max(0,xp-start);
  return{level,label:String(level),start,target,current,needed,remaining:Math.max(0,target-xp),percent:Math.min(100,Math.max(0,Math.round(current/needed*100))),xp};
