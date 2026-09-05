@@ -1,4 +1,4 @@
-import * as base from './student-artifacts.js?v=3';
+import * as base from './student-artifacts.js?v=4';
 
 export const auth=base.auth;
 export const db=base.db;
