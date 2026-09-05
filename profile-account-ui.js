@@ -1,8 +1,8 @@
 (()=>{
-  if(window.__shadratAccountUiV1)return;
-  window.__shadratAccountUiV1=true;
+  if(window.__shadratAccountUiV2)return;
+  window.__shadratAccountUiV2=true;
 
-  let deepRoot=null;
+  let deepRoot=null,editorLoading=false;
 
   function injectStyles(){
     if(document.querySelector('#profile-account-ui-style'))return;
@@ -92,10 +92,17 @@
     panel?.querySelectorAll('#profile-edit-toggle,#profile-edit-form,.profile-edit-head').forEach(el=>el.remove());
   }
 
+  async function openDeepEditor(){
+    if(editorLoading)return;
+    editorLoading=true;
+    try{const m=await import('./profile-edit-deep.js?v=2');await m.openProfileEditor()}catch(e){console.error('[Shadrat] deep editor',e)}finally{editorLoading=false}
+  }
+
   function init(){
     injectStyles();removeLegacyEditor();hardenReadOnly();ensureAccountCard();syncCustomizer();
     const root=document.querySelector('.container.grid')||document.body;
     new MutationObserver(()=>{removeLegacyEditor();hardenReadOnly();ensureAccountCard();syncCustomizer()}).observe(root,{subtree:true,childList:true});
+    document.addEventListener('click',e=>{const pencil=e.target.closest('.profile-cover-edit');if(!pencil)return;e.preventDefault();e.stopImmediatePropagation();openDeepEditor()},true);
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&deepRoot)closeCustomizer()});
   }
 
