@@ -112,5 +112,5 @@
   }
 
   window.ShadratProfileNav={open:(id,options={})=>activate(id,{scroll:true,...options}),activate};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  boot();
 })();
