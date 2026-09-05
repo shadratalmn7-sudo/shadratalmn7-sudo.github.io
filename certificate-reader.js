@@ -32,7 +32,7 @@ function inferTitle(lines,course){return lines.find(x=>/certificate of|professio
 export function extractCertificateInfo(raw,fileName=''){
   const text=normalize(raw),lines=usefulLines(text);if(!lines.length)return null;
   const issuer=inferIssuer(lines,text),course=inferCourse(lines),title=inferTitle(lines,course),date=text.match(dateRe)?.[0]||'',skills=taxonomy.filter(x=>x.re.test(text)).map(x=>({en:x.en,ar:x.ar})),credential=(text.match(/(?:credential\s*(?:id|number)|certificate\s*(?:id|number)|verification\s*(?:id|code)|رقم\s*(?:الشهادة|الاعتماد))\s*[:#-]?\s*([A-Z0-9_-]{5,})/i)||[])[1]||'';
-  return{fileName,title,course,issuer,date,credential,skills,excerpt:lines.slice(0,12).join(' | ').slice(0,1200)}
+  return{fileName,title,course,issuer,date,credential,skills,excerpt:lines.slice(0,18).join(' | ').slice(0,2400),fullText:text.slice(0,20000)}
 }
 async function ocr(source,onProgress){await ensureOcr();const result=await window.Tesseract.recognize(source,'eng+ara',{logger:m=>{if(m.status==='recognizing text'&&Number.isFinite(m.progress))onProgress?.(Math.round(m.progress*100),m.status)}});return result?.data?.text||''}
 async function pageText(page,pageIndex,pageCount,onProgress){
@@ -60,5 +60,25 @@ export function describeCertificate(info,lang='en',{kind='cv',target=''}={}){
   if(!info)return'';const course=info.course||info.title||'',issuer=info.issuer||'',date=info.date||'',skills=skillLabels(info,lang),skillText=skills.join(lang==='ar'?'، ':', ');
   if(lang==='ar'){const first=course?`شهادة «${course}»${issuer?` من ${issuer}`:''}${date?` بتاريخ ${date}`:''}.`:`شهادة موثقة${issuer?` صادرة من ${issuer}`:''}${date?` بتاريخ ${date}`:''}.`,second=skillText?`وترتبط بياناتها بـ ${skillText}.`:'';return kind==='letter'?[first,second,target?`ويتقاطع محتواها مع المسار المستهدف في ${target}.`:null].filter(Boolean).join(' '):[first,second].filter(Boolean).join(' ')}
   const first=course?`Certificate: “${course}”${issuer?` — ${issuer}`:''}${date?` (${date})`:''}.`:`Documented certificate${issuer?` — ${issuer}`:''}${date?` (${date})`:''}.`,second=skillText?`Documented subject areas: ${skillText}.`:'';return kind==='letter'?[first,second,target?`Its documented content overlaps with the intended path in ${target}.`:null].filter(Boolean).join(' '):[first,second].filter(Boolean).join(' ')
+}
+export function certificateEvidence(info,lang='en'){
+  if(!info)return'';
+  const known=new Set([info.title,info.course,info.issuer,info.date,info.credential].filter(Boolean).map(cleanKey));
+  const details=usefulLines(info.fullText||info.excerpt||'').filter(line=>{
+    const key=cleanKey(line);return !known.has(key)&&!boilerplate.test(line)&&!/(verify|signature|credential url|copyright|www\.|https?:|توقيع|تحقق)/i.test(line);
+  }).slice(0,4);
+  const skills=skillLabels(info,lang);
+  if(lang==='ar')return[
+    describeCertificate(info,'ar'),
+    skills.length?`المجالات المثبتة في نص الشهادة: ${skills.join('، ')}.`:'',
+    details.length?`تفاصيل إضافية مستخرجة من الوثيقة: ${details.join('؛ ')}.`:'',
+    info.credential?`رقم الاعتماد: ${info.credential}.`:''
+  ].filter(Boolean).join(' ');
+  return[
+    describeCertificate(info,'en'),
+    skills.length?`Verified subject areas in the certificate text: ${skills.join(', ')}.`:'',
+    details.length?`Additional document details: ${details.join('; ')}.`:'',
+    info.credential?`Credential ID: ${info.credential}.`:''
+  ].filter(Boolean).join(' ');
 }
 export function compactCertificate(info,lang='en'){if(!info)return'';const skills=skillLabels(info,lang);if(lang==='ar')return[info.course||info.title,info.issuer&&`— ${info.issuer}`,info.date&&`(${info.date})`,skills.length&&`— ${skills.join('، ')}`].filter(Boolean).join(' ');return[info.course||info.title,info.issuer&&`— ${info.issuer}`,info.date&&`(${info.date})`,skills.length&&`— ${skills.join(', ')}`].filter(Boolean).join(' ')}
