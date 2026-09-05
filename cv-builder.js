@@ -1,4 +1,4 @@
-import{downloadNodePdf,getArtifact,safeFilename,saveArtifact,waitForUser}from'./student-artifacts.js?v=1';
+import{downloadNodePdf,getArtifact,safeFilename,saveArtifact,waitForUser}from'./student-artifacts.js?v=2';
 
 const $=id=>document.getElementById(id);
 const fieldIds=['artifactName','name','role','email','phone','location','link','summary','education','certs','experience','skills','languages','template','lang'];
@@ -35,13 +35,13 @@ async function cloudSave({silent=false}={}){
   if(!clean(data.artifactName))data.artifactName='CV 1';
   const user=await waitForUser();
   if(!user){if(!silent)status('سجّل الدخول أولًا ليُحفظ الـCV في حسابك.','error');return null}
-  saving=true;if(!silent)status('جارٍ حفظ الـCV في حسابك…');
+  saving=true;const saveButton=$('saveBtn'),oldSaveText=saveButton?.textContent;if(saveButton&&!silent){saveButton.disabled=true;saveButton.textContent='جاري الحفظ…'}if(!silent)status('جارٍ حفظ الـCV في حسابك…');
   try{
     const saved=await saveArtifact({artifactType:'cv',artifactGroupId:groupId,artifactName:data.artifactName,studentName:data.name,specialization:data.role,template:data.template,language:data.lang,version,data,renderedHtml:$('cv').outerHTML});
     lastSavedFingerprint=fingerprint(data);version+=1;try{localStorage.setItem(localKey,JSON.stringify({groupId,version,data}))}catch{}
     if(!silent)status(`تم الحفظ باسم «${data.artifactName}».`,'success');
     return saved;
-  }catch(error){console.error(error);if(!silent)status(error?.code==='login-required'?'سجّل الدخول أولًا ليُحفظ الـCV.':'تعذر الحفظ الآن.','error');return null}finally{saving=false}
+  }catch(error){console.error(error);if(!silent)status(error?.code==='login-required'?'سجّل الدخول أولًا ليُحفظ الـCV.':'تعذر الحفظ الآن.','error');return null}finally{saving=false;if(saveButton&&!silent){saveButton.disabled=false;saveButton.textContent=oldSaveText||'حفظ في حسابي'}}
 }
 async function download(){
   const data=collect();if(!clean(data.name)){status('اكتب اسم الطالب قبل التنزيل.','error');return}
@@ -55,6 +55,6 @@ async function loadInitial(){
   const user=await waitForUser(900);if(user){if(!$('name').value)$('name').value=user.displayName||'';if(!$('email').value)$('email').value=user.email||''}render();
 }
 fieldIds.forEach(id=>$(id)?.addEventListener('input',render));
-$('saveBtn')?.addEventListener('click',()=>cloudSave());$('downloadBtn')?.addEventListener('click',download);
+$('saveBtn')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();cloudSave()});$('downloadBtn')?.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();download()});
 $('clearBtn')?.addEventListener('click',()=>{if(!confirm('مسح المسودة الحالية من الجهاز؟'))return;fieldIds.forEach(id=>{if($(id))$(id).value=''});$('artifactName').value='CV 1';$('template').value='modern';$('lang').value='en';groupId=crypto.randomUUID();version=1;lastSavedFingerprint='';localStorage.removeItem(localKey);render();status('تم مسح المسودة المحلية.')});
 loadInitial();
