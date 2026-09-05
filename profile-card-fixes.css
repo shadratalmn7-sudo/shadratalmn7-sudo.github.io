@@ -1,0 +1,69 @@
+/* شذرات — توحيد مقاس كرت الحساب بين المعاينة وبعد الحفظ */
+.student-cover,.profile-live-preview{
+  box-sizing:border-box;
+  width:100%;
+  aspect-ratio:3/1;
+  min-height:0!important;
+  background-size:cover!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+}
+.student-cover{
+  position:relative;
+  padding:clamp(14px,2.2vw,24px) clamp(16px,2.5vw,26px) clamp(58px,8.2vw,78px)!important;
+}
+.student-cover:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(3,8,24,.12),rgba(3,8,24,.04) 45%,rgba(3,8,24,.34));
+}
+.student-cover>.student-top,.student-cover>.profile-progress,.student-cover>.profile-cover-edit{position:relative;z-index:2}
+.student-cover>.profile-cover-edit{position:absolute}
+.student-cover .student-top{min-height:58px}
+.student-cover .profile-progress{
+  position:absolute;
+  left:clamp(14px,2vw,24px);
+  right:clamp(14px,2vw,24px);
+  bottom:clamp(10px,1.5vw,16px);
+  margin:0!important;
+  padding:8px 11px!important;
+  border-radius:12px!important;
+}
+.student-cover .progress-title{align-items:center;font-size:12px;line-height:1.2}
+.student-cover .progress-track{height:6px!important;margin-top:5px!important}
+.profile-live-preview{display:flex;align-items:center;padding:clamp(12px,2vw,18px)!important}
+.profile-live-preview .profile-preview-top{width:100%}
+
+/* أسماء الثيمات الفنية تبقى واضحة فوق الصور */
+.student-cover.theme-nebula .student-name h2,.student-cover.theme-anime-dusk .student-name h2,.student-cover.theme-luminous-tree .student-name h2,
+.profile-live-preview.theme-nebula [data-preview-name],.profile-live-preview.theme-anime-dusk [data-preview-name],.profile-live-preview.theme-luminous-tree [data-preview-name]{font-weight:900}
+
+/* بطاقة الوصول إلى ملفات الطلاب العامة */
+.public-profile-tools{margin-top:14px;padding:14px;border:1px solid #d7e5f6;border-radius:17px;background:#f8fbff;display:grid;gap:10px}
+.public-profile-tools-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.public-profile-tools-head b{color:#173d75}.public-profile-tools-head small{display:block;margin-top:3px;color:#64748b}
+.public-profile-tools-actions{display:flex;gap:8px;flex-wrap:wrap}.public-profile-tools-actions .btn{min-height:42px}
+.public-profile-search{display:flex;gap:8px}.public-profile-search input{flex:1;min-width:0;min-height:42px;border:1px solid #cfdbeb;border-radius:12px;padding:9px 11px;font:inherit;background:#fff}
+
+@media(max-width:640px){
+  .student-cover{aspect-ratio:3/1;padding:9px 11px 37px!important;border-radius:18px!important}
+  .student-cover .student-top{gap:9px;min-height:48px;align-items:center!important}
+  .student-cover .student-avatar{width:48px!important;height:48px!important;flex:0 0 48px;border-radius:15px!important;font-size:19px!important}
+  .student-cover .student-name h2{font-size:18px;line-height:1.1}
+  .student-cover .student-name p{font-size:12px;margin-top:3px}
+  .student-cover .student-profile-badges{margin-top:4px;gap:4px}
+  .student-cover .student-profile-badge{font-size:9px;padding:3px 5px}
+  .student-cover>.profile-cover-edit{left:10px!important;top:10px!important;width:34px!important;height:34px!important;border-radius:11px!important}
+  .student-cover>.profile-cover-edit svg{width:17px!important;height:17px!important}
+  .student-cover .profile-progress{left:10px;right:10px;bottom:6px;padding:4px 7px!important;border-radius:9px!important}
+  .student-cover .progress-title{font-size:9.5px}
+  .student-cover .progress-track{height:4px!important;margin-top:3px!important}
+  .profile-live-preview{aspect-ratio:3/1;padding:10px 12px!important;border-radius:18px!important}
+  .profile-live-preview .profile-preview-avatar{width:50px!important;height:50px!important;flex-basis:50px!important;border-radius:15px!important}
+  .profile-live-preview .profile-preview-who h4{font-size:18px!important}
+  .profile-live-preview .profile-preview-who p{font-size:12px!important}
+  .public-profile-tools-head{align-items:flex-start;flex-direction:column}.public-profile-search{width:100%;flex-direction:column}.public-profile-search .btn{width:100%}
+}
