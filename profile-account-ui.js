@@ -37,7 +37,7 @@
     editorLoading=true;
     try{
       await loadUnified();
-      const m=await import('./profile-edit-deep.js?v=6');
+      const m=await import('./profile-edit-deep.js?v=7');
       await m.openProfileEditor();
     }catch(e){console.error('[Shadrat] deep editor',e)}finally{editorLoading=false}
   }

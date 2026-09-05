@@ -21,7 +21,7 @@
     if(scroll){const t=sub?document.querySelector(`[data-profile-panel="${sub}"]`):document.querySelector(`[data-profile-panel="${GROUPS[main][0]}"]`);setTimeout(()=>t?.scrollIntoView({behavior:'smooth',block:'start'}),20)}
   }
 
-  function getEditor(){editorPromise=editorPromise||import('./profile-edit-deep.js?v=6').catch(error=>{editorPromise=null;throw error});return editorPromise}
+  function getEditor(){editorPromise=editorPromise||import('./profile-edit-deep.js?v=7').catch(error=>{editorPromise=null;throw error});return editorPromise}
   async function openEditor(){try{const editor=await getEditor();await editor.openProfileEditor()}catch(error){console.error('[Shadrat] profile editor failed to open',error);alert('تعذر فتح تعديل الحساب الآن. حدّث الصفحة وحاول مرة ثانية.')}}
 
   function customColorInput(root=document){return root.querySelector('[name="profileCustomName"],[data-profile-custom-name]')}
