@@ -1,5 +1,5 @@
-import{downloadNodePdf,getArtifact,safeFilename,saveArtifact,waitForUser}from'./student-artifacts-a4.js?v=7';
-import{certificateEvidence,certificateLabel,extractCertificateInfo,readCertificate,skillLabels}from'./certificate-reader.js?v=4';
+import{downloadNodePdf,getArtifact,safeFilename,saveArtifact,waitForUser}from'./student-artifacts-a4.js?v=8';
+import{certificateEvidence,certificateLabel,extractCertificateInfo,readCertificate,skillLabels}from'./certificate-reader.js?v=5';
 import{buildSemanticCv}from'./cv-semantic-polish.js?v=6';
 const $=id=>document.getElementById(id),clean=v=>String(v||'').trim(),lines=v=>String(v||'').split(/\n+/).map(clean).filter(Boolean),splitSkills=v=>String(v||'').split(/[،,|•\n]+/).map(clean).filter(Boolean);
 const fieldIds=['artifactName','name','role','email','phone','location','link','summary','education','certs','experience','skills','languages','institution','destination','studyGoal','employer','workGoal','template','lang'];
