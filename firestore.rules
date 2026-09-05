@@ -15,6 +15,9 @@ service cloud.firestore {
     function moderator() { return supportStaff() || communityStaff(); }
     function safeText(value, minimum, maximum) { return value is string && value.size() >= minimum && value.size() <= maximum; }
     function validPostType(value) { return value in ['question','experience','info','guide','update','warning','accepted']; }
+    function validOptionalAge(data) {
+      return !('age' in data) || data.age == null || (data.age is int && data.age >= 12 && data.age <= 100);
+    }
 
     match /users/{uid} {
       allow create: if own(uid) && request.resource.data.role == 'student'
@@ -22,14 +25,24 @@ service cloud.firestore {
         && request.resource.data.publicProfile == false;
       allow read: if own(uid) || supportStaff();
 
-      // معلومات الحساب واسم المستخدم قابلة للتعديل بدون حد زمني.
+      // معلومات الملف العادية مستقلة عن اسم المستخدم، حتى لا يمنع اسم قديم حفظ العمر أو بقية البيانات.
       allow update: if own(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'fullName','age','nationality','currentCountry','city','contactMethod','contactValue','location','studyLevel','updatedAt'
+        ])
+        && safeText(request.resource.data.fullName, 3, 80)
+        && validOptionalAge(request.resource.data);
+
+      // اسم المستخدم يُفحص فقط عندما يتغير فعلاً.
+      allow update: if own(uid)
+        && request.resource.data.username != resource.data.username
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'fullName','username','age','nationality','currentCountry','city','contactMethod','contactValue','location','studyLevel','updatedAt'
         ])
         && safeText(request.resource.data.fullName, 3, 80)
         && request.resource.data.username.matches('^[a-z0-9_]{3,24}$')
-        && !request.resource.data.username.matches('.*(owner|admin|support|staff|shazarat).*');
+        && !request.resource.data.username.matches('.*(owner|admin|support|staff|shazarat).*')
+        && validOptionalAge(request.resource.data);
 
       allow update: if own(uid)
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
