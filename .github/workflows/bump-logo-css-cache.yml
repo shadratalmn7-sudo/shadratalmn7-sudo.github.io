@@ -29,6 +29,6 @@ jobs:
           if git diff --quiet; then exit 0; fi
           git config user.name 'shadratalmn7-sudo'
           git config user.email 'shadrat.almn7@gmail.com'
-          git add '*.html' '**/*.html' || true
+          git add -A
           git commit -m 'Bust cache for larger Shadrat logo'
           git push
