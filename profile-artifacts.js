@@ -1,4 +1,4 @@
-import{auth,downloadArtifactPdf,ensureBuilderCss,formatSavedAt,listArtifacts,timestampMs,waitForUser}from'./student-artifacts.js?v=1';
+import{auth,downloadArtifactPdf,ensureBuilderCss,formatSavedAt,listArtifacts,timestampMs,waitForUser}from'./student-artifacts.js?v=2';
 
 ensureBuilderCss();
 const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
