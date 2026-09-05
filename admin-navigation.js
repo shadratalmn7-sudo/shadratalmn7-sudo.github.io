@@ -17,4 +17,5 @@
   function ensureMounted(){ensureAside();ensureBackdrop();ensureToggle();document.querySelectorAll('.admin-student-menu-button,.admin-student-menu').forEach(x=>x.remove());document.body.classList.remove('student-menu-open')}
   if(!window.__shadratAdminNavigationEvents){window.__shadratAdminNavigationEvents=true;document.addEventListener('click',e=>{if(e.target.closest('.admin-hamburger')){e.preventDefault();e.stopPropagation();setOpen(!document.body.classList.contains('admin-drawer-open'));return}if(e.target.closest('.admin-drawer-close,.admin-drawer-backdrop')){e.preventDefault();setOpen(false);return}if(e.target.closest('.admin-nav a'))setOpen(false)},true);document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false)})}
   ensureMounted();new MutationObserver(()=>queueMicrotask(ensureMounted)).observe(document.body,{childList:true,subtree:true});setInterval(ensureMounted,2000);
+  if(!document.querySelector('script[data-admin-activity-center]')){const s=document.createElement('script');s.type='module';s.src='admin-activity-center.js?v=1';s.dataset.adminActivityCenter='1';document.body.appendChild(s)}
 })();
