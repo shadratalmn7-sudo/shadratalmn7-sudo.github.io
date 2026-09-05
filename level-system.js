@@ -6,41 +6,40 @@ export const XP_SYSTEM_MAX=1000000;
 export const LEVEL_THRESHOLDS=[0,300,650,1050,1525,2075,2700,3400,4200,5100,6100,7200,8400,9700,11100,12600,14250,16050,17950,19950,22150];
 
 export const LEVEL_REWARDS=[
- {level:1,icon:'🎓',title:'طالب شذرات',description:'بدء رحلة المستويات وفتح شارة طالب شذرات.',type:'badge'},
- {level:2,icon:'🎨',title:'ثيم الملف الأول',description:'فتح ثيم Sky لتخصيص ملفك الشخصي.',type:'profile'},
+ {level:1,icon:'🎓',title:'طالب شذرات',description:'بدء رحلة المستويات وفتح 3 ثيمات أساسية للملف الشخصي.',type:'badge'},
+ {level:2,icon:'🌌',title:'ثيم Nebula',description:'فتح ثيم الفضاء Nebula لتخصيص ملفك الشخصي.',type:'profile'},
  {level:3,icon:'🖌️',title:'ألوان الاسم',description:'فتح ألوان إضافية لاسمك الظاهر في الملف.',type:'profile'},
  {level:4,icon:'🪪',title:'إطار الصورة الأول',description:'فتح إطار أزرق للصورة الشخصية.',type:'profile'},
  {level:5,icon:'✍️',title:'قالبان Motivation',description:'فتح قالبين Premium من قوالب Motivation Letter.',type:'motivation'},
- {level:6,icon:'🌊',title:'حزمة ألوان وثيم',description:'فتح لونين إضافيين للاسم وثيم Ocean.',type:'profile'},
+ {level:6,icon:'🌆',title:'ثيم Anime Dusk',description:'فتح ثيم المدينة والغروب Anime Dusk.',type:'profile'},
  {level:7,icon:'📄',title:'قالبان CV',description:'فتح قالبين Premium من قوالب السيرة الذاتية.',type:'cv'},
  {level:8,icon:'🏅',title:'طالب نشيط',description:'فتح شارة طالب نشيط وإمكانية اختيار الشارة الظاهرة.',type:'badge'},
  {level:9,icon:'📄',title:'قالبان CV إضافيان',description:'فتح قالبين Premium إضافيين للسيرة الذاتية.',type:'cv'},
  {level:10,icon:'✍️',title:'كل قوالب Motivation',description:'فتح القوالب الثلاثة Premium المتبقية.',type:'motivation'},
  {level:11,icon:'📄',title:'كل قوالب CV',description:'فتح آخر قالب Premium للسيرة الذاتية.',type:'cv'},
- {level:12,icon:'🎭',title:'Theme Pack',description:'فتح ثيم Midnight الداكن للملف الشخصي.',type:'profile'},
+ {level:12,icon:'🌳',title:'ثيم Luminous Tree',description:'فتح ثيم الشجرة المضيئة للملف الشخصي.',type:'profile'},
  {level:13,icon:'✨',title:'تأثير الاسم + إطار',description:'فتح تأثير خفيف للاسم وإطار Glow جديد.',type:'profile'},
  {level:14,icon:'📂',title:'مساحة ملفات أكبر',description:'رفع حد النسخ المحفوظة من CV وMotivation داخل الحساب.',type:'files'},
  {level:15,icon:'🎟️',title:'خصم 15%',description:'خصم 15% على خدمة واحدة مؤهلة + شارة برونزية.',type:'discount',discount:15},
  {level:16,icon:'🎨',title:'لون الحساب الخاص',description:'فتح اختيار لون أساسي خاص لملفك الشخصي.',type:'profile'},
  {level:17,icon:'🖼️',title:'3 إطارات جديدة',description:'فتح الإطارات الفضي والذهبي والماسي.',type:'profile'},
  {level:18,icon:'🏆',title:'Badge Showcase',description:'عرض حتى 3 شارات تختارها في ملفك.',type:'badge'},
- {level:19,icon:'💎',title:'Premium Profile',description:'فتح ثيم Premium مميز للملف الشخصي.',type:'profile'},
- {level:20,icon:'🎁',title:'صندوق Level 20',description:'ثيم Elite + إطار حصري + شارة فضية + تخصيص كامل للملف.',type:'milestone'}
+ {level:19,icon:'🌙',title:'ثيم Midnight',description:'فتح ثيم Midnight الداكن للملف الشخصي.',type:'profile'},
+ {level:20,icon:'🎁',title:'صندوق Level 20',description:'إطار حصري + شارة فضية + تخصيص كامل للملف.',type:'milestone'}
 ];
 
 export const CV_TEMPLATE_LEVELS={creative:7,executive:7,timeline:9,editorial:9,technical:11};
 export const MOTIVATION_TEMPLATE_LEVELS={executive:5,editorial:5,creative:10,technical:10,serif:10};
 
+// 7 ثيمات فقط: أول 3 مفتوحة من Level 1، والباقي تفتح مع رفع المستوى.
 export const PROFILE_THEMES=[
  {id:'default',label:'شذرات الأزرق',level:1},
- {id:'nebula',label:'Nebula — فضاء',level:1},
- {id:'anime-dusk',label:'Anime Dusk — غروب',level:1},
- {id:'luminous-tree',label:'Luminous Tree — الشجرة',level:1},
- {id:'sky',label:'Sky',level:2},
- {id:'ocean',label:'Ocean',level:6},
- {id:'midnight',label:'Midnight',level:12},
- {id:'premium',label:'Premium',level:19},
- {id:'elite',label:'Elite',level:20}
+ {id:'sky',label:'Sky — سماوي',level:1},
+ {id:'ocean',label:'Ocean — محيط',level:1},
+ {id:'nebula',label:'Nebula — فضاء',level:2},
+ {id:'anime-dusk',label:'Anime Dusk — مدينة وغروب',level:6},
+ {id:'luminous-tree',label:'Luminous Tree — الشجرة المضيئة',level:12},
+ {id:'midnight',label:'Midnight — ليلي',level:19}
 ];
 export const PROFILE_NAME_COLORS=[
  {id:'white',label:'أبيض',value:'#ffffff',level:1},
@@ -85,6 +84,16 @@ export function artifactSaveLimit(level){return Number(level||1)>=14?8:3}
 
 if(typeof document!=='undefined'&&!document.querySelector('link[data-profile-art-themes]')){
  const link=document.createElement('link');
- link.rel='stylesheet';link.href='./profile-art-themes.css?v=1';link.dataset.profileArtThemes='1';
+ link.rel='stylesheet';link.href='./profile-art-themes.css?v=3';link.dataset.profileArtThemes='1';
  document.head.appendChild(link);
+}
+if(typeof document!=='undefined'&&!document.querySelector('link[data-profile-card-fixes]')){
+ const link=document.createElement('link');
+ link.rel='stylesheet';link.href='./profile-card-fixes.css?v=1';link.dataset.profileCardFixes='1';
+ document.head.appendChild(link);
+}
+if(typeof document!=='undefined'&&/\bprofile\.html$/i.test(location.pathname)&&!document.querySelector('script[data-public-profile-sync]')){
+ const script=document.createElement('script');
+ script.type='module';script.src='./profile-public-sync.js?v=1';script.dataset.publicProfileSync='1';
+ document.head.appendChild(script);
 }
