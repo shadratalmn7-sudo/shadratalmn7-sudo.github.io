@@ -1,6 +1,6 @@
 (()=>{
-  if(window.__shadratProfileLayoutV7)return;
-  window.__shadratProfileLayoutV7=true;
+  if(window.__shadratProfileLayoutV8)return;
+  window.__shadratProfileLayoutV8=true;
 
   const GROUPS={
     overview:['overview'],
@@ -11,7 +11,7 @@
   };
   const LEGACY={favorites:'artifacts',documents:'artifacts',rewards:'level',support:'orders'};
   const LEVEL_TAB='<svg class="profile-main-icon" viewBox="0 0 24 24" fill="none"><path d="M5 18V9m7 9V5m7 13v-6M3 20h18"/></svg><span>تقدمي</span>';
-  let current='overview',repairing=false;
+  let current='overview',repairing=false,editorPromise=null;
 
   function mainOf(id=''){return LEGACY[id]||id}
 
@@ -36,13 +36,25 @@
   function keepFinalTabs(){
     if(repairing)return;
     const level=document.querySelector('.profile-tabs [data-profile-tab="level"]');
-    if(level&&!level.querySelector('.profile-main-icon')){
-      repairing=true;level.innerHTML=LEVEL_TAB;repairing=false;
+    if(level&&!level.querySelector('.profile-main-icon')){repairing=true;level.innerHTML=LEVEL_TAB;repairing=false}
+  }
+
+  async function openEditor(){
+    try{
+      editorPromise=editorPromise||import('./profile-edit-deep.js?v=4');
+      const editor=await editorPromise;
+      await editor.openProfileEditor();
+    }catch(error){
+      editorPromise=null;
+      console.error('[Shadrat] profile editor failed to open',error);
+      alert('تعذر فتح تعديل الحساب الآن. حدّث الصفحة وحاول مرة ثانية.');
     }
   }
 
   function wire(){
     document.addEventListener('click',event=>{
+      const edit=event.target.closest('[data-profile-edit]');
+      if(edit){event.preventDefault();event.stopImmediatePropagation();openEditor();return}
       const tab=event.target.closest('.profile-tabs [data-profile-tab]');
       if(tab){event.preventDefault();activate(tab.dataset.profileTab,{scroll:true});return}
       const shortcut=event.target.closest('[data-open-profile-tab]');
@@ -50,7 +62,7 @@
       const requested=shortcut.dataset.openProfileTab||'',main=mainOf(requested);
       if(!GROUPS[main])return;
       event.preventDefault();activate(main,{scroll:true,sub:requested!==main?requested:''});
-    });
+    },true);
   }
 
   function init(){
