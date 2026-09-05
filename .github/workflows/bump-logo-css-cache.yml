@@ -37,6 +37,7 @@ jobs:
               ns=ns.replace('student-profile.js?v=4','student-profile.js?v=5')
               ns=ns.replace('nav-universal.js?v=158','nav-universal.js?v=159')
               ns=ns.replace("./notifications-live.js?v=12","./notifications-live.js?v=13")
+              ns=ns.replace("const required=[d.username,d.age,d.nationality,d.currentCountry||d.country,d.city,d.studyLevel,d.contactValue]","const required=[d.username,d.age,d.nationality,d.currentCountry||d.country,d.city,d.studyLevel,d.contactMethod,d.contactValue]")
               if ns!=s:
                   p.write_text(ns,encoding='utf-8')
                   changed.append(str(p))
@@ -49,5 +50,5 @@ jobs:
           git config user.name 'shadratalmn7-sudo'
           git config user.email 'shadrat.almn7@gmail.com'
           git add -A
-          git commit -m 'Bust profile settings cache'
+          git commit -m 'Align profile completion percentage'
           git push
