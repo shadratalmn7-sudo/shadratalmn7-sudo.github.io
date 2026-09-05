@@ -95,8 +95,8 @@ const sanitizeStoredHtml=(html='')=>{
   }));
   return parsed.body.innerHTML;
 };
-function normalizeExportNode(clone){
-  const props={position:'relative',top:'auto',left:'auto',right:'auto',bottom:'auto',transform:'none','transform-origin':'initial',display:'block',visibility:'visible',opacity:'1','box-shadow':'none','border-radius':'0',margin:'0',width:`${PAGE_W}px`,'min-width':`${PAGE_W}px`,'max-width':`${PAGE_W}px`,height:`${PAGE_H}px`,'min-height':`${PAGE_H}px`,'max-height':`${PAGE_H}px`,'box-sizing':'border-box',overflow:'hidden'};
+function normalizeExportNode(clone,multiPage=false){
+  const props={position:'relative',top:'auto',left:'auto',right:'auto',bottom:'auto',transform:'none','transform-origin':'initial',display:'block',visibility:'visible',opacity:'1','box-shadow':'none','border-radius':'0',margin:'0',width:`${PAGE_W}px`,'min-width':`${PAGE_W}px`,'max-width':`${PAGE_W}px`,height:multiPage?'auto':`${PAGE_H}px`,'min-height':`${PAGE_H}px`,'max-height':multiPage?'none':`${PAGE_H}px`,'box-sizing':'border-box',overflow:multiPage?'visible':'hidden'};
   Object.entries(props).forEach(([k,v])=>clone.style.setProperty(k,v,'important'));
   return clone;
 }
@@ -138,23 +138,25 @@ function inlineComputedStyles(source,clone){
 }
 const imageReady=img=>new Promise((resolve,reject)=>{img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('SVG_IMAGE_LOAD_FAILED'))});
 async function renderNativeCanvas(node,scale){
-  const clone=normalizeExportNode(node.cloneNode(true));
+  const multiPage=node.dataset.multipage==='true',clone=normalizeExportNode(node.cloneNode(true),multiPage);
   inlineComputedStyles(node,clone);
+  normalizeExportNode(clone,multiPage);
+  const contentHeight=multiPage?Math.max(PAGE_H,node.scrollHeight,node.offsetHeight):PAGE_H;
   const dir=nodeDirection(node);
   clone.setAttribute('dir',dir);
   clone.style.setProperty('direction',dir,'important');
   clone.style.setProperty('unicode-bidi','isolate','important');
   const wrapper=document.createElement('div');
   wrapper.setAttribute('xmlns','http://www.w3.org/1999/xhtml');
-  wrapper.style.cssText=`width:${PAGE_W}px;height:${PAGE_H}px;margin:0;padding:0;background:#fff;overflow:hidden;direction:${dir};`;
+  wrapper.style.cssText=`width:${PAGE_W}px;height:${contentHeight}px;margin:0;padding:0;background:#fff;overflow:hidden;direction:${dir};`;
   wrapper.appendChild(clone);
   const xml=new XMLSerializer().serializeToString(wrapper);
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${PAGE_W}" height="${PAGE_H}" viewBox="0 0 ${PAGE_W} ${PAGE_H}"><foreignObject x="0" y="0" width="${PAGE_W}" height="${PAGE_H}">${xml}</foreignObject></svg>`;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${PAGE_W}" height="${contentHeight}" viewBox="0 0 ${PAGE_W} ${contentHeight}"><foreignObject x="0" y="0" width="${PAGE_W}" height="${contentHeight}">${xml}</foreignObject></svg>`;
   const svgUrl=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
   try{
     const img=new Image();const ready=imageReady(img);img.src=svgUrl;
     if(typeof img.decode==='function'){try{await img.decode()}catch{await ready}}else await ready;
-    const canvas=document.createElement('canvas');canvas.width=Math.round(PAGE_W*scale);canvas.height=Math.round(PAGE_H*scale);
+    const canvas=document.createElement('canvas');canvas.width=Math.round(PAGE_W*scale);canvas.height=Math.round(contentHeight*scale);
     const ctx=canvas.getContext('2d');if(!ctx)throw new Error('CANVAS_CONTEXT_MISSING');
     ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(img,0,0,canvas.width,canvas.height);
     return canvas;
@@ -162,15 +164,16 @@ async function renderNativeCanvas(node,scale){
 }
 async function renderHtml2Canvas(node,scale,preferNativeText=false){
   await ensureHtml2Canvas();
-  const clone=normalizeExportNode(node.cloneNode(true));
+  const multiPage=node.dataset.multipage==='true',clone=normalizeExportNode(node.cloneNode(true),multiPage);
   const shell=document.createElement('div');
   const dir=nodeDirection(node);
   shell.className='artifact-pdf-shell';shell.dir=dir;
-  shell.style.cssText=`position:fixed;top:0;left:-10000px;width:${PAGE_W}px;height:${PAGE_H}px;margin:0;padding:0;background:#fff;z-index:2147483645;overflow:hidden;box-sizing:border-box;pointer-events:none;direction:${dir};`;
+  shell.style.cssText=`position:fixed;top:0;left:-10000px;width:${PAGE_W}px;height:auto;min-height:${PAGE_H}px;margin:0;padding:0;background:#fff;z-index:2147483645;overflow:visible;box-sizing:border-box;pointer-events:none;direction:${dir};`;
   shell.appendChild(clone);document.body.appendChild(shell);
   try{
     await nextPaint();await wait(40);
-    return await window.html2canvas(clone,{scale,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false,removeContainer:true,foreignObjectRendering:preferNativeText,scrollX:0,scrollY:0,width:PAGE_W,height:PAGE_H,windowWidth:PAGE_W,windowHeight:PAGE_H});
+    const contentHeight=multiPage?Math.max(PAGE_H,clone.scrollHeight,clone.offsetHeight):PAGE_H;
+    return await window.html2canvas(clone,{scale,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',logging:false,removeContainer:true,foreignObjectRendering:preferNativeText,scrollX:0,scrollY:0,width:PAGE_W,height:contentHeight,windowWidth:PAGE_W,windowHeight:contentHeight});
   }finally{shell.remove()}
 }
 async function makePdfBlob(node){
@@ -189,7 +192,10 @@ async function makePdfBlob(node){
   await ensureJsPdf();
   const JsPDF=window.jspdf?.jsPDF||window.jsPDF;if(!JsPDF)throw new Error('JSPDF_MISSING');
   const pdf=new JsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true,putOnlyUsedFonts:true});
-  const image=await canvasToDataUrl(canvas);pdf.addImage(image,'JPEG',0,0,210,297,undefined,'FAST');
+  const pagePixels=Math.round(canvas.width*PAGE_H/PAGE_W),pages=Math.max(1,Math.ceil(canvas.height/pagePixels));
+  for(let i=0;i<pages;i++){
+    const slice=document.createElement('canvas');slice.width=canvas.width;slice.height=pagePixels;const ctx=slice.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,slice.width,slice.height);ctx.drawImage(canvas,0,i*pagePixels,canvas.width,Math.min(pagePixels,canvas.height-i*pagePixels),0,0,canvas.width,Math.min(pagePixels,canvas.height-i*pagePixels));if(i)pdf.addPage();pdf.addImage(await canvasToDataUrl(slice),'JPEG',0,0,210,297,undefined,'FAST');
+  }
   const blob=pdf.output('blob');if(!blob||!blob.size)throw new Error('PDF_BLOB_EMPTY');return blob;
 }
 function openPrintFallback(node){
