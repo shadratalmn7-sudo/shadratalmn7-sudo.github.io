@@ -14,10 +14,16 @@ jobs:
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Install Firebase test tooling
         run: npm install --no-save firebase@12.2.1 @firebase/rules-unit-testing firebase-tools
+      - name: Verify Java runtime
+        run: java -version
       - name: Compile and test Firestore rules
         run: npx firebase emulators:exec --only firestore --project demo-shazarat-profile "node scripts/test-profile-rules.mjs"
