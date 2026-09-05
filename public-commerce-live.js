@@ -34,5 +34,15 @@ async function renderOffers() {
   }
 }
 
-// الخدمات الجديدة تُدار من services.html مباشرة حتى لا يعيد الكود القديم بناء الصفحة أو يغيّر تصميمها.
+function addStudentBuilders(){
+  if(!location.pathname.endsWith('/services.html')||document.querySelector('[data-student-builders]'))return;
+  const first=document.querySelector('.service-section');
+  if(!first)return;
+  const section=document.createElement('section');
+  section.className='service-section';section.dataset.studentBuilders='';
+  section.innerHTML='<div class="container"><div class="service-head"><span class="tag">مجانية</span><h2>أدوات تجهيز ملف الطالب</h2><p>أدوات ذاتية تساعدك على تجهيز مستندات التقديم مباشرة.</p></div><div class="service-shelf"><article class="service-card"><span class="tag">مجانية</span><h3>منشئ السيرة الذاتية CV</h3><p>أدخل بياناتك وتعليمك وشهاداتك ومهاراتك، واختر قالبًا مناسبًا للتقديم الأكاديمي.</p><a class="btn outline" href="cv-builder.html">إنشاء CV</a></article><article class="service-card"><span class="tag">مجانية</span><h3>منشئ Motivation Letter</h3><p>ابدأ برفع شهاداتك ثم أضف أهدافك ومعلوماتك ليُبنى خطاب الدافع حول إنجازاتك.</p><a class="btn outline" href="motivation-letter.html">إنشاء خطاب الدافع</a></article></div></div>';
+  first.insertAdjacentElement('beforebegin',section);
+}
+
 if (location.pathname.endsWith('/offers.html')) renderOffers();
+if (location.pathname.endsWith('/services.html')) addStudentBuilders();
