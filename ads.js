@@ -98,10 +98,132 @@
     return wrap;
   }
 
+  const CLICK_METER_KEY = 'shadrat_ad_click_meter_v1';
+  const CLICK_TARGET = 20;
+
+  function installClickInterstitial() {
+    if (window.__shadratClickInterstitialV1) return;
+    window.__shadratClickInterstitialV1 = true;
+
+    const clickStyle = document.createElement('style');
+    clickStyle.textContent = `
+      .shadrat-click-interstitial{position:fixed;inset:0;z-index:2147482000;display:grid;place-items:center;padding:18px;background:rgba(3,12,28,.72);backdrop-filter:blur(5px)}
+      .shadrat-click-interstitial[hidden]{display:none!important}
+      .shadrat-click-card{width:min(420px,calc(100vw - 28px));max-height:calc(100vh - 28px);overflow:auto;border:1px solid rgba(255,255,255,.2);border-radius:22px;background:#fff;color:#0f172a;box-shadow:0 28px 80px rgba(2,8,23,.42);padding:14px;text-align:center}
+      .shadrat-click-label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:9px;color:#64748b;font:700 12px/1.4 Tahoma,Arial,sans-serif}
+      .shadrat-click-ad{min-height:300px;margin:0 auto 12px;background:#f8fbff;border:1px solid rgba(29,78,216,.08);border-radius:16px}
+      .shadrat-click-continue{width:100%;border:0;border-radius:13px;padding:11px 14px;background:#1d4ed8;color:#fff;font:800 14px/1.4 Tahoma,Arial,sans-serif;cursor:pointer}
+      .shadrat-click-continue:disabled{opacity:.55;cursor:wait}
+      .shadrat-click-note{margin:8px 0 0;color:#64748b;font:12px/1.55 Tahoma,Arial,sans-serif}
+      @media(max-width:520px){.shadrat-click-interstitial{padding:10px}.shadrat-click-card{width:calc(100vw - 20px);border-radius:18px;padding:11px}}
+    `;
+    document.head.appendChild(clickStyle);
+
+    const readCount = () => {
+      try { return Math.max(0, Number(localStorage.getItem(CLICK_METER_KEY) || 0) || 0); }
+      catch { return Number(window.__shadratClickCount || 0); }
+    };
+    const writeCount = value => {
+      try { localStorage.setItem(CLICK_METER_KEY, String(value)); }
+      catch { window.__shadratClickCount = value; }
+    };
+
+    function showInterstitial(nextUrl = null) {
+      if (document.querySelector('.shadrat-click-interstitial')) return;
+      const overlay = document.createElement('div');
+      overlay.className = 'shadrat-click-interstitial';
+      overlay.setAttribute('role','dialog');
+      overlay.setAttribute('aria-modal','true');
+      overlay.setAttribute('aria-label','إعلان');
+      const card = document.createElement('div');
+      card.className = 'shadrat-click-card';
+      card.innerHTML = '<div class="shadrat-click-label"><span>إعلان</span><span>شذرات للمنح</span></div>';
+      const ad = makeAd(FOOTER_KEY,160,300,'shadrat-click-ad');
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'shadrat-click-continue';
+      button.disabled = true;
+      button.textContent = 'متابعة خلال لحظة…';
+      const note = document.createElement('p');
+      note.className = 'shadrat-click-note';
+      note.textContent = 'يظهر هذا الإعلان بشكل خفيف بعد كل 20 تفاعل داخل الموقع.';
+      card.append(ad, button, note);
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+      const oldOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        overlay.remove();
+        document.body.style.overflow = oldOverflow;
+        if (nextUrl) location.href = nextUrl;
+      };
+      const unlock = setTimeout(() => {
+        button.disabled = false;
+        button.textContent = nextUrl ? 'متابعة إلى الصفحة' : 'متابعة';
+        try { button.focus({preventScroll:true}); } catch {}
+      }, 1200);
+      button.addEventListener('click', () => {
+        clearTimeout(unlock);
+        finish();
+      });
+      const onKey = event => {
+        if (event.key !== 'Escape' || button.disabled) return;
+        document.removeEventListener('keydown', onKey);
+        clearTimeout(unlock);
+        finish();
+      };
+      document.addEventListener('keydown', onKey);
+    }
+
+    document.addEventListener('click', event => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target.closest?.('a,button,[role="button"]');
+      if (!target) return;
+      if (target.closest('.shadrat-auto-ad,.shadrat-click-interstitial,[data-no-ad-count]')) return;
+      if (target.matches('input,textarea,select,label') || target.closest('input,textarea,select,label')) return;
+
+      let nextUrl = null;
+      if (target.tagName === 'A') {
+        const href = target.getAttribute('href');
+        if (!href || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+        if (target.hasAttribute('download') || target.target === '_blank') return;
+        try {
+          const url = new URL(href, location.href);
+          if (url.origin !== location.origin) return;
+          nextUrl = url.href;
+        } catch { return; }
+      } else if (target.tagName === 'BUTTON') {
+        const type = (target.getAttribute('type') || 'submit').toLowerCase();
+        if (type === 'submit' || type === 'reset' || target.closest('form')) return;
+      }
+
+      const count = readCount() + 1;
+      if (count < CLICK_TARGET) {
+        writeCount(count);
+        return;
+      }
+      writeCount(0);
+
+      if (nextUrl) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        showInterstitial(nextUrl);
+      } else {
+        setTimeout(() => showInterstitial(null), 0);
+      }
+    }, true);
+  }
+
   const main = document.querySelector('main');
   if (!main) return;
   const sections = [...main.querySelectorAll(':scope > section')];
   if (!sections.length) return;
+
+  installClickInterstitial();
 
   main.prepend(makeAd(BAR_KEY,468,60,'shadrat-ad-bar shadrat-ad-top'));
 
