@@ -1,4 +1,4 @@
-/* شذرات — توحيد مقاس كرت الحساب بين المعاينة وبعد الحفظ */
+/* شذرات — توحيد مقاس وشكل كرت الحساب بين المعاينة وبعد الحفظ */
 .student-cover,.profile-live-preview{
   box-sizing:border-box;
   width:100%;
@@ -12,13 +12,10 @@
   position:relative;
   padding:clamp(14px,2.2vw,24px) clamp(16px,2.5vw,26px) clamp(58px,8.2vw,78px)!important;
 }
-.student-cover:before{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  background:linear-gradient(90deg,rgba(3,8,24,.12),rgba(3,8,24,.04) 45%,rgba(3,8,24,.34));
+/* لا نضيف طبقة تعتيم مختلفة بعد الحفظ: الصورة المحفوظة = نفس صورة المعاينة */
+.student-cover:before,.profile-live-preview:before{
+  content:none!important;
+  display:none!important;
 }
 .student-cover>.student-top,.student-cover>.profile-progress,.student-cover>.profile-cover-edit{position:relative;z-index:2}
 .student-cover>.profile-cover-edit{position:absolute}
