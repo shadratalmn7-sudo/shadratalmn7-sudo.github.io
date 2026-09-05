@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>منشئ Motivation Letter | شذرات للمنح</title>
 <meta name="description" content="أنشئ خطاب دافع بالعربية أو الإنجليزية من معلوماتك وشهاداتك، مع 10 قوالب مختلفة فعليًا وحفظ النسخ في حسابك.">
-<link rel="stylesheet" href="site.css?v=31"><link rel="stylesheet" href="nav-universal.css?v=157"><link rel="stylesheet" href="builder-system.css?v=3"><link rel="stylesheet" href="builder-a4.css?v=2">
+<link rel="stylesheet" href="site.css?v=31"><link rel="stylesheet" href="nav-universal.css?v=157"><link rel="stylesheet" href="builder-system.css?v=3"><link rel="stylesheet" href="builder-a4.css?v=4">
 <script type="importmap">{"imports":{"./student-artifacts-a4.js?v=1":"./student-artifacts-a4.js?v=3"}}</script>
 </head>
 <body>
@@ -13,6 +13,7 @@
 <section class="page-hero compact-hero"><div class="container"><span class="eyebrow">أداة مجانية للطالب</span><h1>منشئ Motivation Letter</h1><p class="lead">اكتب المعلومات الأساسية فقط، وسيبني الموقع خطابًا طويلًا ومنظمًا من البيانات المتوفرة وشهاداتك دون اختراع إنجازات. يدعم العربية والإنجليزية و10 أشكال مختلفة فعليًا.</p></div></section>
 <section class="section"><div class="container builder-shell">
 <section class="builder-editor">
+<div class="builder-choice-block"><b>نوع الخطاب</b><div class="builder-mode"><button type="button" class="is-active" data-letter-purpose="study">تقديم دراسي</button><button type="button" data-letter-purpose="work">تقديم وظيفي</button></div></div>
 <div class="builder-mode"><button type="button" class="is-active" data-letter-mode="auto">الموقع يجهز الخطاب</button><button type="button" data-letter-mode="manual">أكتب الخطاب بنفسي</button></div>
 <div class="builder-fields">
 <label class="builder-field full"><span>اسم الملف داخل حسابك</span><input id="artifactName" value="Motivation 1" maxlength="100" placeholder="مثال: Motivation Open Doors"></label>
@@ -22,10 +23,22 @@
 <label class="builder-field"><span>التخصص المستهدف</span><input id="target" maxlength="160" placeholder="Cybersecurity"></label>
 <label class="builder-field"><span>لغة الخطاب</span><select id="lang"><option value="en">English</option><option value="ar">العربية</option></select></label>
 <label class="builder-field"><span>النبرة</span><select id="tone"><option value="formal">أكاديمية رسمية</option><option value="personal">شخصية ومقنعة</option></select></label>
+<label class="builder-field"><span>الطول المطلوب</span><select id="wordTarget"><option value="500">حوالي 500 كلمة</option><option value="750" selected>حوالي 750 كلمة</option><option value="1000">حوالي 1000 كلمة</option><option value="1500">حوالي 1500 كلمة</option><option value="2000">حتى 2000 كلمة</option></select></label>
 <select id="template" hidden><option value="academic">أكاديمي</option><option value="formal">رسمي</option><option value="editorial">صحيفة</option><option value="modern">حديث</option><option value="executive">تنفيذي</option><option value="minimal">Minimal</option><option value="creative">إبداعي</option><option value="technical">تقني</option><option value="serif">Serif</option><option value="clean">Clean</option></select>
 </div>
 <div id="autoFields">
-<div class="builder-step" style="margin-top:16px"><h2><span class="builder-step-num">1</span>المعلومات الأساسية</h2><p class="builder-note">هذه الخانات اختيارية بعد الاسم والتخصص. إذا تركتها فارغة سيكتب الموقع فقرات مناسبة من المعلومات الموجودة فقط، من غير اختراع قصة أو إنجاز.</p><div class="builder-fields"><label class="builder-field full"><span>لماذا اخترت هذا التخصص؟</span><textarea id="whyField" maxlength="4000" placeholder="اكتب السبب الحقيقي إن أردت تخصيص الخطاب أكثر."></textarea></label><label class="builder-field full"><span>لماذا هذه الجامعة/المنحة/البرنامج؟</span><textarea id="whyProgram" maxlength="4000"></textarea></label><label class="builder-field full"><span>هدفك المستقبلي</span><textarea id="future" maxlength="4000"></textarea></label><label class="builder-field full"><span>إنجازات إضافية</span><textarea id="achievements" maxlength="9000" placeholder="اختياري — كل إنجاز في سطر"></textarea></label></div></div>
+<div class="builder-step" style="margin-top:16px"><h2><span class="builder-step-num">1</span>معلومات يبني منها الموقع الخطاب</h2><p class="builder-note">يكفي أن تكتب سطرًا صادقًا في كل خانة. الموقع يوسعه إلى فقرة مترابطة بحسب الطول المختار، دون اختراع إنجازات أو درجات أو خبرات.</p><div class="builder-fields">
+<label class="builder-field full"><span>تعريف مختصر عن نفسك</span><textarea id="about" maxlength="4000" placeholder="مرحلتك، اهتمامك، وأبرز صفة فيك"></textarea></label>
+<label class="builder-field full"><span>أهم إنجازاتك وتجاربك</span><textarea id="achievements" maxlength="9000" placeholder="كل إنجاز أو تجربة في سطر"></textarea></label>
+<label class="builder-field full"><span>لماذا اخترت هذا التخصص أو المسار؟</span><textarea id="whyField" maxlength="4000"></textarea></label>
+<label class="builder-field full" data-study-field><span>لماذا اخترت هذه الدولة؟</span><textarea id="whyCountry" maxlength="4000" placeholder="مثال: لماذا روسيا؟"></textarea></label>
+<label class="builder-field full" data-study-field><span>لماذا اخترت هذه المدينة؟</span><textarea id="whyCity" maxlength="4000"></textarea></label>
+<label class="builder-field full" data-study-field><span>لماذا هذه الجامعة/المنحة/البرنامج؟</span><textarea id="whyProgram" maxlength="4000"></textarea></label>
+<label class="builder-field full" data-work-field hidden><span>لماذا اخترت هذه الشركة أو جهة العمل؟</span><textarea id="whyCompany" maxlength="4000"></textarea></label>
+<label class="builder-field full" data-work-field hidden><span>خبرتك المناسبة للوظيفة</span><textarea id="relevantExperience" maxlength="6000"></textarea></label>
+<label class="builder-field full" data-work-field hidden><span>ماذا ستضيف لجهة العمل؟</span><textarea id="employerValue" maxlength="4000"></textarea></label>
+<label class="builder-field full"><span>هدفك المستقبلي</span><textarea id="future" maxlength="4000"></textarea></label>
+</div></div>
 <div class="builder-step"><h2><span class="builder-step-num">2</span>ارفع الشهادات — الموقع يقرأها</h2><label class="builder-upload"><input id="certFiles" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp"><b>PDF أو JPG / PNG / WebP</b><small>يستخرج اسم الشهادة، الجهة، التاريخ، والمجال ثم يستخدمها في صياغة فقرات الخطاب</small></label><div class="cert-results" id="certResults"></div><p class="builder-note">PDF النصي يُقرأ مباشرة. الصور وملفات PDF الممسوحة تُقرأ عبر OCR داخل المتصفح. الملف الأصلي لا يُرفع إلى خادم شذرات أثناء القراءة؛ عند التنزيل تُحفظ البيانات المستخرجة والنص النهائي تلقائيًا في ملفك الخاص إذا كنت مسجل الدخول.</p></div>
 </div>
 <div id="manualFields" hidden><div class="builder-step" style="margin-top:16px"><h2>نص الخطاب</h2><label class="builder-field full"><span>اكتب أو الصق خطابك</span><textarea id="manualText" maxlength="30000" style="min-height:320px" placeholder="اكتب الخطاب هنا..."></textarea></label></div></div>
@@ -34,9 +47,9 @@
 <p class="builder-status" id="builderStatus">عند تحميل الـPDF تُحفظ نسخة تلقائيًا في ملفك الخاص إذا كنت مسجل الدخول، ويمكنك الرجوع إليها من حسابك الشخصي.</p>
 <div class="builder-warning">راجع الخطاب قبل التقديم. الصياغة تلقائية بقواعد وقوالب داخل الموقع وليست خدمة ذكاء اصطناعي خارجية.</div>
 </section>
-<div class="preview-wrap"><article class="letter letter-template-academic" id="letter"><h1 id="letterTitle">Motivation Letter</h1><div class="letter-meta" id="letterMeta"></div><p id="letterText">أدخل الاسم والتخصص ليظهر الخطاب هنا.</p><div class="counter" id="counter"></div></article></div>
+<div class="preview-wrap"><article class="letter letter-template-academic" id="letter" data-multipage="true"><h1 id="letterTitle">Motivation Letter</h1><div class="letter-meta" id="letterMeta"></div><div id="letterText" class="letter-body">أدخل الاسم والتخصص ليظهر الخطاب هنا.</div><div class="counter" id="counter"></div></article></div>
 </div></section>
 </main>
 <footer class="site-footer"><div class="container footer-grid"><div><img class="footer-logo" src="assets/shazarat-logo.svg" alt="شذرات للمنح"><p>أدوات عملية تساعد الطالب على تجهيز ملفه الدراسي.</p></div><div><b>الأدوات</b><a href="documents.html">تحويل المستندات</a><a href="cv-builder.html">منشئ CV</a><a href="profile.html">ملفاتي المحفوظة</a></div><div><b>روابط</b><a href="services.html">الخدمات</a><a href="scholarships.html">المنح</a></div></div></footer>
-<script src="nav-universal.js?v=157"></script><script src="account-gate.js?v=1"></script><script src="ads.js?v=5"></script><script type="module" src="motivation-builder.js?v=6"></script><script src="a4-preview.js?v=3"></script>
+<script src="nav-universal.js?v=157"></script><script src="account-gate.js?v=1"></script><script src="ads.js?v=5"></script><script type="module" src="motivation-builder.js?v=7"></script><script src="a4-preview.js?v=4"></script>
 </body></html>
