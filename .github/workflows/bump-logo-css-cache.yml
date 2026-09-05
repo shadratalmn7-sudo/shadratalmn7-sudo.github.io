@@ -34,6 +34,8 @@ jobs:
               ns=ns.replace("./profile-edit-deep.js?v=2","./profile-edit-deep.js?v=7")
               ns=ns.replace('profile-art-themes.css?v=3','profile-art-themes.css?v=4')
               ns=ns.replace('student-profile.js?v=4','student-profile.js?v=5')
+              ns=ns.replace('nav-universal.js?v=158','nav-universal.js?v=159')
+              ns=ns.replace("./notifications-live.js?v=12","./notifications-live.js?v=13")
               if ns!=s:
                   p.write_text(ns,encoding='utf-8')
                   changed.append(str(p))
@@ -46,5 +48,5 @@ jobs:
           git config user.name 'shadratalmn7-sudo'
           git config user.email 'shadrat.almn7@gmail.com'
           git add -A
-          git commit -m 'Bust cache for upgraded profile themes and editor'
+          git commit -m 'Bust notification cache for OneSignal prompt'
           git push
