@@ -1,8 +1,3 @@
-const __shadratPage = location.pathname.split('/').pop() || '';
-if (['cv-builder.html','motivation-letter.html'].includes(__shadratPage)) {
-  import('./builder-enhancements.js?v=2').catch(error => console.warn('[Shadrat] builder enhancements', error));
-}
-
 (() => {
   if (window.__shadratAnalyticsLoaded) return;
   window.__shadratAnalyticsLoaded = true;
