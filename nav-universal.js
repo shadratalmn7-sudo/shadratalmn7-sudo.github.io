@@ -33,11 +33,22 @@
 
   const icon=path=>`<svg class="shadrat-nav-svg" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="${path}"/></svg>`;
   const icons={
-    home:icon('M4 11.2 12 4l8 7.2v8.3H14.5v-5.5h-5V19.5H4v-8.3Z'),scholarship:icon('m3.5 8.2 8.5-4 8.5 4-8.5 4-8.5-4Zm3 2.1v4.2c0 1.7 2.5 3.5 5.5 3.5s5.5-1.8 5.5-3.5v-4.2M20.5 8.5v5'),documents:icon('M7 3.5h7l3 3v13H7v-16Zm7 0v4h4M9.5 11h5M9.5 14h5M9.5 17H13'),currency:icon('M7 7h10m0 0-3-3m3 3-3 3M17 17H7m0 0 3 3m-3-3 3-3'),services:icon('M7 6.5h10l1 3.5-2 8H8l-2-8 1-3.5Zm2-2h6v2H9v-2ZM9.5 12h5M12 9.5v5'),offers:icon('M4.5 8 9 3.5h8.5l2 2V14L15 18.5 4.5 8Zm10-1.2h.01M9 13l6-6'),contact:icon('M4 6h16v12H4V6Zm0 1 8 6 8-6'),profile:icon('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20c.7-3.6 3-5.5 7-5.5s6.3 1.9 7 5.5'),about:icon('M12 4a8 8 0 0 0-8 8v6l2.5-1.5A8 8 0 1 0 12 4Zm-3 7h.01M12 11h.01M15 11h.01M8.5 14.5c2.2 1.6 4.8 1.6 7 0'),grid:icon('M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h5v5h-5v-5Z'),cv:icon('M7 3.5h10v17H7v-17Zm3 5h4M9.5 12h5M9.5 15h5'),letter:icon('M5 4h14v16H5V4Zm3 4h8M8 12h8M8 16h5')
+    home:icon('M4 11.2 12 4l8 7.2v8.3H14.5v-5.5h-5V19.5H4v-8.3Z'),
+    scholarship:icon('m3.5 8.2 8.5-4 8.5 4-8.5 4-8.5-4Zm3 2.1v4.2c0 1.7 2.5 3.5 5.5 3.5s5.5-1.8 5.5-3.5v-4.2M20.5 8.5v5'),
+    documents:icon('M7 3.5h7l3 3v13H7v-16Zm7 0v4h4M9.5 11h5M9.5 14h5M9.5 17H13'),
+    currency:icon('M7 7h10m0 0-3-3m3 3-3 3M17 17H7m0 0 3 3m-3-3 3-3'),
+    services:icon('M7 6.5h10l1 3.5-2 8H8l-2-8 1-3.5Zm2-2h6v2H9v-2ZM9.5 12h5M12 9.5v5'),
+    offers:icon('M4.5 8 9 3.5h8.5l2 2V14L15 18.5 4.5 8Zm10-1.2h.01M9 13l6-6'),
+    contact:icon('M4 6h16v12H4V6Zm0 1 8 6 8-6'),
+    profile:icon('M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20c.7-3.6 3-5.5 7-5.5s6.3 1.9 7 5.5'),
+    about:icon('M12 4a8 8 0 0 0-8 8v6l2.5-1.5A8 8 0 1 0 12 4Zm-3 7h.01M12 11h.01M15 11h.01M8.5 14.5c2.2 1.6 4.8 1.6 7 0'),
+    grid:icon('M5 5h5v5H5V5Zm9 0h5v5h-5V5ZM5 14h5v5H5v-5Zm9 0h5v5h-5v-5Z'),
+    cv:icon('M7 3.5h10v17H7v-17Zm3 5h4M9.5 12h5M9.5 15h5'),
+    letter:icon('M5 4h14v16H5V4Zm3 4h8M8 12h8M8 16h5')
   };
   const item=(href,key,label,extra='')=>`<a href="${href}" ${extra}><span class="menu-icon" aria-hidden="true">${icons[key]}</span><span class="menu-label">${label}</span></a>`;
   const section=(title,subtitle,items,key)=>`<section class="hamburger-section" data-accordion="${key}"><button type="button" class="hamburger-section-toggle" aria-expanded="false"><span><b>${title}</b><small>${subtitle}</small></span><i aria-hidden="true">⌄</i></button><div class="hamburger-section-links" hidden>${items}</div></section>`;
-  const servicesMenu=()=>`<div class="hamburger-service-item ${['documents.html','services.html','cv-builder.html','motivation-letter.html'].includes(page)?'is-current-parent':''}" data-services-menu><button type="button" class="hamburger-service-toggle" aria-expanded="false"><span class="menu-icon" aria-hidden="true">${icons.services}</span><span class="menu-label">الخدمات</span><i aria-hidden="true">⌄</i></button><div class="hamburger-service-links" hidden>${item('documents.html','documents','تحويل المستندات')}${item('services.html','services','الخدمات المدفوعة والمجانية')}${item('cv-builder.html','cv','منشئ السيرة الذاتية CV')}${item('motivation-letter.html','letter','منشئ Motivation Letter')}</div></div>`;
+  const servicesMenu=()=>`<div class="hamburger-service-item ${['documents.html','services.html','cv-builder.html','motivation-letter.html'].includes(page)?'is-current-parent':''}" data-services-menu data-service-tools-menu><button type="button" class="hamburger-service-toggle" aria-expanded="false"><span class="menu-icon" aria-hidden="true">${icons.services}</span><span class="menu-label">الخدمات</span><i aria-hidden="true">⌄</i></button><div class="hamburger-service-links" hidden>${item('documents.html','documents','تحويل المستندات')}${item('services.html','services','الخدمات المدفوعة والمجانية')}${item('cv-builder.html','cv','منشئ السيرة الذاتية CV')}${item('motivation-letter.html','letter','منشئ Motivation Letter')}</div></div>`;
 
   let header=document.querySelector('.site-header');if(!header){header=document.createElement('header');header.className='site-header';header.innerHTML='<div class="container nav"></div>';document.body.prepend(header)}
   const nav=header.querySelector('.nav')||header.appendChild(document.createElement('div'));nav.classList.add('nav');
@@ -59,7 +70,19 @@
 
   document.querySelectorAll('.global-menu a').forEach(link=>{if(link.getAttribute('href')===page){link.classList.add('is-current');link.setAttribute('aria-current','page')}});
   const report=(label,error)=>console.warn(`[Shadrat] ${label}`,error),load=(path,label=path)=>import(path).catch(error=>report(label,error)),onIdle=callback=>('requestIdleCallback'in window?requestIdleCallback(callback,{timeout:1800}):setTimeout(callback,900));
-  const publicModules=async()=>{const routes={'index.html':async()=>{await load('./homepage-fixes.js?v=11','homepage setup');await load('./homepage-live.js?v=12','homepage data')},'scholarships.html':()=>Promise.all([load('./scholarships-live.js?v=20260902full','scholarships'),load('./scholarship-favorites.js?v=11','favorites')]),'documents.html':()=>Promise.all([load('./documents.js?v=81','documents tools'),load('./student-activity.js?v=1','document activity')]),'services.html':()=>load('./public-commerce-live.js?v=21','services'),'offers.html':()=>load('./public-commerce-live.js?v=21','offers'),'contact.html':()=>load('./contact-live.js?v=11','contact'),'profile.html':()=>Promise.all([load('./scholarship-favorites.js?v=11','favorites'),load('./profile-artifacts.js?v=1','saved files')])};await routes[page]?.();onIdle(()=>{if(!['login.html','register.html'].includes(page))load('./nav-auth.js?v=102','navigation account state');load('./analytics.js?v=10','analytics');if(!['login.html','register.html','terms.html','privacy.html'].includes(page))load('./notifications-live.js?v=12','notifications');load('./ads.js?v=1','ads')})};
+  const publicModules=async()=>{
+    const routes={
+      'index.html':async()=>{await load('./homepage-fixes.js?v=11','homepage setup');await load('./homepage-live.js?v=12','homepage data');await load('./homepage-student-tools.js?v=1','student builders')},
+      'scholarships.html':()=>Promise.all([load('./scholarships-live.js?v=20260902full','scholarships'),load('./scholarship-favorites.js?v=11','favorites')]),
+      'documents.html':()=>Promise.all([load('./documents.js?v=81','documents tools'),load('./student-activity.js?v=1','document activity')]),
+      'services.html':async()=>{await load('./public-commerce-live.js?v=21','services');await load('./services-tools.js?v=1','free student tools')},
+      'offers.html':()=>load('./public-commerce-live.js?v=21','offers'),
+      'contact.html':()=>load('./contact-live.js?v=11','contact'),
+      'profile.html':()=>Promise.all([load('./scholarship-favorites.js?v=11','favorites'),load('./profile-artifacts.js?v=1','saved files')])
+    };
+    await routes[page]?.();
+    onIdle(()=>{if(!['login.html','register.html'].includes(page))load('./nav-auth.js?v=103','navigation account state');load('./analytics.js?v=10','analytics');if(!['login.html','register.html','terms.html','privacy.html'].includes(page))load('./notifications-live.js?v=12','notifications');load('./ads.js?v=1','ads')});
+  };
   const adminModules=async()=>{try{const{requireAdmin}=await import('./admin-access.js?v=12');const session=await requireAdmin();if(page==='admin-community.html'){location.replace('admin-analytics.html');return}document.body.dataset.role=session.role;root.classList.remove('admin-pending');await load('./admin-navigation.js?v=19','admin navigation');load('./admin-mobile.js?v=11','admin mobile navigation');load('./admin-alert-badges.js?v=10','admin alerts');const routes={'admin-analytics.html':'./admin-analytics.js?v=10','admin-homepage.html':'./admin-live-data.js?v=10','admin-scholarships.html':'./scholarships-admin.js?v=10','admin-users.html':'./admin-users.js?v=10','admin-student.html':'./admin-student.js?v=11','admin-staff.html':'./admin-staff.js?v=10','admin-gamification.html':'./admin-gamification.js?v=10','admin-services.html':'./admin-commerce.js?v=21','admin-offers.html':'./admin-commerce.js?v=21','admin-orders.html':'./admin-orders.js?v=11','admin-messages.html':'./admin-messages.js?v=11','admin-announcements.html':'./admin-announcements.js?v=22'};if(routes[page])await load(routes[page],page)}catch(error){report('admin access denied',error);location.replace(`login.html?next=${encodeURIComponent(page)}`)}};
   if(isAdmin)adminModules();else publicModules();
 })();
