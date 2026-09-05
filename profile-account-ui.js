@@ -1,6 +1,6 @@
 (()=>{
-  if(window.__shadratAccountUiV3)return;
-  window.__shadratAccountUiV3=true;
+  if(window.__shadratAccountUiV4)return;
+  window.__shadratAccountUiV4=true;
   let editorLoading=false,unifiedReady=null;
 
   function injectStyles(){
@@ -25,7 +25,9 @@
   }
 
   function loadUnified(){
-    unifiedReady=unifiedReady||import('./profile-save-compat.js?v=1').then(()=>import('./profile-edit-unified.js?v=1));
+    unifiedReady=unifiedReady||import('./profile-submit-guard.js?v=1')
+      .then(()=>import('./profile-save-compat.js?v=2'))
+      .then(()=>import('./profile-edit-unified.js?v=1'));
     return unifiedReady;
   }
 
