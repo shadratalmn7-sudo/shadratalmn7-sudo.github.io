@@ -169,22 +169,37 @@ function styleExportClone(clone){
   return clone;
 }
 
-async function canvasToPdf(canvas,filename){
-  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',()=>!!window.jspdf?.jsPDF);
+function decoratePdfPage(ctx,canvas,node,pageNumber,totalPages){
+  const cls=node?.classList||[],w=canvas.width,h=canvas.height,unit=w/794;
+  const band=(color,side=false)=>{ctx.fillStyle=color;if(side)ctx.fillRect(0,0,Math.max(8,12*unit),h);else ctx.fillRect(0,0,w,Math.max(7,9*unit))};
+  if(cls.contains('template-modern')||cls.contains('letter-template-modern'))band('#2563eb');
+  else if(cls.contains('template-sidebar'))band('#2563eb',true);
+  else if(cls.contains('template-technical')||cls.contains('letter-template-technical'))band('#0f172a');
+  else if(cls.contains('template-creative')||cls.contains('letter-template-creative'))band('#7c3aed');
+  else if(cls.contains('template-executive')||cls.contains('letter-template-executive'))band('#334155',true);
+  else if(cls.contains('template-academic')||cls.contains('letter-template-academic'))band('#1e3a8a');
+  else if(cls.contains('template-timeline'))band('#0f766e',true);
+  else if(cls.contains('template-editorial')||cls.contains('letter-template-editorial'))band('#111827');
+  ctx.save();ctx.strokeStyle=cls.contains('template-minimal')||cls.contains('letter-template-minimal')?'#cbd5e1':'rgba(15,23,42,.14)';ctx.lineWidth=Math.max(1,unit);ctx.strokeRect(5*unit,5*unit,w-10*unit,h-10*unit);ctx.fillStyle='#64748b';ctx.font=`${Math.max(10,10*unit)}px Arial`;ctx.textAlign='center';ctx.fillText(`${pageNumber} / ${totalPages}`,w/2,h-13*unit);ctx.restore();
+}
+async function canvasToPdf(canvas,filename,templateNode){
+  try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',()=>!!window.jspdf?.jsPDF)}
+  catch{await loadScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js',()=>!!window.jspdf?.jsPDF)}
   const{jsPDF}=window.jspdf;
   const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
   const pageWidth=210,pageHeight=297,margin=10,contentWidth=190,contentHeight=277;
   const pxPerMm=canvas.width/contentWidth;
   const maxSlice=Math.max(1,Math.floor(contentHeight*pxPerMm));
-  let offset=0,pageIndex=0;
+  let offset=0,pageIndex=0,totalPages=Math.max(1,Math.ceil(canvas.height/maxSlice));
   while(offset<canvas.height){
     const sliceHeight=Math.min(maxSlice,canvas.height-offset);
     const pageCanvas=document.createElement('canvas');
-    pageCanvas.width=canvas.width;pageCanvas.height=sliceHeight;
+    pageCanvas.width=canvas.width;pageCanvas.height=maxSlice;
     const ctx=pageCanvas.getContext('2d',{alpha:false});ctx.fillStyle='#fff';ctx.fillRect(0,0,pageCanvas.width,pageCanvas.height);
     ctx.drawImage(canvas,0,offset,canvas.width,sliceHeight,0,0,canvas.width,sliceHeight);
+    decoratePdfPage(ctx,pageCanvas,templateNode,pageIndex+1,totalPages);
     const image=pageCanvas.toDataURL('image/jpeg',0.97);
-    const renderedHeight=sliceHeight*contentWidth/canvas.width;
+    const renderedHeight=contentHeight;
     if(pageIndex>0)pdf.addPage();
     pdf.addImage(image,'JPEG',margin,margin,contentWidth,renderedHeight,undefined,'FAST');
     offset+=sliceHeight;pageIndex+=1;
@@ -195,7 +210,8 @@ async function canvasToPdf(canvas,filename){
 export async function downloadNodePdf(node,filename){
   if(!node)throw new Error('PDF_NODE_MISSING');
   ensureBuilderCss();
-  await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',()=>!!window.html2canvas);
+  try{await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',()=>!!window.html2canvas)}
+  catch{await loadScript('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',()=>!!window.html2canvas)}
   if(document.fonts?.ready)await document.fonts.ready.catch(()=>{});
 
   const clone=styleExportClone(node.cloneNode(true));
@@ -212,7 +228,7 @@ export async function downloadNodePdf(node,filename){
     const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
     const height=Math.max(1123,Math.ceil(clone.scrollHeight));
     const canvas=await window.html2canvas(clone,{scale:isIOS?1.5:2,useCORS:true,backgroundColor:'#ffffff',logging:false,scrollX:0,scrollY:0,width:794,height,windowWidth:794,windowHeight:Math.min(height,1123)});
-    await canvasToPdf(canvas,filename);
+    await canvasToPdf(canvas,filename,node);
   }finally{cover.remove();shell.remove();document.documentElement.style.overflow=oldOverflow}
 }
 
