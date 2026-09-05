@@ -2,7 +2,7 @@ import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2
 import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import{collection,doc,getDoc,getDocs,getFirestore,limit,query,serverTimestamp,setDoc,where}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import{firebaseConfig}from'./firebase-config.js';
-import{levelFromXp}from'./level-system.js?v=3';
+import{levelFromXp}from'./level-system.js?v=4';
 
 const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
 const clean=v=>String(v??'').trim();

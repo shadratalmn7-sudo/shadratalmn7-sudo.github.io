@@ -2,7 +2,7 @@ import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2
 import{collection,doc,getDoc,getDocs,getFirestore,query,serverTimestamp,updateDoc,where}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import{getAuth}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import{firebaseConfig}from'./firebase-config.js';
-import{XP_SYSTEM_MAX,levelFromXp,levelLabel}from'./level-system.js?v=2';
+import{XP_SYSTEM_MAX,levelFromXp,levelLabel}from'./level-system.js?v=4';
 const OWNER_EMAIL='shadrat.almn7@gmail.com';
 const app=getApps().length?getApp():initializeApp(firebaseConfig),db=getFirestore(app),auth=getAuth(app),root=document.querySelector('#student-admin-root'),uid=new URLSearchParams(location.search).get('uid');
 const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

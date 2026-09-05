@@ -1,6 +1,6 @@
 import*as base from'./student-artifacts-a4.js?v=6&base=1';
 import{doc,getDoc}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
-import{artifactSaveLimit,levelFromXp}from'./level-system.js?v=2';
+import{artifactSaveLimit,levelFromXp}from'./level-system.js?v=4';
 export*from'./student-artifacts-a4.js?v=6&base=1';
 
 export async function saveArtifact(record){

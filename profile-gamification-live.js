@@ -2,7 +2,7 @@ import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2
 import{collection,doc,getDocs,getFirestore,onSnapshot,query,where}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import{firebaseConfig}from'./firebase-config.js';
-import{LEVEL_REWARDS,PROFILE_BADGES,PROFILE_FRAMES,PROFILE_NAME_COLORS,PROFILE_THEMES,VISIBLE_LEVEL_MAX,artifactSaveLimit,journeyProgress,levelFromXp,nextLevelInfo}from'./level-system.js?v=3';
+import{LEVEL_REWARDS,PROFILE_BADGES,PROFILE_FRAMES,PROFILE_NAME_COLORS,PROFILE_THEMES,VISIBLE_LEVEL_MAX,artifactSaveLimit,journeyProgress,levelFromXp,nextLevelInfo}from'./level-system.js?v=4';
 import{levelBadge}from'./level-badges.js?v=2';
 
 const OWNER_EMAIL='shadrat.almn7@gmail.com',PREF_PREFIX='shadrat-profile-v2:';

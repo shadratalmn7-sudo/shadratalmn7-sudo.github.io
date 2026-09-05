@@ -18,7 +18,7 @@
 import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
 import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import{addDoc,collection,doc,getDoc,getDocs,getFirestore,query,serverTimestamp,where}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
-import{firebaseConfig}from'./firebase-config.js';import{levelFromXp}from'./level-system.js?v=2';
+import{firebaseConfig}from'./firebase-config.js';import{levelFromXp}from'./level-system.js?v=4';
 const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),params=new URLSearchParams(location.search),service=params.get('service')||'خدمة من شذرات',price=params.get('price')||'',form=document.querySelector('#request-form'),submit=document.querySelector('#submit-request'),box=document.querySelector('#success-box'),rewardHint=document.querySelector('#level-reward-hint'),LEVEL15_REWARD='level15-discount15';
 document.querySelector('#service-name').textContent=service;document.querySelector('#service-price').textContent=price?`السعر / الحالة: ${price}`:'';
 const parsedAmount=()=>{const m=String(price).match(/\d+(?:\.\d+)?/);return m?Number(m[0]):0},money=v=>Number(v||0).toFixed(Number(v||0)%1?2:0);
