@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='27';
+  const VERSION='28';
   const css=document.createElement('link');
   css.rel='stylesheet';css.href=`admin-navigation.css?v=${VERSION}`;css.dataset.adminNavigationCss=VERSION;document.head.appendChild(css);
 
@@ -23,26 +23,28 @@
   };
 
   const groups=[
-    {key:'home',title:'الرئيسية',desc:'الملخص الحي وما يحتاج انتباهك',icon:'dashboard',items:[
+    {key:'home',title:'الرئيسية',desc:'الملخص الحي وآخر نشاط الطلاب',icon:'dashboard',items:[
       {href:'admin-analytics.html',label:'لوحة الإدارة',desc:'الأرقام الحية وآخر نشاط',icon:'dashboard',roles:['owner','admin','support','editor']}
     ]},
-    {key:'students',title:'الطلاب والمتابعة',desc:'الحسابات والطلبات والرسائل في مكان واحد',icon:'users',items:[
-      {href:'admin-users.html',label:'الطلاب',desc:'الحسابات والملفات والنشاط',icon:'users',roles:['owner','admin','support']},
-      {href:'admin-orders.html',label:'طلبات الخدمات',desc:'الجديدة وقيد التنفيذ والمكتملة',icon:'orders',roles:['owner','admin','support']},
-      {href:'admin-messages.html',label:'الرسائل والشكاوى',desc:'الوارد والردود وحالة القراءة',icon:'mail',roles:['owner','admin','support']}
-    ]},
-    {key:'content',title:'المحتوى والخدمات',desc:'كل ما يظهر للطلاب من منح وخدمات وعروض',icon:'scholarship',items:[
+    {key:'content',title:'المحتوى',desc:'المنح والخدمات والعروض وكل ما يظهر للطلاب',icon:'scholarship',items:[
+      {href:'admin-homepage.html',label:'تنسيق الرئيسية',desc:'ترتيب ما يظهر في الصفحة الرئيسية',icon:'homepage',roles:['owner','admin','editor']},
       {href:'admin-scholarships.html',label:'المنح',desc:'إضافة ونشر وإدارة المنح',icon:'scholarship',roles:['owner','admin','editor']},
       {href:'admin-services.html',label:'الخدمات',desc:'إضافة ونشر وإدارة الخدمات',icon:'services',roles:['owner','admin','editor']},
       {href:'admin-offers.html',label:'العروض',desc:'العروض وتواريخها',icon:'offers',roles:['owner','admin','editor']},
-      {href:'admin-homepage.html',label:'تنسيق الرئيسية',desc:'ترتيب ما يظهر في الصفحة الرئيسية',icon:'homepage',roles:['owner','admin','editor']},
       {href:'admin-videos.html',label:'الفيديوهات',desc:'المحتوى المرئي',icon:'videos',roles:['owner','admin','editor']}
     ]},
-    {key:'engagement',title:'التنبيهات والتفاعل',desc:'البوش والإشعارات والمهام والجوائز',icon:'announcements',items:[
-      {href:'admin-announcements.html',label:'الإشعارات والبوش',desc:'تنبيهات داخل الموقع وإشعارات Push',icon:'announcements',roles:['owner','admin']},
-      {href:'admin-gamification.html',label:'المهام والمكافآت',desc:'XP والجوائز والمهمات',icon:'gamification',roles:['owner','admin']}
+    {key:'students',title:'الطلاب',desc:'حسابات الطلاب وملفاتهم ونشاطهم',icon:'users',items:[
+      {href:'admin-users.html',label:'الطلاب',desc:'الحسابات والملفات والنشاط',icon:'users',roles:['owner','admin','support']}
     ]},
-    {key:'system',title:'النظام والإدارة',desc:'الفريق والصلاحيات والتكاملات والدخل',icon:'security',items:[
+    {key:'followup',title:'الطلبات والمتابعة',desc:'طلبات الخدمات والرسائل والشكاوى',icon:'orders',items:[
+      {href:'admin-orders.html',label:'طلبات الخدمات',desc:'الجديدة وقيد التنفيذ والمكتملة',icon:'orders',roles:['owner','admin','support']},
+      {href:'admin-messages.html',label:'الرسائل والشكاوى',desc:'الوارد والردود وحالة القراءة',icon:'mail',roles:['owner','admin','support']}
+    ]},
+    {key:'engagement',title:'التفاعل والمكافآت',desc:'المهام والمكافآت والإشعارات',icon:'gamification',items:[
+      {href:'admin-gamification.html',label:'المهام والمكافآت',desc:'XP والجوائز والمهمات',icon:'gamification',roles:['owner','admin']},
+      {href:'admin-announcements.html',label:'الإشعارات',desc:'الإشعارات الداخلية والخارجية',icon:'announcements',roles:['owner','admin']}
+    ]},
+    {key:'system',title:'النظام',desc:'الفريق والأمان والتكاملات والإعلانات',icon:'security',items:[
       {href:'admin-staff.html',label:'الفريق والصلاحيات',desc:'الموظفون والأدوار',icon:'staff',roles:['owner']},
       {href:'admin-security.html',label:'الإعدادات والتكاملات',desc:'الأمان وربط الخدمات الخارجية',icon:'security',roles:['owner','admin']},
       {href:'admin-revenue.html',label:'الإعلانات والدخل',desc:'الإيرادات والمتابعة',icon:'finance',roles:['owner','admin']}
@@ -60,7 +62,7 @@
   const groupCard=g=>`<button type="button" class="admin-group-card ${currentGroup?.key===g.key?'is-current':''}" data-admin-section="${g.key}"><span class="admin-nav-icon-wrap">${icon(icons[g.icon])}</span><span class="admin-group-card-copy"><b>${g.title}</b><small>${g.desc}</small></span><span class="admin-group-card-arrow" aria-hidden="true">‹</span></button>`;
 
   function rootView(){
-    return `<div class="admin-drawer-heading"><b>أقسام الإدارة</b><small>اختر القسم أولاً، وبعدها ستظهر لك الأدوات داخله على شكل كروت.</small></div><div class="admin-group-grid">${visible.map(groupCard).join('')}</div><a class="admin-back-site" href="index.html">العودة إلى الموقع</a>`;
+    return `<div class="admin-drawer-heading"><b>أقسام الإدارة</b><small>اختر القسم، وبعدها تظهر أدواته ككروت مستقلة.</small></div><div class="admin-group-grid">${visible.map(groupCard).join('')}</div><a class="admin-back-site" href="index.html">العودة إلى الموقع</a>`;
   }
   function sectionView(key){
     const g=visible.find(x=>x.key===key);
@@ -112,8 +114,7 @@
     if(!main||!title||main.querySelector('.admin-control-hub'))return;
     const hub=document.createElement('section');
     hub.className='admin-control-hub';
-    const sections=visible.filter(g=>g.key!=='home');
-    hub.innerHTML=`<div class="admin-control-hub-head"><div><h2>أقسام الإدارة</h2><p>كل قسم مرتب، وداخله أدواته على شكل كروت واضحة.</p></div></div><div class="admin-control-groups">${sections.map(g=>`<section class="admin-control-group"><div class="admin-control-group-head"><span class="admin-nav-icon-wrap">${icon(icons[g.icon])}</span><span class="admin-control-group-copy"><b>${g.title}</b><small>${g.desc}</small></span></div><div class="admin-control-items">${g.items.map(i=>itemLink(i,'admin-control-item')).join('')}</div></section>`).join('')}</div>`;
+    hub.innerHTML=`<div class="admin-control-hub-head"><div><h2>أقسام الإدارة</h2><p>الستة أقسام الأساسية، وكل قسم يحتوي أدواته ككروت.</p></div></div><div class="admin-control-groups">${visible.map(g=>`<section class="admin-control-group"><div class="admin-control-group-head"><span class="admin-nav-icon-wrap">${icon(icons[g.icon])}</span><span class="admin-control-group-copy"><b>${g.title}</b><small>${g.desc}</small></span></div><div class="admin-control-items">${g.items.map(i=>itemLink(i,'admin-control-item')).join('')}</div></section>`).join('')}</div>`;
     title.insertAdjacentElement('afterend',hub);
   }
 
@@ -146,11 +147,10 @@
   }
 
   ensureMounted();
-  new MutationObserver(()=>queueMicrotask(ensureMounted)).observe(document.body,{childList:true,subtree:true});
-  setInterval(ensureMounted,2500);
-  setTimeout(prefetchAdminPages,250);
+  setTimeout(ensureMounted,500);
+  setTimeout(prefetchAdminPages,150);
 
   if(!messageOnly&&!document.querySelector('script[data-admin-activity-center]')){
-    const s=document.createElement('script');s.type='module';s.src='admin-activity-center.js?v=2';s.dataset.adminActivityCenter='1';document.body.appendChild(s);
+    const s=document.createElement('script');s.type='module';s.src='admin-activity-center.js?v=3';s.dataset.adminActivityCenter='1';document.body.appendChild(s);
   }
 })();
