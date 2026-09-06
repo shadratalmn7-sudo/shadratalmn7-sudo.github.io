@@ -1,0 +1,50 @@
+name: Patch community Firestore rules
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/patch-social-firestore-rules.yml'
+      - 'firestore.rules'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch social profile and follow rules
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('firestore.rules')
+          s=p.read_text()
+          old="""      allow update: if own(uid)\n        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([\n          'publicProfile','avatarKey','updatedAt'\n        ]);"""
+          new="""      allow update: if own(uid)\n        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([\n          'publicProfile','avatarKey','updatedAt'\n        ]);\n\n      // بيانات مجتمع اختيارية للنشر في الملف العام. الحساب نفسه يظل ظاهرًا لكل الطلاب.\n      allow update: if own(uid)\n        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([\n          'bio','telegram','whatsapp','studentStatus','interests','updatedAt'\n        ])\n        && request.resource.data.bio is string && request.resource.data.bio.size() <= 180\n        && request.resource.data.telegram is string && request.resource.data.telegram.size() <= 32\n        && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 15\n        && request.resource.data.studentStatus is string && request.resource.data.studentStatus.size() <= 60\n        && request.resource.data.interests is list && request.resource.data.interests.size() <= 8;"""
+          if old in s:
+              s=s.replace(old,new,1)
+
+          old_keys="'uid','fullName','username','avatarKey','level','xp','studyLevel','badges','achievements','completedTasks','expertise','verifiedExpert','verifiedAccepted','visible','updatedAt'"
+          new_keys="'uid','fullName','username','avatarKey','level','xp','studyLevel','badges','achievements','completedTasks','expertise','verifiedExpert','verifiedAccepted','bio','telegram','whatsapp','studentStatus','interests','followingCount','visible','updatedAt'"
+          if old_keys in s:
+              s=s.replace(old_keys,new_keys,1)
+
+          marker="""    match /communityPosts/{postId} {"""
+          social="""    // المتابعون: يمكن معرفة من يتابع الحساب، أما قائمة من يتابعهم الشخص فهي خاصة به وبالإدارة.\n    match /followers/{targetUid}/users/{followerUid} {\n      allow read: if true;\n      allow create: if own(followerUid)\n        && request.resource.data.uid == followerUid\n        && request.resource.data.keys().hasOnly(['uid','username','fullName','avatarKey','createdAt']);\n      allow delete: if own(followerUid) || adminRole();\n      allow update: if false;\n    }\n\n    match /following/{followerUid}/users/{targetUid} {\n      allow read: if own(followerUid) || adminRole();\n      allow create: if own(followerUid)\n        && request.resource.data.targetUid == targetUid\n        && request.resource.data.keys().hasOnly(['targetUid','createdAt']);\n      allow delete: if own(followerUid) || adminRole();\n      allow update: if false;\n    }\n\n"""
+          if social.strip() not in s and marker in s:
+              s=s.replace(marker,social+marker,1)
+          p.write_text(s)
+          PY
+      - name: Commit rules if changed
+        run: |
+          if git diff --quiet -- firestore.rules; then
+            echo "Rules already patched"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add firestore.rules
+          git commit -m "Allow free student community profiles and follows"
+          git push
