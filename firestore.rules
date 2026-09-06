@@ -22,7 +22,19 @@ service cloud.firestore {
     match /users/{uid} {
       allow create: if own(uid) && request.resource.data.role == 'student'
         && request.resource.data.accountStatus == 'active'
-        && request.resource.data.publicProfile == false;
+        && request.resource.data.publicProfile == false
+        && request.resource.data.referralCount == 0
+        && request.resource.data.level == 1
+        && (
+          (request.resource.data.referredBy == null && request.resource.data.xp == 0)
+          || (
+            request.resource.data.referredBy is string
+            && request.resource.data.referredBy != uid
+            && request.resource.data.xp == 50
+            && getAfter(/databases/$(database)/documents/referrals/$(uid)).data.inviteeUid == uid
+            && getAfter(/databases/$(database)/documents/referrals/$(uid)).data.inviterUid == request.resource.data.referredBy
+          )
+        );
       allow read: if own(uid) || supportStaff();
 
       // معلومات الملف العادية مستقلة عن اسم المستخدم، حتى لا يمنع اسم قديم حفظ العمر أو بقية البيانات.
@@ -48,6 +60,16 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'publicProfile','avatarKey','updatedAt'
         ]);
+      // مكافأة إحالة واحدة فقط: +100 XP لصاحب الرابط، وتُنفذ ذريًا مع إنشاء حساب المدعو.
+      allow update: if signedIn()
+        && request.auth.uid != uid
+        && !exists(/databases/$(database)/documents/referrals/$(request.auth.uid))
+        && getAfter(/databases/$(database)/documents/referrals/$(request.auth.uid)).data.inviteeUid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/referrals/$(request.auth.uid)).data.inviterUid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['xp','referralCount','updatedAt'])
+        && request.resource.data.xp == resource.data.xp + 100
+        && request.resource.data.referralCount == (resource.data.referralCount is int ? resource.data.referralCount : 0) + 1;
+
       allow update: if ownerOnly();
       allow delete: if ownerOnly();
 
@@ -56,6 +78,34 @@ service cloud.firestore {
         allow create: if adminRole() || roleIs('support');
         allow delete: if own(uid) || adminRole() || roleIs('support');
       }
+    }
+
+    // كود عام لا يحتوي بيانات شخصية، ويُستخدم للتحقق من صحة رابط الإحالة قبل التسجيل.
+    match /referralCodes/{uid} {
+      allow read: if true;
+      allow create: if own(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.keys().hasOnly(['uid','createdAt']);
+      allow update, delete: if ownerOnly();
+    }
+
+    match /referrals/{inviteeUid} {
+      allow create: if own(inviteeUid)
+        && !exists(/databases/$(database)/documents/referrals/$(inviteeUid))
+        && request.resource.data.keys().hasOnly([
+          'inviteeUid','inviterUid','inviterXp','inviteeXp','status','createdAt'
+        ])
+        && request.resource.data.inviteeUid == inviteeUid
+        && request.resource.data.inviterUid is string
+        && request.resource.data.inviterUid != inviteeUid
+        && request.resource.data.inviterXp == 100
+        && request.resource.data.inviteeXp == 50
+        && request.resource.data.status == 'awarded'
+        && exists(/databases/$(database)/documents/referralCodes/$(request.resource.data.inviterUid))
+        && get(/databases/$(database)/documents/referralCodes/$(request.resource.data.inviterUid)).data.uid == request.resource.data.inviterUid;
+      allow read: if signedIn()
+        && (request.auth.uid == inviteeUid || request.auth.uid == resource.data.inviterUid || adminRole());
+      allow update, delete: if ownerOnly();
     }
 
     match /phoneReservations/{phoneHash} {
