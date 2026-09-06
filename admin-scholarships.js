@@ -1,0 +1,21 @@
+import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
+import{collection,getDocs,getFirestore,query,where}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
+import{firebaseConfig}from'./firebase-config.js';
+import{buildVisibleScholarships}from'./scholarship-visible-source.js?v=20260907';
+
+const app=getApps().length?getApp():initializeApp(firebaseConfig),db=getFirestore(app),auth=getAuth(app);
+const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const parseDate=v=>{if(!v)return null;const d=new Date(String(v).length===10?`${v}T00:00:00`:v);return Number.isNaN(d.getTime())?null:d};
+const formatDate=v=>{const d=parseDate(v);return d?d.toLocaleDateString('en-GB',{year:'numeric',month:'short',day:'2-digit'}):'غير محدد'};
+function dateState(item){const now=Date.now(),opens=parseDate(item.openDate||item.openingDate),closes=parseDate(item.deadline||item.closeDate||item.endDate);if(opens&&now<opens)return{key:'upcoming',label:'تفتح قريبًا'};if(closes&&now>closes)return{key:'closed',label:'مغلقة'};if(opens||closes)return{key:'open',label:'مفتوحة'};return{key:'unknown',label:'الموعد غير محدد'}}
+
+let scholarships=buildVisibleScholarships();
+const body=document.querySelector('#admin-scholarship-body'),search=document.querySelector('#admin-scholarship-search'),status=document.querySelector('#admin-scholarship-status'),source=document.querySelector('#admin-scholarship-source');
+function setText(id,value){const el=document.getElementById(id);if(el)el.textContent=value}
+function searchable(x){return[x.title,x.country,x.provider,x.funding,...(x.studyLevels||[])].filter(Boolean).join(' ').toLowerCase()}
+function filtered(){const q=(search?.value||'').trim().toLowerCase(),s=status?.value||'all';return scholarships.filter(x=>(s==='all'||dateState(x).key===s)&&(!q||searchable(x).includes(q)))}
+function render(){const list=filtered();const states=scholarships.map(dateState);setText('admin-scholarship-total',scholarships.length.toLocaleString('en-US'));setText('admin-scholarship-open',states.filter(x=>x.key==='open').length.toLocaleString('en-US'));setText('admin-scholarship-upcoming',states.filter(x=>x.key==='upcoming').length.toLocaleString('en-US'));setText('admin-scholarship-unknown',states.filter(x=>x.key==='unknown').length.toLocaleString('en-US'));setText('admin-scholarship-result-count',`${list.length.toLocaleString('en-US')} من ${scholarships.length.toLocaleString('en-US')}`);if(!body)return;body.innerHTML=list.length?list.map(item=>{const state=dateState(item),slug=item.slug||item.id||'',opens=item.openDate||item.openingDate,closes=item.deadline||item.closeDate||item.endDate;return`<tr><td><b>${esc(item.title||'بدون عنوان')}</b><br><small>${esc(slug)}</small></td><td>${esc(item.country||'دولي')}</td><td>${esc(item.provider||'غير محدد')}</td><td><span class="status-chip scholarship-admin-${state.key}">${esc(state.label)}</span></td><td>${esc(formatDate(opens))}</td><td>${esc(formatDate(closes))}</td><td>${esc((item.studyLevels||[]).join('، ')||'غير محدد')}</td><td>${esc(item.funding||'غير محدد')}</td><td><a class="admin-action" href="scholarship.html?slug=${encodeURIComponent(slug)}" target="_blank">عرض</a></td></tr>`}).join(''):'<tr><td colspan="9">لا توجد منح مطابقة.</td></tr>'}
+search?.addEventListener('input',render);status?.addEventListener('change',render);render();
+async function refresh(){try{source.textContent='جارٍ مطابقة الإدارة مع صفحة المنح العامة…';const snap=await getDocs(query(collection(db,'scholarships'),where('publishStatus','==','published')));const remote=snap.docs.map(d=>({id:d.id,...d.data()}));scholarships=buildVisibleScholarships(remote);source.textContent='مطابق لصفحة المنح العامة — نفس المصدر ونفس السجلات المنشورة';source.dataset.ok='yes';render()}catch(error){console.warn('[Shadrat admin scholarships]',error);source.textContent='تعذر قراءة Firestore الآن؛ المعروض مطابق للنسخة الموثقة التي تظهر للطلاب عند تعذر الاتصال.';source.dataset.ok='partial';render()}}
+onAuthStateChanged(auth,user=>{if(user)refresh()});
