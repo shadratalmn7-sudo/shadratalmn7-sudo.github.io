@@ -153,7 +153,6 @@ async function referralUidFromUrl(currentUid = '') {
 }
 
 function addReferralWrites(batch, uid, inviterUid) {
-  batch.set(doc(db, 'referralCodes', uid), { uid, createdAt: serverTimestamp() });
   if (!inviterUid) return;
   batch.set(doc(db, 'referrals', uid), {
     inviteeUid: uid,
@@ -201,6 +200,7 @@ async function ensureGoogleProfile(user) {
   });
   addReferralWrites(batch, user.uid, inviterUid);
   await withTimeout(batch.commit(), 18000);
+  setDoc(doc(db, 'referralCodes', user.uid), { uid: user.uid, createdAt: serverTimestamp() }).catch(error => console.warn('[Shadrat] referral code pending rules deployment', error));
 }
 
 document.querySelectorAll('[data-google-auth]').forEach(button => button.addEventListener('click', async () => {
@@ -344,6 +344,7 @@ registerForm?.addEventListener('submit', async event => {
     addReferralWrites(batch, createdUser.uid, referralUid);
     await withTimeout(batch.commit(), 18000);
     profileCommitted = true;
+    setDoc(doc(db, 'referralCodes', createdUser.uid), { uid: createdUser.uid, createdAt: serverTimestamp() }).catch(error => console.warn('[Shadrat] referral code pending rules deployment', error));
     let verificationSent = true;
     try {
       await withTimeout(sendEmailVerification(createdUser), 15000);
