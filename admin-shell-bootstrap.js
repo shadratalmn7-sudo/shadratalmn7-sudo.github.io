@@ -22,7 +22,7 @@
 
   function ensureCurrentCss(){
     return new Promise((resolve,reject)=>{
-      const existing=document.querySelector('link[data-admin-navigation-current="24"]');
+      const existing=document.querySelector('link[data-admin-navigation-current="25"]');
       if(existing){
         if(existing.sheet)return resolve();
         existing.addEventListener('load',resolve,{once:true});
@@ -32,7 +32,7 @@
       const link=document.createElement('link');
       link.rel='stylesheet';
       link.href='admin-navigation.css?v=24';
-      link.dataset.adminNavigationCurrent='24';
+      link.dataset.adminNavigationCurrent='25';
       link.addEventListener('load',resolve,{once:true});
       link.addEventListener('error',()=>reject(new Error('admin navigation css failed')),{once:true});
       document.head.appendChild(link);
@@ -43,10 +43,10 @@
     await waitForRole();
     await ensureCurrentCss();
     const aside=document.querySelector('.admin-nav');
-    if(aside)aside.dataset.adminBuilt='force-current-24';
-    await import('./admin-navigation.js?v=24');
+    if(aside)aside.dataset.adminBuilt='force-current-25';
+    await import('./admin-navigation.js?v=25');
     await nextPaint();
-    document.body.dataset.adminShellReady='24';
+    document.body.dataset.adminShellReady='25';
     root.classList.remove('admin-pending','admin-shell-pending');
   }
 
