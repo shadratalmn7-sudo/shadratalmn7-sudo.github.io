@@ -56,3 +56,5 @@ jobs:
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
         run: firebase deploy --only firestore:rules --project shazarat-platform --non-interactive --token "$FIREBASE_TOKEN"
+
+# Triggered for the student community rules rollout.
