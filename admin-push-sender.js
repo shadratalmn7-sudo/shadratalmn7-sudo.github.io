@@ -4,7 +4,7 @@ import{firebaseConfig}from'./firebase-config.js';
 
 const app=getApps().length?getApp():initializeApp(firebaseConfig);
 const auth=getAuth(app);
-const PUSH_WEBHOOK='https://hook.eu1.make.com/f2k7h9lrtectb39xsr9qfjxfcbx8fusg';
+const PUSH_WEBHOOK='https://hook.eu1.make.com/fy3fpwyc5xqo67r9am0tcjcjnj7zglf7';
 
 function ensureStyle(){
   if(document.querySelector('#shz-admin-push-style'))return;
@@ -37,12 +37,16 @@ function inject(){
     try{
       const user=auth.currentUser;
       if(!user)throw new Error('AUTH_REQUIRED');
-      const idToken=await user.getIdToken(true);
+      const firebaseIdToken=await user.getIdToken(true);
       const payload=new URLSearchParams({
-        idToken,
+        eventId:`admin-${Date.now()}`,
+        eventType:'admin_broadcast',
         title:form.title.value.trim(),
-        body:form.body.value.trim(),
-        url:form.url.value.trim()||'https://shadratalmn7-sudo.github.io/index.html'
+        message:form.body.value.trim(),
+        url:form.url.value.trim()||'https://shadratalmn7-sudo.github.io/index.html',
+        audience:'all',
+        firebaseIdToken,
+        publishedAt:new Date().toISOString()
       });
       const response=await fetch(PUSH_WEBHOOK,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body:payload});
       const data=await response.json().catch(()=>({}));
