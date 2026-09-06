@@ -71,6 +71,17 @@ service cloud.firestore {
         && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 15
         && request.resource.data.studentStatus is string && request.resource.data.studentStatus.size() <= 60
         && request.resource.data.interests is list && request.resource.data.interests.size() <= 8;
+
+      // بيانات مجتمع اختيارية للنشر في الملف العام. الحساب نفسه يظل ظاهرًا لكل الطلاب.
+      allow update: if own(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'bio','telegram','whatsapp','studentStatus','interests','updatedAt'
+        ])
+        && request.resource.data.bio is string && request.resource.data.bio.size() <= 180
+        && request.resource.data.telegram is string && request.resource.data.telegram.size() <= 32
+        && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 15
+        && request.resource.data.studentStatus is string && request.resource.data.studentStatus.size() <= 60
+        && request.resource.data.interests is list && request.resource.data.interests.size() <= 8;
       // مكافأة إحالة واحدة فقط: +50 XP لصاحب الرابط، وتُنفذ ذريًا مع إنشاء حساب المدعو.
       allow update: if signedIn()
         && request.auth.uid != uid
@@ -247,8 +258,13 @@ service cloud.firestore {
         && request.resource.data.username == getAfter(/databases/$(database)/documents/users/$(uid)).data.username
         && request.resource.data.xp == getAfter(/databases/$(database)/documents/users/$(uid)).data.xp
         && request.resource.data.level == getAfter(/databases/$(database)/documents/users/$(uid)).data.level
-        && request.resource.data.visible is bool;
-      allow update: if adminRole();
+        && request.resource.data.visible == true;
+      allow create, update: if adminRole()
+        && request.resource.data.keys().hasOnly([
+          'uid','fullName','username','avatarKey','level','xp','studyLevel','badges','achievements','completedTasks','expertise','verifiedExpert','verifiedAccepted','bio','telegram','whatsapp','studentStatus','interests','followingCount','visible','updatedAt'
+        ])
+        && request.resource.data.uid == uid
+        && request.resource.data.visible == true;
       allow delete: if own(uid) || adminRole();
     }
 
