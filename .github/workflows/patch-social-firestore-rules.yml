@@ -31,6 +31,8 @@ jobs:
           if old_keys in s:
               s=s.replace(old_keys,new_keys,1)
 
+          s=s.replace("&& request.resource.data.visible is bool;\n      allow update: if adminRole();", "&& request.resource.data.visible == true;\n      allow create, update: if adminRole()\n        && request.resource.data.keys().hasOnly([\n          'uid','fullName','username','avatarKey','level','xp','studyLevel','badges','achievements','completedTasks','expertise','verifiedExpert','verifiedAccepted','bio','telegram','whatsapp','studentStatus','interests','followingCount','visible','updatedAt'\n        ])\n        && request.resource.data.uid == uid\n        && request.resource.data.visible == true;", 1)
+
           marker="""    match /communityPosts/{postId} {"""
           social="""    // المتابعون: يمكن معرفة من يتابع الحساب، أما قائمة من يتابعهم الشخص فهي خاصة به وبالإدارة.\n    match /followers/{targetUid}/users/{followerUid} {\n      allow read: if true;\n      allow create: if own(followerUid)\n        && request.resource.data.uid == followerUid\n        && request.resource.data.keys().hasOnly(['uid','username','fullName','avatarKey','createdAt']);\n      allow delete: if own(followerUid) || adminRole();\n      allow update: if false;\n    }\n\n    match /following/{followerUid}/users/{targetUid} {\n      allow read: if own(followerUid) || adminRole();\n      allow create: if own(followerUid)\n        && request.resource.data.targetUid == targetUid\n        && request.resource.data.keys().hasOnly(['targetUid','createdAt']);\n      allow delete: if own(followerUid) || adminRole();\n      allow update: if false;\n    }\n\n"""
           if social.strip() not in s and marker in s:
@@ -46,5 +48,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add firestore.rules
-          git commit -m "Allow free student community profiles and follows"
+          git commit -m "Require visible public student profiles"
           git push
