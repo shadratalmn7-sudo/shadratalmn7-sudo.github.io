@@ -1,5 +1,5 @@
 import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
-import{doc,getFirestore,onSnapshot,serverTimestamp,setDoc}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+import{doc,getDoc,getFirestore,onSnapshot,serverTimestamp,setDoc}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import{firebaseConfig}from'./firebase-config.js';
 
@@ -59,10 +59,11 @@ function mount(uid){
 
 onAuthStateChanged(auth,async user=>{
  if(!user)return;
+ mount(user.uid);
  try{
-  await setDoc(doc(db,'referralCodes',user.uid),{uid:user.uid,createdAt:serverTimestamp()},{merge:true});
-  mount(user.uid);
+  const reference=doc(db,'referralCodes',user.uid),snapshot=await getDoc(reference);
+  if(!snapshot.exists())await setDoc(reference,{uid:user.uid,createdAt:serverTimestamp()});
  }catch(error){
-  console.error('[Shadrat] referral link',error);
+  console.error('[Shadrat] referral code',error);
  }
 });
