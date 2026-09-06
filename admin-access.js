@@ -16,7 +16,8 @@ const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const OWNER_EMAIL = 'shadrat.almn7@gmail.com';
-const MESSAGE_TEAM_EMAILS = new Set([OWNER_EMAIL, '7ruahmed@mail.ru', '7ruarafat@gmail.com']);
+const ARAFAT_EMAIL = '7ruarafat@gmail.com';
+const MESSAGE_TEAM_EMAILS = new Set([OWNER_EMAIL, '7ruahmed@mail.ru', ARAFAT_EMAIL]);
 const AUTH_SESSION_KEY = 'shadrat_auth_session';
 const ADMIN_SESSION_KEY = 'shadrat_admin_session';
 const ADMIN_SESSION_MAX_AGE = 12 * 60 * 60 * 1000;
@@ -97,14 +98,16 @@ export async function requireAdmin() {
   }
   const page = location.pathname.split('/').pop() || '';
   const messageTeam = MESSAGE_TEAM_EMAILS.has(email);
-  const allowedByRole = (access[page] || ['owner', 'admin']).includes(role);
+  const messageOnly = email === ARAFAT_EMAIL;
+  const allowedByRole = !messageOnly && (access[page] || ['owner', 'admin']).includes(role);
   const allowedMessageTeam = page === 'admin-messages.html' && messageTeam;
   if (!allowedByRole && !allowedMessageTeam) throw new Error('not-authorized');
   if (document.body) {
     document.body.dataset.role = role;
     document.body.dataset.messageTeam = messageTeam ? 'true' : 'false';
+    document.body.dataset.messageOnly = messageOnly ? 'true' : 'false';
   }
   document.documentElement.classList.remove('admin-pending');
   document.documentElement.classList.add('admin-authorized');
-  return { user, role, messageTeam };
+  return { user, role, messageTeam, messageOnly };
 }
