@@ -1,0 +1,12 @@
+import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
+import{getAuth,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
+import{doc,getDoc,getFirestore,serverTimestamp,updateDoc}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+import{firebaseConfig}from'./firebase-config.js';
+const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),form=document.querySelector('#social-profile-form'),status=document.querySelector('#social-status'),save=document.querySelector('#save-social');let user=null;
+const clean=v=>String(v||'').trim();
+const telegram=v=>clean(v).replace(/^https?:\/\/(t\.me|telegram\.me)\//i,'').replace(/^@/,'').replace(/[^a-zA-Z0-9_]/g,'').slice(0,32);
+const whatsapp=v=>clean(v).replace(/\D/g,'').slice(0,15);
+const interests=v=>[...new Set(clean(v).split(/[,،]/).map(x=>x.trim()).filter(Boolean))].slice(0,8);
+function setStatus(text,type=''){status.textContent=text;status.className=`status ${type}`}
+onAuthStateChanged(auth,async current=>{if(!current){location.href='login.html?next=profile-social-settings.html';return}user=current;try{const snap=await getDoc(doc(db,'users',current.uid)),d=snap.data()||{};form.bio.value=d.bio||'';form.telegram.value=d.telegram||'';form.whatsapp.value=d.whatsapp||'';form.studentStatus.value=d.studentStatus||'';form.interests.value=Array.isArray(d.interests)?d.interests.join('، '):d.interests||''}catch(e){console.error(e);setStatus('تعذر تحميل بيانات ملف المجتمع الآن.','err')}});
+form.addEventListener('submit',async e=>{e.preventDefault();if(!user)return;const payload={bio:clean(form.bio.value).slice(0,180),telegram:telegram(form.telegram.value),whatsapp:whatsapp(form.whatsapp.value),studentStatus:clean(form.studentStatus.value).slice(0,60),interests:interests(form.interests.value),updatedAt:serverTimestamp()};if(payload.telegram&&payload.telegram.length<5){setStatus('اسم Telegram غير صحيح.','err');return}if(payload.whatsapp&&payload.whatsapp.length<8){setStatus('رقم WhatsApp قصير جدًا. أضف رمز الدولة.','err');return}save.disabled=true;setStatus('جاري الحفظ…');try{await updateDoc(doc(db,'users',user.uid),payload);setStatus('تم حفظ ملف المجتمع ✓','ok');setTimeout(()=>location.href='profile.html',700)}catch(err){console.error('[Shadrat] community profile save',err);setStatus(err?.code?.includes('permission-denied')?'صلاحيات Firebase الحالية لم تُنشر بعد لحفظ هذه الحقول.':'تعذر الحفظ الآن. جرّب مرة أخرى.','err')}finally{save.disabled=false}});
