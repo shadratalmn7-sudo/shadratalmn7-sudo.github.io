@@ -1,0 +1,12 @@
+import{getApp,getApps,initializeApp}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js';
+import{collection,getDocs,getFirestore,limit,orderBy,query}from'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+import{firebaseConfig}from'./firebase-config.js';
+const app=getApps().length?getApp():initializeApp(firebaseConfig),db=getFirestore(app),grid=document.querySelector('#students-grid'),search=document.querySelector('#student-search');
+const esc=(v='')=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PREF='shadrat-profile-v2:';
+let rows=[];
+function prefsOf(p={}){const raw=String(p.avatarKey||'');if(!raw.startsWith(PREF))return{};try{return JSON.parse(raw.slice(PREF.length))||{}}catch{return{}}}
+function avatar(p={}){const pref=prefsOf(p),img=typeof pref.avatarDataUrl==='string'&&pref.avatarDataUrl.startsWith('data:image/')?pref.avatarDataUrl:'',initial=esc((p.fullName||p.username||'ط').trim().slice(0,1).toUpperCase());return `<div class="student-card-avatar">${img?`<img src="${esc(img)}" alt="الصورة الشخصية">`:initial}</div>`}
+function render(){const needle=String(search?.value||'').trim().toLowerCase();const filtered=rows.filter(p=>!needle||String(p.fullName||'').toLowerCase().includes(needle)||String(p.username||'').toLowerCase().includes(needle));if(!filtered.length){grid.innerHTML='<div class="students-status">لا توجد نتائج مطابقة.</div>';return}grid.innerHTML=filtered.map(p=>`<a class="student-card" href="student-profile.html?uid=${encodeURIComponent(p.uid)}"> <div class="student-card-top">${avatar(p)}<div><h2>${esc(p.fullName||'طالب شذرات')}</h2><p class="username">@${esc(p.username||'student')}</p></div></div><p class="bio">${esc(p.bio||'طالب في مجتمع شذرات للمنح.')}</p><div class="student-meta">${p.studyLevel?`<span>${esc(p.studyLevel)}</span>`:''}${p.studentStatus?`<span>${esc(p.studentStatus)}</span>`:''}${Array.isArray(p.interests)?p.interests.slice(0,2).map(x=>`<span>${esc(x)}</span>`).join(''):''}</div></a>`).join('')}
+try{const snap=await getDocs(query(collection(db,'publicProfiles'),orderBy('updatedAt','desc'),limit(200)));rows=snap.docs.map(d=>({uid:d.id,...d.data()})).filter(p=>p.visible!==false);render()}catch(e){console.error('[Shadrat] students directory',e);grid.innerHTML='<div class="students-status">تعذر تحميل قائمة الطلاب الآن.</div>'}
+search?.addEventListener('input',render);
