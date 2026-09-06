@@ -34,8 +34,8 @@ jobs:
 
           changed = []
           for p in Path('.').glob('*.html'):
-              # Keep ads off owner/admin pages to avoid self-impressions.
-              if p.name.startswith('admin-') or p.name.startswith('google'):
+              # Keep ads off the homepage and owner/admin/verification pages.
+              if p.name == 'index.html' or p.name.startswith('admin-') or p.name.startswith('google'):
                   continue
               s = p.read_text(encoding='utf-8')
               if '<html' not in s.lower() or '</body>' not in s.lower():
