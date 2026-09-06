@@ -5,27 +5,33 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>تواصل معنا | شذرات للمنح</title>
   <link rel="stylesheet" href="site.css?v=30"><link rel="stylesheet" href="nav-universal.css?v=155"><link rel="stylesheet" href="section-pages.css?v=5">
-<meta name="referrer" content="no-referrer-when-downgrade">
+  <meta name="referrer" content="no-referrer-when-downgrade">
+  <style>
+    .contact-simple{width:min(680px,100%);margin:auto}.contact-simple .card{padding:20px}.contact-simple .form{gap:14px}.contact-note{margin:0;color:var(--muted);font-size:13px;line-height:1.8}.contact-simple textarea{min-height:150px;resize:vertical}.contact-simple .btn{min-height:48px;width:100%}
+    @media(max-width:640px){.contact-simple .card{padding:15px}.page-hero .lead{max-width:32rem}}
+  </style>
 </head>
 <body>
   <header class="site-header"><div class="container nav"><a class="brand" href="index.html"><img class="brand-logo" src="assets/shazarat-logo-blue.png?v=20260905b" alt="شذرات للمنح"></a></div></header>
   <main>
-    <section class="page-hero"><div class="container"><span class="eyebrow">نسمعك بوضوح</span><h1>تواصل معنا</h1><p class="lead">للاستفسارات العامة، الخدمات، الشكاوى، الإنجازات أو الإبلاغ عن معلومة غير صحيحة.</p></div></section>
-    <section class="section"><div class="container grid grid-2">
+    <section class="page-hero"><div class="container"><span class="eyebrow">فريق شذرات</span><h1>تواصل معنا</h1><p class="lead">اكتب رسالتك فقط، وستصل مباشرة إلى صندوق إدارة شذرات.</p></div></section>
+    <section class="section"><div class="container contact-simple">
       <form class="card form" data-demo-form>
-        <div class="field"><label for="name">الاسم</label><input id="name" required minlength="2"></div>
-        <div class="field"><label for="email">البريد الإلكتروني</label><input id="email" type="email" required><small class="muted">إذا كنت مسجلًا سيظهر بريد حسابك تلقائيًا، ويمكنك تغييره لهذه الرسالة فقط.</small></div>
-        <div class="field"><label for="type">نوع الرسالة</label><select id="type" required><option value="">اختر</option><option value="general">استفسار عام</option><option value="service">طلب خدمة</option><option value="complaint">شكوى</option><option value="report">معلومة غير صحيحة</option><option value="achievement">إنجازات</option></select></div>
-        <div class="field" data-service-field hidden><label for="service-name">الخدمة المطلوبة</label><input id="service-name" readonly></div>
-        <div class="field" data-achievement-field hidden><label for="contact-method">حساب تيليجرام أو وسيلة التواصل</label><input id="contact-method" placeholder="مثال: @username أو رقم جوال"><small class="muted">اكتب وسيلة صحيحة حتى يتواصل معك فريق شذرات بعد المراجعة.</small></div>
-        <div class="field" data-achievement-field hidden><label for="proof-link">رابط دليل الإعلان أو النشر</label><input id="proof-link" type="url" placeholder="https://..."><small class="muted">ضع رابط المنشور أو الملف الذي يثبت الإنجاز.</small></div>
-        <div class="field"><label for="message">الرسالة</label><textarea id="message" required minlength="10"></textarea></div>
-        <button class="btn primary" type="submit">إرسال الرسالة</button><div class="success" role="status" aria-live="polite"></div>
+        <div class="field"><label for="name">الاسم</label><input id="name" autocomplete="name" required minlength="2"></div>
+        <div class="field"><label for="email">البريد الإلكتروني</label><input id="email" type="email" autocomplete="email" required></div>
+        <div class="field"><label for="type">الموضوع</label><select id="type" required><option value="general" selected>استفسار أو رسالة</option><option value="service">طلب خدمة</option><option value="complaint">شكوى</option><option value="report">بلاغ عن معلومة</option><option value="achievement">إنجاز</option></select></div>
+        <div class="field" data-service-field hidden><label for="service-name">الخدمة</label><input id="service-name" readonly></div>
+        <div class="field" data-achievement-field hidden><label for="contact-method">وسيلة التواصل</label><input id="contact-method" placeholder="تيليجرام أو رقم جوال"></div>
+        <div class="field" data-achievement-field hidden><label for="proof-link">رابط الدليل</label><input id="proof-link" type="url" placeholder="https://..."></div>
+        <div class="field"><label for="message">رسالتك</label><textarea id="message" required minlength="10" maxlength="5000" placeholder="اكتب رسالتك هنا..."></textarea></div>
+        <p class="contact-note">لا ترسل كلمة مرور أو بيانات بطاقة أو وثائق شخصية داخل الرسالة.</p>
+        <button class="btn primary" type="submit">إرسال</button>
+        <div class="success" role="status" aria-live="polite"></div>
       </form>
-      <aside class="card"><h2>قبل الإرسال</h2><p class="muted">لا ترسل كلمة مرور أو بيانات بطاقة أو وثائق شخصية داخل رسالة عامة.</p><div class="notice"><b>الإنجازات:</b> أرسل رابط الإعلان أو دليل النشر ووسيلة التواصل. تراجع الإدارة الدليل، ثم تعتمد XP أو ترفضه مع توضيح السبب.</div><div class="notice"><b>بلاغات المنح:</b> لا يتغير المحتوى تلقائيًا؛ يراجعه فريق شذرات أولًا.</div><h3>متابعة الرسالة</h3><p class="muted">بعد الإرسال تظهر الرسالة في صندوق الإدارة، ويصل رد الإدارة داخل حسابك في شذرات.</p></aside>
     </div></section>
   </main>
-  <footer class="site-footer"><div class="container"><b>شذرات للمنح</b><p>استخدم نموذج التواصل لإرسال الاستفسارات والطلبات والشكاوى إلى فريق الإدارة.</p></div></footer>
+  <footer class="site-footer"><div class="container"><b>شذرات للمنح</b><p>رسائلك تصل إلى فريق الإدارة، ويمكن متابعة الرد من حسابك إذا كنت مسجلًا.</p></div></footer>
   <script src="nav-universal.js?v=162"></script>
+  <script type="module" src="contact-live.js?v=2"></script>
 </body>
 </html>
