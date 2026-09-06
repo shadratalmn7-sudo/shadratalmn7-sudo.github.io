@@ -11,6 +11,8 @@ on:
       - 'push-notifications.js'
       - 'shadrat-messaging.js'
       - 'admin-commerce.js'
+      - 'scholarships-admin.js'
+      - 'admin-push-events.js'
       - 'level-system.js'
       - 'profile-core.js'
       - 'profile-edit-deep.js'
@@ -31,6 +33,8 @@ jobs:
           node --check service-auto-alerts.js
           node --check shadrat-messaging.js
           node --check admin-commerce.js
+          node --check scholarships-admin.js
+          node --check admin-push-events.js
       - name: Bust changed front-end asset caches
         run: |
           python3 - <<'PY'
