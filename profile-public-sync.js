@@ -27,6 +27,9 @@ function publicBadges(data){
   const labels={student:'طالب شذرات',active:'طالب نشيط',bronze:'المستوى البرونزي',silver:'نخبة Level 20'};
   return[...new Set(ids.map(id=>labels[id]).filter(Boolean))].slice(0,3);
 }
+function cleanTelegram(v){return clean(v).replace(/^https?:\/\/(t\.me|telegram\.me)\//i,'').replace(/^@/,'').replace(/[^a-zA-Z0-9_]/g,'').slice(0,32)}
+function cleanWhatsApp(v){return clean(v).replace(/\D/g,'').slice(0,15)}
+function cleanInterests(v){const raw=Array.isArray(v)?v:String(v||'').split(/[,،]/);return[...new Set(raw.map(clean).filter(Boolean))].slice(0,8)}
 async function syncPublicProfile(user){
   const snap=await getDoc(doc(db,'users',user.uid));if(!snap.exists())return null;
   const data=snap.data()||{},xp=Math.max(0,Number(data.xp)||0),level=Math.max(1,Number(data.level)||levelFromXp(xp)),username=cleanUsername(data.username||'student');
@@ -36,9 +39,7 @@ async function syncPublicProfile(user){
     achievements:listFrom(data,['achievements','completedAchievements','achievementTitles'],16),
     completedTasks:listFrom(data,['completedTasks','completedMissions','missionsCompleted','missionHistory'],16)
   };
-  // نخزن المعلومات العامة الإضافية داخل expertise لأنه موجود أصلًا في مخطط الملف العام.
-  // لا يتم نسخ البريد أو الجوال أو الملفات أو الطلبات أو الرسائل أو بيانات الدخول.
-  const publicData={uid:user.uid,username,avatarKey:String(data.avatarKey||''),level,xp,badges:publicBadges(data),expertise:safeInfo,visible:true,updatedAt:serverTimestamp()};
+  const publicData={uid:user.uid,username,fullName:safeInfo.fullName,studyLevel:safeInfo.studyLevel,avatarKey:String(data.avatarKey||''),level,xp,badges:publicBadges(data),expertise:safeInfo,bio:clean(data.bio||'').slice(0,180),telegram:cleanTelegram(data.telegram),whatsapp:cleanWhatsApp(data.whatsapp),studentStatus:clean(data.studentStatus||'').slice(0,60),interests:cleanInterests(data.interests),visible:true,updatedAt:serverTimestamp()};
   await setDoc(doc(db,'publicProfiles',user.uid),publicData,{merge:true});
   return{...publicData,...safeInfo};
 }
@@ -46,7 +47,7 @@ function addTools(uid,username){
   if(document.querySelector('.public-profile-tools'))return;
   const host=document.querySelector('.dashboard-actions');if(!host)return;
   const box=document.createElement('div');box.className='public-profile-tools';
-  box.innerHTML=`<div class="public-profile-tools-head"><div><b>ملفات الطلاب</b><small>الملف العام يعرض الاسم واليوزر والمستوى والإنجازات والمهام فقط، ولا يعرض ملفاتك أو بيانات الدخول.</small></div><a class="btn outline" href="student-profile.html?uid=${encodeURIComponent(uid)}">عرض ملفي العام</a></div><div class="public-profile-search"><input type="text" maxlength="24" inputmode="text" autocomplete="off" placeholder="اكتب يوزر صديقك مثل ahmed7" aria-label="اسم مستخدم الطالب"><button class="btn primary" type="button">فتح الملف</button></div><small class="public-profile-search-status" aria-live="polite"></small>`;
+  box.innerHTML=`<div class="public-profile-tools-head"><div><b>مجتمع الطلاب</b><small>كل الطلاب يظهرون في قائمة الطلاب، ويمكن فتح الملف العام أو البحث باسم المستخدم.</small></div><div style="display:flex;gap:7px;flex-wrap:wrap"><a class="btn primary" href="students.html">استكشف الطلاب</a><a class="btn outline" href="student-profile.html?uid=${encodeURIComponent(uid)}">عرض ملفي العام</a></div></div><div class="public-profile-search"><input type="text" maxlength="24" inputmode="text" autocomplete="off" placeholder="اكتب يوزر طالب مثل ahmed7" aria-label="اسم مستخدم الطالب"><button class="btn outline" type="button">فتح الملف</button></div><small class="public-profile-search-status" aria-live="polite"></small>`;
   host.insertAdjacentElement('afterend',box);
   const input=box.querySelector('input'),button=box.querySelector('button'),status=box.querySelector('.public-profile-search-status');
   const open=async()=>{
@@ -55,7 +56,7 @@ function addTools(uid,username){
     button.disabled=true;status.textContent='جاري البحث…';
     try{
       const q=query(collection(db,'publicProfiles'),where('username','==',wanted),where('visible','==',true),limit(1));
-      const found=await getDocs(q);if(found.empty){status.textContent='لم نجد ملفًا عامًا بهذا اليوزر.';return}
+      const found=await getDocs(q);if(found.empty){status.textContent='لم نجد طالبًا بهذا اليوزر.';return}
       location.href=`student-profile.html?uid=${encodeURIComponent(found.docs[0].id)}`;
     }catch(e){console.error('[Shadrat] public profile search',e);status.textContent='تعذر البحث الآن. جرّب بعد قليل.'}
     finally{button.disabled=false}
