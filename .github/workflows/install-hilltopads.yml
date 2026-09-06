@@ -1,4 +1,4 @@
-name: install-hilltopads
+name: remove-hilltopads-multitag
 on:
   push:
     paths:
@@ -9,56 +9,37 @@ permissions:
   contents: write
 
 jobs:
-  install:
+  cleanup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Add HilltopAds to public pages
+      - name: Remove HilltopAds MultiTag from all public pages
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
-          meta = '<meta name="referrer" content="no-referrer-when-downgrade">'
-          ad = '''<script>
-          (function(aduq){
-          var d = document,
-              s = d.createElement('script'),
-              l = d.scripts[d.scripts.length - 1];
-          s.settings = aduq || {};
-          s.src = "\\/\\/untimely-hello.com\\/bIX.VFskdXG_lM0dYjWBcH\\/Iexmf9tuSZUU-lakpP_T\\/cJzMOrTRAl0oNQzDMZtmNtzwMt5UMnDkQz3\\/NIwC";
-          s.async = true;
-          s.referrerPolicy = 'no-referrer-when-downgrade';
-          l.parentNode.insertBefore(s, l);
-          })({})
-          </script>'''
+          pattern = re.compile(
+              r'<script>\s*\(function\(aduq\)\{.*?untimely-hello\.com.*?</script>\s*',
+              re.S,
+          )
 
           changed = []
           for p in Path('.').glob('*.html'):
-              # Keep ads off the homepage and owner/admin/verification pages.
-              if p.name == 'index.html' or p.name.startswith('admin-') or p.name.startswith('google'):
-                  continue
               s = p.read_text(encoding='utf-8')
-              if '<html' not in s.lower() or '</body>' not in s.lower():
-                  continue
-              ns = s
-              if 'name="referrer"' not in ns and '</head>' in ns.lower():
-                  idx = ns.lower().rfind('</head>')
-                  ns = ns[:idx] + meta + '\n' + ns[idx:]
-              if 'untimely-hello.com' not in ns:
-                  idx = ns.lower().rfind('</body>')
-                  ns = ns[:idx] + ad + '\n' + ns[idx:]
-              if ns != s:
+              ns, count = pattern.subn('', s)
+              if count:
                   p.write_text(ns, encoding='utf-8')
                   changed.append(p.name)
 
-          print(f'Updated {len(changed)} public pages')
+          print(f'Removed HilltopAds MultiTag from {len(changed)} pages')
           print('\n'.join(changed))
           PY
-      - name: Commit HilltopAds integration
+      - name: Commit cleanup
         run: |
           if git diff --quiet; then exit 0; fi
           git config user.name 'shadratalmn7-sudo'
           git config user.email 'shadrat.almn7@gmail.com'
           git add '*.html'
-          git commit -m 'Add HilltopAds video ads across public pages'
+          git commit -m 'Remove aggressive HilltopAds MultiTag popups'
           git push
