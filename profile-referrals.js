@@ -37,7 +37,7 @@ function mount(uid){
  card.id='profile-referral-card';
  card.className='referral-card';
  const link=referralUrl(uid);
- card.innerHTML=`<div class="referral-head"><div><span class="eyebrow">ادعُ صديقًا</span><h2>رابط الإحالة الخاص بك</h2><p>أرسل الرابط لصديقك. عند إنشاء حساب جديد من خلاله تحصل أنت على <b>100 XP</b> ويحصل صديقك على <b>50 XP</b>.</p></div><span class="referral-points">مكافأة تلقائية</span></div><div class="referral-link-row"><input class="referral-link" id="referral-link" readonly aria-label="رابط الإحالة" value="${link.replace(/"/g,'&quot;')}"><button class="btn primary" id="copy-referral" type="button">نسخ الرابط</button><button class="btn outline" id="share-referral" type="button">مشاركة</button></div><div class="referral-stat-row"><div class="referral-stat"><b data-referral-count>٠</b><small>أصدقاء سجلوا برابطك</small></div><div class="referral-stat"><b data-referral-xp>٠ XP</b><small>XP من الإحالات</small></div><div class="referral-stat"><b>+٥٠ XP</b><small>هدية الصديق الجديد</small></div></div><p class="referral-message" data-referral-message role="status"></p>`;
+ card.innerHTML=`<div class="referral-head"><div><span class="eyebrow">ادعُ صديقًا</span><h2>رابط الإحالة الخاص بك</h2><p>أرسل الرابط لصديقك. عند إنشاء حساب جديد من خلاله تحصل أنت على <b>25 XP</b> ويحصل صديقك على <b>25 XP</b>.</p></div><span class="referral-points">مكافأة تلقائية</span></div><div class="referral-link-row"><input class="referral-link" id="referral-link" readonly aria-label="رابط الإحالة" value="${link.replace(/"/g,'&quot;')}"><button class="btn primary" id="copy-referral" type="button">نسخ الرابط</button><button class="btn outline" id="share-referral" type="button">مشاركة</button></div><div class="referral-stat-row"><div class="referral-stat"><b data-referral-count>٠</b><small>أصدقاء سجلوا برابطك</small></div><div class="referral-stat"><b data-referral-xp>٠ XP</b><small>XP من الإحالات</small></div><div class="referral-stat"><b>+٢٥ XP</b><small>هدية الصديق الجديد</small></div></div><p class="referral-message" data-referral-message role="status"></p>`;
  const actions=overview.querySelector('.dashboard-actions');
  if(actions)actions.insertAdjacentElement('afterend',card);else overview.appendChild(card);
  const input=card.querySelector('#referral-link'),message=card.querySelector('[data-referral-message]');
@@ -46,14 +46,14 @@ function mount(uid){
   try{await navigator.clipboard.writeText(link);copied()}catch{input.select();document.execCommand('copy');copied()}
  });
  card.querySelector('#share-referral').addEventListener('click',async()=>{
-  const data={title:'شذرات للمنح',text:'سجّل في شذرات للمنح من رابط دعوتي واحصل على 50 XP كبداية.',url:link};
+  const data={title:'شذرات للمنح',text:'سجّل في شذرات للمنح من رابط دعوتي واحصل على 25 XP كبداية.',url:link};
   if(navigator.share){try{await navigator.share(data)}catch{}}
   else{try{await navigator.clipboard.writeText(link);copied()}catch{input.select();document.execCommand('copy');copied()}}
  });
  onSnapshot(doc(db,'users',uid),snapshot=>{
   const count=Math.max(0,Number(snapshot.data()?.referralCount||0));
   card.querySelector('[data-referral-count]').textContent=ar(count);
-  card.querySelector('[data-referral-xp]').textContent=`${ar(count*100)} XP`;
+  card.querySelector('[data-referral-xp]').textContent=`${ar(count*50)} XP`;
  });
 }
 
