@@ -13,7 +13,7 @@ import {
   signOut,
   updateProfile
 } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
-import { doc, getDoc, getFirestore, serverTimestamp, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
+import { doc, getDoc, getFirestore, increment, serverTimestamp, setDoc, writeBatch } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import { firebaseConfig } from './firebase-config.js';
 
 const OWNER_EMAIL = 'shadrat.almn7@gmail.com';
@@ -141,6 +141,35 @@ async function destination(user) {
   return next || 'profile.html';
 }
 
+async function referralUidFromUrl(currentUid = '') {
+  const raw = new URLSearchParams(location.search).get('ref') || '';
+  if (!/^[A-Za-z0-9_-]{20,128}$/.test(raw) || raw === currentUid) return null;
+  try {
+    const snapshot = await withTimeout(getDoc(doc(db, 'referralCodes', raw)), 10000);
+    return snapshot.exists() && snapshot.data().uid === raw ? raw : null;
+  } catch {
+    return null;
+  }
+}
+
+function addReferralWrites(batch, uid, inviterUid) {
+  batch.set(doc(db, 'referralCodes', uid), { uid, createdAt: serverTimestamp() });
+  if (!inviterUid) return;
+  batch.set(doc(db, 'referrals', uid), {
+    inviteeUid: uid,
+    inviterUid,
+    inviterXp: 100,
+    inviteeXp: 50,
+    status: 'awarded',
+    createdAt: serverTimestamp()
+  });
+  batch.update(doc(db, 'users', inviterUid), {
+    xp: increment(100),
+    referralCount: increment(1),
+    updatedAt: serverTimestamp()
+  });
+}
+
 async function ensureGoogleProfile(user) {
   if (isOwner(user.email)) return;
   const reference = doc(db, 'users', user.uid);
@@ -148,7 +177,9 @@ async function ensureGoogleProfile(user) {
   if (snapshot.exists()) return;
   const base = (user.displayName || user.email?.split('@')[0] || 'student').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 16) || 'student';
   const username = `${base}_${user.uid.slice(0, 5)}`.slice(0, 24);
-  await withTimeout(setDoc(reference, {
+  const inviterUid = await referralUidFromUrl(user.uid);
+  const batch = writeBatch(db);
+  batch.set(reference, {
     uid: user.uid,
     fullName: user.displayName || 'طالب شذرات',
     username,
@@ -159,14 +190,17 @@ async function ensureGoogleProfile(user) {
     avatarKey: null,
     location: '',
     studyLevel: '',
-    xp: 0,
+    xp: inviterUid ? 50 : 0,
+    referralCount: 0,
     level: 1,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
     authProvider: 'google',
     emailVerificationRequired: false,
-    referredBy: null
-  }), 15000);
+    referredBy: inviterUid
+  });
+  addReferralWrites(batch, user.uid, inviterUid);
+  await withTimeout(batch.commit(), 18000);
 }
 
 document.querySelectorAll('[data-google-auth]').forEach(button => button.addEventListener('click', async () => {
@@ -267,8 +301,7 @@ registerForm?.addEventListener('submit', async event => {
   const phone = normalizePhone(registerForm.querySelector('#phone').value);
   const password = registerForm.querySelector('#pass').value;
   const confirmation = registerForm.querySelector('#confirm').value;
-  const referralRaw = new URLSearchParams(location.search).get('ref') || '';
-  const referralUid = /^[A-Za-z0-9_-]{20,128}$/.test(referralRaw) ? referralRaw : null;
+  const referralUid = await referralUidFromUrl();
   if (!/^[a-z0-9_]{3,24}$/.test(username) || reservedUsername(username)) return show(registerForm, 'اسم المستخدم يجب أن يكون 3–24 حرفًا إنجليزيًا أو رقمًا أو شرطة سفلية، وألا يكون اسمًا محجوزًا.');
   if (!phone) return show(registerForm, 'اكتب رقم جوال صحيحًا بصيغة دولية، مثل +9665xxxxxxxx.');
   if (password !== confirmation) return show(registerForm, 'كلمتا المرور غير متطابقتين.');
@@ -297,7 +330,8 @@ registerForm?.addEventListener('submit', async event => {
       avatarKey: null,
       location: '',
       studyLevel: '',
-      xp: 0,
+      xp: referralUid ? 50 : 0,
+      referralCount: 0,
       level: 1,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -307,6 +341,7 @@ registerForm?.addEventListener('submit', async event => {
     });
     batch.set(doc(db, 'phoneReservations', phoneHash), { uid: createdUser.uid, createdAt: serverTimestamp() });
     batch.set(doc(db, 'usernameReservations', username), { uid: createdUser.uid, createdAt: serverTimestamp() });
+    addReferralWrites(batch, createdUser.uid, referralUid);
     await withTimeout(batch.commit(), 18000);
     profileCommitted = true;
     let verificationSent = true;
