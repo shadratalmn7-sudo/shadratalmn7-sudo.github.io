@@ -44,10 +44,11 @@ async function syncPublicProfile(user){
   return{...publicData,...safeInfo};
 }
 function addTools(uid,username){
+  document.querySelector('.dashboard-help')?.remove();
   if(document.querySelector('.public-profile-tools'))return;
   const host=document.querySelector('.dashboard-actions');if(!host)return;
   const box=document.createElement('div');box.className='public-profile-tools';
-  box.innerHTML=`<div class="public-profile-tools-head"><div><b>مجتمع الطلاب</b><small>كل الطلاب يظهرون في قائمة الطلاب، ويمكن فتح الملف العام أو البحث باسم المستخدم.</small></div><div style="display:flex;gap:7px;flex-wrap:wrap"><a class="btn primary" href="students.html">استكشف الطلاب</a><a class="btn outline" href="student-profile.html?uid=${encodeURIComponent(uid)}">عرض ملفي العام</a></div></div><div class="public-profile-search"><input type="text" maxlength="24" inputmode="text" autocomplete="off" placeholder="اكتب يوزر طالب مثل ahmed7" aria-label="اسم مستخدم الطالب"><button class="btn outline" type="button">فتح الملف</button></div><small class="public-profile-search-status" aria-live="polite"></small>`;
+  box.innerHTML=`<div class="public-profile-tools-head"><div><b>مجتمع الطلاب</b><small>كل الطلاب يظهرون في قائمة الطلاب، ويمكن فتح الملف العام أو البحث باسم المستخدم.</small></div><div style="display:flex;gap:7px;flex-wrap:wrap"><a class="btn primary" href="students.html">استكشف الطلاب</a><a class="btn outline" href="profile-social-settings.html">تعديل ملف المجتمع</a><a class="btn outline" href="student-profile.html?uid=${encodeURIComponent(uid)}">عرض ملفي العام</a></div></div><div class="public-profile-search"><input type="text" maxlength="24" inputmode="text" autocomplete="off" placeholder="اكتب يوزر طالب مثل ahmed7" aria-label="اسم مستخدم الطالب"><button class="btn outline" type="button">فتح الملف</button></div><small class="public-profile-search-status" aria-live="polite"></small>`;
   host.insertAdjacentElement('afterend',box);
   const input=box.querySelector('input'),button=box.querySelector('button'),status=box.querySelector('.public-profile-search-status');
   const open=async()=>{
@@ -66,5 +67,5 @@ function addTools(uid,username){
 
 onAuthStateChanged(auth,async user=>{
   if(!user)return;
-  try{const p=await syncPublicProfile(user);if(p)addTools(user.uid,p.username)}catch(e){console.error('[Shadrat] public profile sync',e)}
+  try{const p=await syncPublicProfile(user);if(p)addTools(user.uid,p.username)}catch(e){console.error('[Shadrat] public profile sync',e);document.querySelector('.dashboard-help')?.remove()}
 });
