@@ -158,13 +158,13 @@ function addReferralWrites(batch, uid, inviterUid) {
   batch.set(doc(db, 'referrals', uid), {
     inviteeUid: uid,
     inviterUid,
-    inviterXp: 100,
-    inviteeXp: 50,
+    inviterXp: 50,
+    inviteeXp: 25,
     status: 'awarded',
     createdAt: serverTimestamp()
   });
   batch.update(doc(db, 'users', inviterUid), {
-    xp: increment(100),
+    xp: increment(50),
     referralCount: increment(1),
     updatedAt: serverTimestamp()
   });
@@ -190,7 +190,7 @@ async function ensureGoogleProfile(user) {
     avatarKey: null,
     location: '',
     studyLevel: '',
-    xp: inviterUid ? 50 : 0,
+    xp: inviterUid ? 25 : 0,
     referralCount: 0,
     level: 1,
     createdAt: serverTimestamp(),
