@@ -60,6 +60,17 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'publicProfile','avatarKey','updatedAt'
         ]);
+
+      // بيانات مجتمع اختيارية للنشر في الملف العام. الحساب نفسه يظل ظاهرًا لكل الطلاب.
+      allow update: if own(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'bio','telegram','whatsapp','studentStatus','interests','updatedAt'
+        ])
+        && request.resource.data.bio is string && request.resource.data.bio.size() <= 180
+        && request.resource.data.telegram is string && request.resource.data.telegram.size() <= 32
+        && request.resource.data.whatsapp is string && request.resource.data.whatsapp.size() <= 15
+        && request.resource.data.studentStatus is string && request.resource.data.studentStatus.size() <= 60
+        && request.resource.data.interests is list && request.resource.data.interests.size() <= 8;
       // مكافأة إحالة واحدة فقط: +50 XP لصاحب الرابط، وتُنفذ ذريًا مع إنشاء حساب المدعو.
       allow update: if signedIn()
         && request.auth.uid != uid
@@ -230,7 +241,7 @@ service cloud.firestore {
       allow read: if resource.data.visible == true || own(uid) || supportStaff();
       allow create, update: if own(uid)
         && request.resource.data.keys().hasOnly([
-          'uid','fullName','username','avatarKey','level','xp','studyLevel','badges','achievements','completedTasks','expertise','verifiedExpert','verifiedAccepted','visible','updatedAt'
+          'uid','fullName','username','avatarKey','level','xp','studyLevel','badges','achievements','completedTasks','expertise','verifiedExpert','verifiedAccepted','bio','telegram','whatsapp','studentStatus','interests','followingCount','visible','updatedAt'
         ])
         && request.resource.data.uid == uid
         && request.resource.data.username == getAfter(/databases/$(database)/documents/users/$(uid)).data.username
@@ -239,6 +250,25 @@ service cloud.firestore {
         && request.resource.data.visible is bool;
       allow update: if adminRole();
       allow delete: if own(uid) || adminRole();
+    }
+
+    // المتابعون: يمكن معرفة من يتابع الحساب، أما قائمة من يتابعهم الشخص فهي خاصة به وبالإدارة.
+    match /followers/{targetUid}/users/{followerUid} {
+      allow read: if true;
+      allow create: if own(followerUid)
+        && request.resource.data.uid == followerUid
+        && request.resource.data.keys().hasOnly(['uid','username','fullName','avatarKey','createdAt']);
+      allow delete: if own(followerUid) || adminRole();
+      allow update: if false;
+    }
+
+    match /following/{followerUid}/users/{targetUid} {
+      allow read: if own(followerUid) || adminRole();
+      allow create: if own(followerUid)
+        && request.resource.data.targetUid == targetUid
+        && request.resource.data.keys().hasOnly(['targetUid','createdAt']);
+      allow delete: if own(followerUid) || adminRole();
+      allow update: if false;
     }
 
     match /communityPosts/{postId} {
