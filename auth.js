@@ -330,7 +330,7 @@ registerForm?.addEventListener('submit', async event => {
       avatarKey: null,
       location: '',
       studyLevel: '',
-      xp: referralUid ? 50 : 0,
+      xp: referralUid ? 25 : 0,
       referralCount: 0,
       level: 1,
       createdAt: serverTimestamp(),
