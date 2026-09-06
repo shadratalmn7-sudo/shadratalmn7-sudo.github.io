@@ -1,5 +1,5 @@
 (()=>{
-  const VERSION='29';
+  const VERSION='30';
   const css=document.createElement('link');
   css.rel='stylesheet';css.href=`admin-navigation.css?v=${VERSION}`;css.dataset.adminNavigationCss=VERSION;document.head.appendChild(css);
 
@@ -26,23 +26,25 @@
     {key:'home',title:'الرئيسية',desc:'الملخص الحي وما يحتاج انتباهك الآن',icon:'dashboard',items:[
       {href:'admin-analytics.html',label:'لوحة الإدارة',desc:'الأرقام الحية وآخر نشاط',icon:'dashboard',roles:['owner','admin','support','editor']}
     ]},
-    {key:'students',title:'الطلاب والمتابعة',desc:'الحسابات والطلبات والرسائل في مكان واحد',icon:'users',items:[
-      {href:'admin-users.html',label:'الطلاب',desc:'الحسابات والملفات والنشاط',icon:'users',roles:['owner','admin','support']},
-      {href:'admin-orders.html',label:'طلبات الخدمات',desc:'الجديدة وقيد التنفيذ والمكتملة',icon:'orders',roles:['owner','admin','support']},
-      {href:'admin-messages.html',label:'الرسائل والشكاوى',desc:'الوارد والردود وحالة القراءة',icon:'mail',roles:['owner','admin','support']}
-    ]},
-    {key:'content',title:'المحتوى والخدمات',desc:'المنح والخدمات والعروض وكل ما يظهر للطلاب',icon:'scholarship',items:[
+    {key:'content',title:'المحتوى',desc:'المنح والخدمات والعروض وكل ما يظهر للطلاب',icon:'scholarship',items:[
+      {href:'admin-homepage.html',label:'تنسيق الرئيسية',desc:'ترتيب ما يظهر في الصفحة الرئيسية',icon:'homepage',roles:['owner','admin','editor']},
       {href:'admin-scholarships.html',label:'المنح',desc:'إضافة ونشر وإدارة المنح',icon:'scholarship',roles:['owner','admin','editor']},
       {href:'admin-services.html',label:'الخدمات',desc:'إضافة ونشر وإدارة الخدمات',icon:'services',roles:['owner','admin','editor']},
       {href:'admin-offers.html',label:'العروض',desc:'العروض وتواريخها',icon:'offers',roles:['owner','admin','editor']},
-      {href:'admin-homepage.html',label:'تنسيق الرئيسية',desc:'ترتيب ما يظهر في الصفحة الرئيسية',icon:'homepage',roles:['owner','admin','editor']},
       {href:'admin-videos.html',label:'الفيديوهات',desc:'المحتوى المرئي',icon:'videos',roles:['owner','admin','editor']}
     ]},
-    {key:'engagement',title:'التنبيهات والتفاعل',desc:'البوش والإشعارات والمهام والجوائز',icon:'announcements',items:[
-      {href:'admin-announcements.html',label:'الإشعارات والبوش',desc:'تنبيهات الموقع وإشعارات Push',icon:'announcements',roles:['owner','admin']},
-      {href:'admin-gamification.html',label:'المهام والمكافآت',desc:'XP والجوائز والمهمات',icon:'gamification',roles:['owner','admin']}
+    {key:'students',title:'الطلاب',desc:'حسابات الطلاب وملفاتهم ونشاطهم',icon:'users',items:[
+      {href:'admin-users.html',label:'الطلاب',desc:'الحسابات والملفات والنشاط',icon:'users',roles:['owner','admin','support']}
     ]},
-    {key:'system',title:'النظام والإدارة',desc:'الفريق والصلاحيات والتكاملات والدخل',icon:'security',items:[
+    {key:'followup',title:'الطلبات والمتابعة',desc:'طلبات الخدمات والرسائل والشكاوى',icon:'orders',items:[
+      {href:'admin-orders.html',label:'طلبات الخدمات',desc:'الجديدة وقيد التنفيذ والمكتملة',icon:'orders',roles:['owner','admin','support']},
+      {href:'admin-messages.html',label:'الرسائل والشكاوى',desc:'الوارد والردود وحالة القراءة',icon:'mail',roles:['owner','admin','support']}
+    ]},
+    {key:'engagement',title:'التفاعل والمكافآت',desc:'المهام والمكافآت والإشعارات',icon:'gamification',items:[
+      {href:'admin-gamification.html',label:'المهام والمكافآت',desc:'XP والجوائز والمهمات',icon:'gamification',roles:['owner','admin']},
+      {href:'admin-announcements.html',label:'الإشعارات',desc:'داخل الموقع وPush وواتساب',icon:'announcements',roles:['owner','admin']}
+    ]},
+    {key:'system',title:'النظام',desc:'الفريق والصلاحيات والتكاملات والدخل',icon:'security',items:[
       {href:'admin-staff.html',label:'الفريق والصلاحيات',desc:'الموظفون والأدوار',icon:'staff',roles:['owner']},
       {href:'admin-security.html',label:'الإعدادات والتكاملات',desc:'الأمان وربط الخدمات الخارجية',icon:'security',roles:['owner','admin']},
       {href:'admin-revenue.html',label:'الإعلانات والدخل',desc:'الإيرادات والمتابعة',icon:'finance',roles:['owner','admin']}
@@ -59,104 +61,25 @@
   const itemLink=(i,extraClass='admin-drawer-link')=>`<a href="${i.href}" class="${extraClass} ${current===i.href?'is-current':''}" data-admin-target="${i.href}"><span class="admin-nav-icon-wrap">${icon(icons[i.icon])}</span><span class="admin-nav-copy"><b>${i.label}</b><small>${i.desc}</small></span><b class="admin-count-badge" data-admin-badge="${i.href}" hidden>0</b></a>`;
   const groupCard=g=>`<button type="button" class="admin-group-card ${currentGroup?.key===g.key?'is-current':''}" data-admin-section="${g.key}"><span class="admin-nav-icon-wrap">${icon(icons[g.icon])}</span><span class="admin-group-card-copy"><b>${g.title}</b><small>${g.desc}</small></span><span class="admin-group-card-arrow" aria-hidden="true">‹</span></button>`;
 
-  function rootView(){
-    return `<div class="admin-drawer-heading"><b>أقسام الإدارة</b><small>اختر القسم، وبعدها تظهر كل أدواته ككروت مستقلة.</small></div><div class="admin-group-grid">${visible.map(groupCard).join('')}</div><a class="admin-back-site" href="index.html">العودة إلى الموقع</a>`;
-  }
-  function sectionView(key){
-    const g=visible.find(x=>x.key===key);
-    if(!g)return rootView();
-    return `<div class="admin-section-top"><button type="button" class="admin-section-back" aria-label="الرجوع إلى أقسام الإدارة">→</button><span class="admin-section-title"><b>${g.title}</b><small>${g.desc}</small></span></div><div class="admin-section-card-grid">${g.items.map(i=>itemLink(i)).join('')}</div><a class="admin-back-site" href="index.html">العودة إلى الموقع</a>`;
-  }
+  function rootView(){return `<div class="admin-drawer-heading"><b>أقسام الإدارة</b><small>اختر القسم، وبعدها تظهر كل أدواته ككروت مستقلة.</small></div><div class="admin-group-grid">${visible.map(groupCard).join('')}</div><a class="admin-back-site" href="index.html">العودة إلى الموقع</a>`}
+  function sectionView(key){const g=visible.find(x=>x.key===key);if(!g)return rootView();return `<div class="admin-section-top"><button type="button" class="admin-section-back" aria-label="الرجوع إلى أقسام الإدارة">→</button><span class="admin-section-title"><b>${g.title}</b><small>${g.desc}</small></span></div><div class="admin-section-card-grid">${g.items.map(i=>itemLink(i)).join('')}</div><a class="admin-back-site" href="index.html">العودة إلى الموقع</a>`}
 
-  function ensureAside(){
-    let a=document.querySelector('.admin-nav');
-    if(!a){a=document.createElement('aside');a.className='admin-nav';document.body.appendChild(a)}
-    a.style.setProperty('display','block','important');
-    if(a.dataset.adminBuilt!==VERSION){
-      a.dataset.adminBuilt=VERSION;
-      a.setAttribute('aria-hidden','true');
-      const homeHref=messageOnly?'admin-messages.html':'admin-analytics.html';
-      const homeLabel=messageOnly?'صندوق الرسائل':'إدارة شذرات';
-      const homeSub=messageOnly?'رسائل فريق شذرات':'مركز الإدارة';
-      a.innerHTML=`<div class="admin-drawer-head"><a class="admin-drawer-home" href="${homeHref}"><span class="admin-nav-icon-wrap">${icon(messageOnly?icons.mail:icons.monitor)}</span><span><b>${homeLabel}</b><small>${homeSub}</small></span></a><button type="button" class="admin-drawer-close" aria-label="إغلاق القائمة">×</button></div><div class="admin-drawer-body"><div class="admin-drawer-stage">${rootView()}</div></div>`;
-    }
-    return a;
-  }
+  function ensureAside(){let a=document.querySelector('.admin-nav');if(!a){a=document.createElement('aside');a.className='admin-nav';document.body.appendChild(a)}a.style.setProperty('display','block','important');if(a.dataset.adminBuilt!==VERSION){a.dataset.adminBuilt=VERSION;a.setAttribute('aria-hidden','true');const homeHref=messageOnly?'admin-messages.html':'admin-analytics.html',homeLabel=messageOnly?'صندوق الرسائل':'إدارة شذرات',homeSub=messageOnly?'رسائل فريق شذرات':'مركز الإدارة';a.innerHTML=`<div class="admin-drawer-head"><a class="admin-drawer-home" href="${homeHref}"><span class="admin-nav-icon-wrap">${icon(messageOnly?icons.mail:icons.monitor)}</span><span><b>${homeLabel}</b><small>${homeSub}</small></span></a><button type="button" class="admin-drawer-close" aria-label="إغلاق القائمة">×</button></div><div class="admin-drawer-body"><div class="admin-drawer-stage">${rootView()}</div></div>`}return a}
   function drawerStage(){return ensureAside().querySelector('.admin-drawer-stage')}
   function showRoot(){const s=drawerStage();if(s)s.innerHTML=rootView()}
   function showSection(key){const s=drawerStage();if(s)s.innerHTML=sectionView(key)}
-  function ensureBackdrop(){
-    let b=document.querySelector('.admin-drawer-backdrop');
-    if(!b){b=document.createElement('button');b.type='button';b.className='admin-drawer-backdrop';b.setAttribute('aria-label','إغلاق قائمة الإدارة');document.body.appendChild(b)}
-    return b;
-  }
-  function ensureToggle(){
-    const nav=document.querySelector('.site-header .nav');if(!nav)return null;
-    let t=nav.querySelector('.admin-hamburger');
-    if(!t){t=document.createElement('button');t.type='button';t.className='admin-hamburger';t.setAttribute('aria-label','فتح قائمة الإدارة');t.innerHTML='<span aria-hidden="true">☰</span><b>الإدارة</b>';nav.prepend(t)}
-    t.setAttribute('aria-expanded',String(document.body.classList.contains('admin-drawer-open')));
-    return t;
-  }
-  function setOpen(open){
-    const a=ensureAside();ensureBackdrop();const t=ensureToggle();
-    if(open)showRoot();
-    document.body.classList.toggle('admin-drawer-open',open);
-    a.setAttribute('aria-hidden',String(!open));
-    t?.setAttribute('aria-expanded',String(open));
-  }
+  function ensureBackdrop(){let b=document.querySelector('.admin-drawer-backdrop');if(!b){b=document.createElement('button');b.type='button';b.className='admin-drawer-backdrop';b.setAttribute('aria-label','إغلاق قائمة الإدارة');document.body.appendChild(b)}return b}
+  function ensureToggle(){const nav=document.querySelector('.site-header .nav');if(!nav)return null;let t=nav.querySelector('.admin-hamburger');if(!t){t=document.createElement('button');t.type='button';t.className='admin-hamburger';t.setAttribute('aria-label','فتح قائمة الإدارة');t.innerHTML='<span aria-hidden="true">☰</span><b>الإدارة</b>';nav.prepend(t)}t.setAttribute('aria-expanded',String(document.body.classList.contains('admin-drawer-open')));return t}
+  function setOpen(open){const a=ensureAside();ensureBackdrop();const t=ensureToggle();if(open)showRoot();document.body.classList.toggle('admin-drawer-open',open);a.setAttribute('aria-hidden',String(!open));t?.setAttribute('aria-expanded',String(open))}
 
-  function ensureHub(){
-    if(messageOnly||current!=='admin-analytics.html')return;
-    const main=document.querySelector('.admin-main');
-    const title=main?.querySelector('.admin-title');
-    if(!main||!title)return;
-    main.querySelectorAll('.admin-control-hub').forEach(x=>x.remove());
-    const hub=document.createElement('section');
-    hub.className='admin-control-hub';
-    hub.innerHTML=`<div class="admin-control-hub-head"><div><h2>أقسام الإدارة</h2><p>خمسة أقسام واضحة، وكل قسم يحتوي أدواته ككروت.</p></div></div><div class="admin-control-groups">${visible.map(g=>`<section class="admin-control-group"><div class="admin-control-group-head"><span class="admin-nav-icon-wrap">${icon(icons[g.icon])}</span><span class="admin-control-group-copy"><b>${g.title}</b><small>${g.desc}</small></span></div><div class="admin-control-items">${g.items.map(i=>itemLink(i,'admin-control-item')).join('')}</div></section>`).join('')}</div>`;
-    title.insertAdjacentElement('afterend',hub);
-  }
+  function ensureHub(){if(messageOnly||current!=='admin-analytics.html')return;const main=document.querySelector('.admin-main'),title=main?.querySelector('.admin-title');if(!main||!title)return;main.querySelectorAll('.admin-control-hub').forEach(x=>x.remove());const hub=document.createElement('section');hub.className='admin-control-hub';hub.innerHTML=`<div class="admin-control-hub-head"><div><h2>أقسام الإدارة</h2><p>ستة أقسام واضحة، وكل قسم يحتوي أدواته ككروت.</p></div></div><div class="admin-control-groups">${visible.map(g=>`<section class="admin-control-group"><div class="admin-control-group-head"><span class="admin-nav-icon-wrap">${icon(icons[g.icon])}</span><span class="admin-control-group-copy"><b>${g.title}</b><small>${g.desc}</small></span></div><div class="admin-control-items">${g.items.map(i=>itemLink(i,'admin-control-item')).join('')}</div></section>`).join('')}</div>`;title.insertAdjacentElement('afterend',hub)}
 
-  function prefetchAdminPages(){
-    visible.flatMap(g=>g.items).forEach(i=>{
-      if(i.href===current||document.head.querySelector(`link[data-admin-prefetch="${i.href}"]`))return;
-      const l=document.createElement('link');l.rel='prefetch';l.href=i.href;l.dataset.adminPrefetch=i.href;document.head.appendChild(l);
-    });
-  }
+  function prefetchAdminPages(){visible.flatMap(g=>g.items).forEach(i=>{if(i.href===current||document.head.querySelector(`link[data-admin-prefetch="${i.href}"]`))return;const l=document.createElement('link');l.rel='prefetch';l.href=i.href;l.dataset.adminPrefetch=i.href;document.head.appendChild(l)})}
+  function primeSlowPages(){if(current==='admin-orders.html')import('./admin-orders.js?v=22').catch(console.error);if(current==='admin-users.html')import('./admin-users.js?v=12').catch(console.error)}
+  function ensureMounted(){ensureAside();ensureBackdrop();ensureToggle();document.querySelectorAll('.admin-student-menu-button,.admin-student-menu').forEach(x=>x.remove());document.body.classList.remove('student-menu-open')}
 
-  function primeSlowPages(){
-    if(current==='admin-orders.html')import('./admin-orders.js?v=21').catch(console.error);
-    if(current==='admin-users.html')import('./admin-users.js?v=11').catch(console.error);
-  }
+  if(!window.__shadratAdminNavigationEvents){window.__shadratAdminNavigationEvents=true;document.addEventListener('click',e=>{if(e.target.closest('.admin-hamburger')){e.preventDefault();e.stopPropagation();setOpen(!document.body.classList.contains('admin-drawer-open'));return}if(e.target.closest('.admin-drawer-close,.admin-drawer-backdrop')){e.preventDefault();setOpen(false);return}const section=e.target.closest('[data-admin-section]');if(section){e.preventDefault();showSection(section.dataset.adminSection);return}if(e.target.closest('.admin-section-back')){e.preventDefault();showRoot();return}const link=e.target.closest('a[data-admin-target]');if(link){document.body.classList.add('admin-navigating');setOpen(false)}},true);document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false)});window.addEventListener('pageshow',()=>document.body.classList.remove('admin-navigating'))}
 
-  function ensureMounted(){
-    ensureAside();ensureBackdrop();ensureToggle();
-    document.querySelectorAll('.admin-student-menu-button,.admin-student-menu').forEach(x=>x.remove());
-    document.body.classList.remove('student-menu-open');
-  }
-
-  if(!window.__shadratAdminNavigationEvents){
-    window.__shadratAdminNavigationEvents=true;
-    document.addEventListener('click',e=>{
-      if(e.target.closest('.admin-hamburger')){e.preventDefault();e.stopPropagation();setOpen(!document.body.classList.contains('admin-drawer-open'));return}
-      if(e.target.closest('.admin-drawer-close,.admin-drawer-backdrop')){e.preventDefault();setOpen(false);return}
-      const section=e.target.closest('[data-admin-section]');
-      if(section){e.preventDefault();showSection(section.dataset.adminSection);return}
-      if(e.target.closest('.admin-section-back')){e.preventDefault();showRoot();return}
-      const link=e.target.closest('a[data-admin-target]');
-      if(link){document.body.classList.add('admin-navigating');setOpen(false)}
-    },true);
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')setOpen(false)});
-    window.addEventListener('pageshow',()=>document.body.classList.remove('admin-navigating'));
-  }
-
-  ensureMounted();
-  ensureHub();
-  setTimeout(ensureMounted,350);
-  setTimeout(prefetchAdminPages,100);
-  primeSlowPages();
-
-  if(!messageOnly&&!document.querySelector('script[data-admin-activity-center]')){
-    const s=document.createElement('script');s.type='module';s.src='admin-activity-center.js?v=3';s.dataset.adminActivityCenter='1';document.body.appendChild(s);
-  }
+  ensureMounted();ensureHub();setTimeout(ensureMounted,350);setTimeout(prefetchAdminPages,100);primeSlowPages();
+  if(!messageOnly&&!document.querySelector('script[data-admin-activity-center]')){const s=document.createElement('script');s.type='module';s.src='admin-activity-center.js?v=3';s.dataset.adminActivityCenter='1';document.body.appendChild(s)}
 })();
