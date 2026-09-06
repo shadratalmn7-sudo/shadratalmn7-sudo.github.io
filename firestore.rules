@@ -30,7 +30,7 @@ service cloud.firestore {
           || (
             request.resource.data.referredBy is string
             && request.resource.data.referredBy != uid
-            && request.resource.data.xp == 50
+            && request.resource.data.xp == 25
             && getAfter(/databases/$(database)/documents/referrals/$(uid)).data.inviteeUid == uid
             && getAfter(/databases/$(database)/documents/referrals/$(uid)).data.inviterUid == request.resource.data.referredBy
           )
@@ -60,14 +60,14 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'publicProfile','avatarKey','updatedAt'
         ]);
-      // مكافأة إحالة واحدة فقط: +100 XP لصاحب الرابط، وتُنفذ ذريًا مع إنشاء حساب المدعو.
+      // مكافأة إحالة واحدة فقط: +50 XP لصاحب الرابط، وتُنفذ ذريًا مع إنشاء حساب المدعو.
       allow update: if signedIn()
         && request.auth.uid != uid
         && !exists(/databases/$(database)/documents/referrals/$(request.auth.uid))
         && getAfter(/databases/$(database)/documents/referrals/$(request.auth.uid)).data.inviteeUid == request.auth.uid
         && getAfter(/databases/$(database)/documents/referrals/$(request.auth.uid)).data.inviterUid == uid
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['xp','referralCount','updatedAt'])
-        && request.resource.data.xp == resource.data.xp + 100
+        && request.resource.data.xp == resource.data.xp + 50
         && request.resource.data.referralCount == (resource.data.referralCount is int ? resource.data.referralCount : 0) + 1;
 
       allow update: if ownerOnly();
@@ -98,8 +98,8 @@ service cloud.firestore {
         && request.resource.data.inviteeUid == inviteeUid
         && request.resource.data.inviterUid is string
         && request.resource.data.inviterUid != inviteeUid
-        && request.resource.data.inviterXp == 100
-        && request.resource.data.inviteeXp == 50
+        && request.resource.data.inviterXp == 50
+        && request.resource.data.inviteeXp == 25
         && request.resource.data.status == 'awarded'
         && exists(/databases/$(database)/documents/referralCodes/$(request.resource.data.inviterUid))
         && get(/databases/$(database)/documents/referralCodes/$(request.resource.data.inviterUid)).data.uid == request.resource.data.inviterUid;
