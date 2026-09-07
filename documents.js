@@ -5,6 +5,9 @@ if (!window.__shadratDocsUnifiedReady) {
   const toEl = document.querySelector('#convert-to');
   const area = document.querySelector('#active-tool-area');
   let currentUrl = '';
+  const resultVisibilityStyle = document.createElement('style');
+  resultVisibilityStyle.textContent = '.tool-actions [hidden]{display:none!important}';
+  document.head.appendChild(resultVisibilityStyle);
 
   const formats = [
     { value: 'image', label: 'صورة' },
