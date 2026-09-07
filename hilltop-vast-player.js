@@ -6,9 +6,11 @@
   if (document.getElementById('shadrat-vast-ad')) return;
 
   const AD_TAG = 'https://nautical-hand.com/d/m.FnznduGYNavCZ_GEUr/ieSmh9MuQZDUTlfkNPGTZcnzbOQTmEO0-MSzUMWtBNxzDMI5iMRT/QXzLN-wT';
+  const rewardedMode = page === 'documents.html';
   let started = false;
   let closed = false;
   let watchdog = null;
+  let rewardResolve = null;
 
   const style = document.createElement('style');
   style.textContent = `
@@ -39,18 +41,28 @@
       <button class="shadrat-vast-play" type="button">تشغيل الإعلان</button>
     </div>`;
   document.body.appendChild(root);
+  root.hidden = rewardedMode;
 
   const video = root.querySelector('#shadrat-vast-content');
   const gate = root.querySelector('.shadrat-vast-gate');
   const playButton = root.querySelector('.shadrat-vast-play');
 
-  function closePlayer() {
+  function closePlayer(completed) {
     if (closed) return;
-    closed = true;
     clearTimeout(watchdog);
     try { video.pause(); } catch (_) {}
     video.removeAttribute('src');
     video.load();
+    if (rewardedMode) {
+      const resolve = rewardResolve;
+      rewardResolve = null;
+      started = false;
+      root.hidden = true;
+      gate.hidden = false;
+      if (resolve) resolve(Boolean(completed));
+      return;
+    }
+    closed = true;
     root.remove();
     style.remove();
   }
@@ -60,7 +72,7 @@
     clearTimeout(watchdog);
     gate.hidden = false;
     gate.innerHTML = '<b>لا يوجد إعلان متاح الآن</b><span>سنخفي المشغّل تلقائيًا.</span>';
-    setTimeout(closePlayer, 1800);
+    setTimeout(function () { closePlayer(rewardedMode); }, 1800);
   }
 
   function ping(url) {
@@ -125,7 +137,7 @@
           ad.starts.forEach(ping);
         }
       }, { once: true });
-      video.addEventListener('ended', closePlayer, { once: true });
+      video.addEventListener('ended', function () { closePlayer(true); }, { once: true });
       video.addEventListener('error', fail, { once: true });
       video.src = ad.mediaUrl;
       video.load();
@@ -136,5 +148,20 @@
   }
 
   playButton.addEventListener('click', requestAd);
-  root.querySelector('.shadrat-vast-close').addEventListener('click', closePlayer);
+  root.querySelector('.shadrat-vast-close').addEventListener('click', function () { closePlayer(false); });
+
+  if (rewardedMode) {
+    window.ShadratRewardedAd = {
+      play: function () {
+        if (rewardResolve) return Promise.resolve(false);
+        root.hidden = false;
+        gate.hidden = false;
+        gate.innerHTML = '<b>شاهد الإعلان لإكمال التحويل</b><span>سيبدأ تحميل ملفك تلقائيًا بعد انتهاء الفيديو.</span>';
+        return new Promise(function (resolve) {
+          rewardResolve = resolve;
+          requestAd();
+        });
+      }
+    };
+  }
 })();
