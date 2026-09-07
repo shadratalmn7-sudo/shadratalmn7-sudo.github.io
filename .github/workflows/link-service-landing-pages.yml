@@ -1,0 +1,70 @@
+name: Link service landing pages
+on:
+  push:
+    paths:
+      - '.github/workflows/link-service-landing-pages.yml'
+permissions:
+  contents: write
+jobs:
+  link-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Link service cards and update sitemap
+        shell: python
+        run: |
+          from pathlib import Path
+
+          replacements = {
+              'services.html': {
+                  'href="service-request.html?service=استشارة%20Open%20Doors&price=مجانية"': 'href="consultation-open-doors.html"',
+                  'href="service-request.html?service=استشارة%20Education%20in%20Russia&price=مجانية"': 'href="consultation-education-in-russia.html"',
+                  'href="service-request.html?service=ترجمة%20الجواز%20والشهادة%20نوتاريوس&price=60$"': 'href="translation-passport-certificate.html"',
+                  'href="service-request.html?service=ترجمة%20مستندات%20حسب%20الملف&price=يحدد%20بعد%20المراجعة"': 'href="translation-documents.html"',
+                  'href="service-request.html?service=التقديم%20على%20منحة%20الحكومة%20الروسية&price=30$%20للشخص%20-%20شخصين%2050$"': 'href="russia-scholarship-application-service.html"',
+                  'href="service-request.html?service=التقديم%20على%20Open%20Doors%20Stage%201&price=70$"': 'href="open-doors-stage1-service.html"',
+              },
+              'offers.html': {
+                  'href="service-request.html?service=عرض%20التقديم%20على%20منحة%20الحكومة%20الروسية&price=30$%20للشخص%20-%20شخصين%2050$"': 'href="russia-scholarship-application-service.html"',
+                  'href="service-request.html?service=عرض%20Open%20Doors%20Stage%201&price=70$"': 'href="open-doors-stage1-service.html"',
+              },
+          }
+
+          for filename, mapping in replacements.items():
+              p = Path(filename)
+              text = p.read_text(encoding='utf-8')
+              for old, new in mapping.items():
+                  text = text.replace(old, new)
+              p.write_text(text, encoding='utf-8')
+
+          sitemap = Path('sitemap.xml')
+          text = sitemap.read_text(encoding='utf-8')
+          urls = [
+              'consultation-open-doors.html',
+              'consultation-education-in-russia.html',
+              'translation-passport-certificate.html',
+              'translation-documents.html',
+              'russia-scholarship-application-service.html',
+              'open-doors-stage1-service.html',
+          ]
+          lines = []
+          for page in urls:
+              full = f'https://shadratalmn7-sudo.github.io/{page}'
+              if full not in text:
+                  lines.append(f'  <url><loc>{full}</loc><lastmod>2026-09-07</lastmod><priority>0.8</priority></url>')
+          if lines:
+              text = text.replace('</urlset>', '\n'.join(lines) + '\n</urlset>')
+              sitemap.write_text(text, encoding='utf-8')
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add services.html offers.html sitemap.xml
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Link dedicated service pages and update sitemap"
+            git push
+          fi
