@@ -1,0 +1,47 @@
+name: Strengthen service SEO pages
+on:
+  push:
+    paths:
+      - '.github/workflows/strengthen-service-seo.yml'
+permissions:
+  contents: write
+jobs:
+  strengthen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Improve service content and schema
+        shell: python
+        run: |
+          from pathlib import Path
+
+          extra = {
+            'consultation-open-doors.html': '''<section class="section"><div class="container service-landing"><article class="service-box"><h2>لمن تناسب استشارة Open Doors؟</h2><p class="muted">تناسب الطالب الذي يريد فهم المسابقة قبل البدء، أو يحتار بين المسارات والمراحل، أو يريد معرفة ما الذي يجب تجهيزه أولًا. الهدف من الاستشارة هو ترتيب الخطوات وتوضيح المتطلبات العامة، وليس إعطاء وعد بالقبول أو الفوز.</p><h2>قبل طلب الاستشارة</h2><p class="muted">جهّز تخصصك المستهدف، مرحلتك الدراسية، وأهم الأسئلة التي تريد إجابة واضحة عنها. كلما كانت معلوماتك مختصرة ومحددة، كان من الأسهل توجيهك إلى الصفحة أو الخطوة المناسبة داخل شذرات.</p></article></div></section>''',
+            'consultation-education-in-russia.html': '''<section class="section"><div class="container service-landing"><article class="service-box"><h2>متى تحتاج هذه الاستشارة؟</h2><p class="muted">إذا كنت تريد التقديم على منحة الحكومة الروسية ولا تعرف كيف تبدأ في Education in Russia، أو تريد فهم ترتيب الخطوات والخيارات والمتطلبات العامة، فهذه الاستشارة مخصصة لترتيب الصورة قبل أي خدمة مدفوعة.</p><h2>ما الأفضل أن تجهزه قبل التواصل؟</h2><p class="muted">حدد المرحلة والتخصص والدولة التي تقدم منها، واكتب النقاط غير الواضحة بالنسبة لك. الاستشارة تساعدك على فهم المسار والخطوة التالية، بينما القرارات النهائية والمواعيد الرسمية تبقى للجهات المختصة.</p></article></div></section>''',
+            'translation-passport-certificate.html': '''<section class="section"><div class="container service-landing"><article class="service-box"><h2>مستندات شائعة في خدمة الترجمة</h2><p class="muted">تُستخدم هذه الخدمة عادة عندما يحتاج الطالب إلى ترجمة الجواز أو الشهادة ضمن ملف دراسي. يتم أولًا التأكد من وضوح الصور وعدد المستندات وما إذا كان النطاق المتفق عليه يتطلب نوتاريوس، ثم تثبيت التفاصيل قبل التنفيذ.</p><h2>كيف تتجنب التأخير؟</h2><p class="muted">استخدم نسخة واضحة وكاملة من المستند، وتأكد من ظهور الحواف والنصوص وعدم وجود قص أو تشويش. لا ترسل مستندات حساسة من نموذج عام؛ انتظر قناة التواصل التي يحددها الفريق بعد تسجيل الطلب.</p></article></div></section>''',
+            'translation-documents.html': '''<section class="section"><div class="container service-landing"><article class="service-box"><h2>ما أنواع المستندات التي يمكن تقييمها؟</h2><p class="muted">يمكن طلب مراجعة ملفات مثل الجوازات والشهادات وكشوف الدرجات والمستندات الدراسية الإضافية. السعر لا يُفترض مسبقًا لأن عدد الصفحات، وضوح المستندات، ونوع الترجمة المطلوبة تختلف من ملف لآخر.</p><h2>ماذا يحدث بعد إرسال الطلب؟</h2><p class="muted">يُراجع نطاق العمل أولًا، ثم يوضح لك ما يدخل في الخدمة والسعر والمدة المتوقعة قبل أي دفع. إذا كان الملف يحتاج متطلبًا مختلفًا أو نوتاريوس فسيتم توضيح ذلك بدل بدء عمل غير متفق عليه.</p></article></div></section>''',
+            'russia-scholarship-application-service.html': '''<section class="section"><div class="container service-landing"><article class="service-box"><h2>لمن تناسب خدمة التقديم؟</h2><p class="muted">تناسب الطالب الذي قرر التقديم على منحة الحكومة الروسية ويحتاج مساعدة في تجهيز ومراجعة بيانات Education in Russia ضمن نطاق الخدمة. قبل البدء يتم توضيح ما الذي سيجهزه الطالب وما الذي ستراجعه شذرات.</p><h2>ما الذي لا تعنيه الخدمة؟</h2><p class="muted">شراء الخدمة لا يضمن القبول أو الترشيح أو إصدار دعوة. شذرات تساعد في التجهيز والمراجعة فقط، بينما القرار النهائي والمواعيد والمتطلبات الرسمية تعود للجهات الحكومية والجامعات المختصة.</p></article></div></section>''',
+            'open-doors-stage1-service.html': '''<section class="section"><div class="container service-landing"><article class="service-box"><h2>نطاق خدمة Open Doors Stage 1</h2><p class="muted">هذه الصفحة مخصصة لخدمة المرحلة الأولى فقط. يتم توضيح البيانات والمواد المطلوبة ضمن Stage 1 ومراجعة ما تم تجهيزه قبل الإرسال، مع تنبيه الطالب إلى أي نقص ظاهر ضمن النطاق المتفق عليه.</p><h2>ماذا عن Stage 2؟</h2><p class="muted">المرحلة الثانية ليست مشمولة في هذه الخدمة ولا في السعر المعروض هنا. كما أن الخدمة لا تعني ضمان التأهل للمرحلة التالية؛ نتيجة المسابقة والقبول تعتمد على الجهة المنظمة ومعاييرها الرسمية.</p></article></div></section>'''
+          }
+
+          for filename, block in extra.items():
+              p = Path(filename)
+              text = p.read_text(encoding='utf-8')
+              if 'favicon-96x96.png' not in text.split('</script>',1)[0]:
+                  text = text.replace('"url":"https://shadratalmn7-sudo.github.io/"},"areaServed"', '"url":"https://shadratalmn7-sudo.github.io/","logo":{"@type":"ImageObject","url":"https://shadratalmn7-sudo.github.io/favicon-96x96.png"}},"areaServed"')
+              if block not in text:
+                  text = text.replace('</main>', block + '</main>')
+              p.write_text(text, encoding='utf-8')
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add consultation-open-doors.html consultation-education-in-russia.html translation-passport-certificate.html translation-documents.html russia-scholarship-application-service.html open-doors-stage1-service.html
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "Strengthen dedicated service SEO pages"
+            git push
+          fi
