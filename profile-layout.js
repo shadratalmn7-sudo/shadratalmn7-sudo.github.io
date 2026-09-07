@@ -1,6 +1,6 @@
 (()=>{
-  if(window.__shadratProfileLayoutV10)return;
-  window.__shadratProfileLayoutV10=true;
+  if(window.__shadratProfileLayoutV11)return;
+  window.__shadratProfileLayoutV11=true;
 
   const GROUPS={overview:['overview'],'student-info':['student-info'],level:['level','rewards'],artifacts:['favorites','documents','artifacts'],orders:['orders','support']};
   const LEGACY={favorites:'artifacts',documents:'artifacts',rewards:'level',support:'orders'};
@@ -22,7 +22,7 @@
   }
 
   function getEditor(){editorPromise=editorPromise||import('./profile-edit-deep.js?v=7').catch(error=>{editorPromise=null;throw error});return editorPromise}
-  async function openEditor(){try{const editor=await getEditor();await editor.openProfileEditor()}catch(error){console.error('[Shadrat] profile editor failed to open',error);alert('تعذر فتح تعديل الحساب الآن. حدّث الصفحة وحاول مرة ثانية.')}}
+  async function openEditor(){try{const editor=await getEditor();await editor.openProfileEditor()}catch(error){console.error('[Shadrat] profile editor failed to open',error);location.href='profile-settings.html'}}
 
   function customColorInput(root=document){return root.querySelector('[name="profileCustomName"],[data-profile-custom-name]')}
   function prepareColorMode(root=document){const input=customColorInput(root);if(!input)return;input.dataset.profileCustomName='1';const radios=[...root.querySelectorAll('[name="profileNameColor"]')];if(input.name==='profileCustomName'&&input.value.toLowerCase()==='#ffffff'&&radios.some(r=>r.checked))input.removeAttribute('name')}
@@ -32,9 +32,9 @@
     new MutationObserver(()=>prepareColorMode()).observe(document.documentElement,{subtree:true,childList:true});
   }
 
-  function wire(){document.addEventListener('click',event=>{const edit=event.target.closest('[data-profile-edit]');if(edit){event.preventDefault();event.stopImmediatePropagation();openEditor();return}const tab=event.target.closest('.profile-tabs [data-profile-tab]');if(tab){event.preventDefault();activate(tab.dataset.profileTab,{scroll:true});return}const shortcut=event.target.closest('[data-open-profile-tab]');if(!shortcut)return;const req=shortcut.dataset.openProfileTab||'',main=mainOf(req);if(!GROUPS[main])return;event.preventDefault();activate(main,{scroll:true,sub:req!==main?req:''})},true)}
+  function wire(){document.addEventListener('click',event=>{const edit=event.target.closest('[data-profile-edit],.profile-cover-edit');if(edit){event.preventDefault();event.stopImmediatePropagation();openEditor();return}const tab=event.target.closest('.profile-tabs [data-profile-tab]');if(tab){event.preventDefault();activate(tab.dataset.profileTab,{scroll:true});return}const shortcut=event.target.closest('[data-open-profile-tab]');if(!shortcut)return;const req=shortcut.dataset.openProfileTab||'',main=mainOf(req);if(!GROUPS[main])return;event.preventDefault();activate(main,{scroll:true,sub:req!==main?req:''})},true)}
 
-  function boot(){cleanLegacy();ensureFinalTabs();activate(current);wire();wireColorMode();prepareColorMode();const tabs=document.querySelector('.profile-tabs');if(tabs)new MutationObserver(()=>{ensureFinalTabs();activate(current)}).observe(tabs,{childList:true,subtree:true,characterData:true});document.body.classList.add('profile-ui-ready');window.dispatchEvent(new CustomEvent('shadrat:profile-ui-ready'));const warm=()=>getEditor().catch(()=>{});if('requestIdleCallback'in window)requestIdleCallback(warm,{timeout:1200});else setTimeout(warm,250)}
+  function boot(){cleanLegacy();ensureFinalTabs();activate(current);wire();wireColorMode();prepareColorMode();import('./profile-email-verification.js?v=1').catch(error=>console.error('[Shadrat] email verification module failed',error));const tabs=document.querySelector('.profile-tabs');if(tabs)new MutationObserver(()=>{ensureFinalTabs();activate(current)}).observe(tabs,{childList:true,subtree:true,characterData:true});document.body.classList.add('profile-ui-ready');window.dispatchEvent(new CustomEvent('shadrat:profile-ui-ready'));const warm=()=>getEditor().catch(()=>{});if('requestIdleCallback'in window)requestIdleCallback(warm,{timeout:1200});else setTimeout(warm,250)}
 
   window.ShadratProfileNav={open:(id,options={})=>activate(id,{scroll:true,...options}),activate};
   boot();
