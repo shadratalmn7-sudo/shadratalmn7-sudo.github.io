@@ -1,0 +1,240 @@
+name: Optimize public SEO pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/seo-public-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  optimize-seo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Optimize public page metadata and sitemap
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import html, json, re
+
+          BASE = 'https://shadratalmn7-sudo.github.io/'
+          TODAY = '2026-09-07'
+
+          pages = {
+              'index.html': {
+                  'title': 'منح دراسية وأدوات الطلاب 2026 | شذرات للمنح',
+                  'description': 'منصة عربية للمنح الدراسية 2026 وأدوات الطلاب: منح ممولة، تحويل صورة إلى PDF، تحويل العملات، إنشاء CV وخطاب دافع وخدمات التقديم والترجمة.',
+                  'url': BASE,
+              },
+              'scholarships.html': {
+                  'title': 'منح دراسية 2026 للطلاب العرب | منح ممولة وفرص دولية',
+                  'description': 'ابحث عن منح دراسية 2026 ومنح ممولة للطلاب العرب حسب الدولة والمرحلة وحالة التقديم، مع المواعيد وروابط المصادر الرسمية.',
+                  'url': BASE + 'scholarships.html',
+              },
+              'documents.html': {
+                  'title': 'تحويل صورة إلى PDF مجانًا | دمج وتقسيم وتحويل PDF',
+                  'description': 'حوّل صورة إلى PDF مجانًا من الجوال أو الكمبيوتر، وحوّل PDF إلى صور أو نص، وادمج أو قسم أو دوّر صفحات PDF وأدوات JPG وPNG وWebP.',
+                  'url': BASE + 'documents.html',
+              },
+              'currency.html': {
+                  'title': 'تحويل العملات مباشر | ريال سعودي وروبل ودولار ويورو',
+                  'description': 'محول عملات مباشر للريال السعودي والروبل الروسي والدولار واليورو والعملات العربية. احسب RUB إلى SAR وSAR إلى RUB والعملات الأخرى بسرعة.',
+                  'url': BASE + 'currency.html',
+              },
+              'cv-builder.html': {
+                  'title': 'إنشاء سيرة ذاتية CV مجانًا | قوالب CV للطلاب والوظائف',
+                  'description': 'أنشئ سيرة ذاتية CV مجانًا بالعربية أو الإنجليزية مع قوالب متعددة وتنزيل PDF، للمنح والجامعات والوظائف مع إمكانية الاستفادة من الشهادات.',
+                  'url': BASE + 'cv-builder.html',
+              },
+              'motivation-letter.html': {
+                  'title': 'إنشاء Motivation Letter وخطاب دافع مجانًا | للمنح والجامعات',
+                  'description': 'أنشئ خطاب دافع Motivation Letter بالعربية أو الإنجليزية للمنح والجامعات والوظائف، بقوالب متعددة وتنزيل PDF وصياغة من معلوماتك.',
+                  'url': BASE + 'motivation-letter.html',
+              },
+              'services.html': {
+                  'title': 'خدمات الطلاب للمنح والجامعات | ترجمة وتقديم واستشارات',
+                  'description': 'خدمات طلابية للمنح والجامعات: استشارات مجانية، ترجمة مستندات، تقديم على Education in Russia وOpen Doors، وتجهيز ملفات التقديم.',
+                  'url': BASE + 'services.html',
+              },
+              'offers.html': {
+                  'title': 'عروض وخصومات خدمات الطلاب | تقديم المنح والترجمة',
+                  'description': 'عروض وخصومات حالية على خدمات الطلاب والتقديم على المنح، ومنها Education in Russia وOpen Doors، مع السعر والنطاق والشروط قبل الطلب.',
+                  'url': BASE + 'offers.html',
+              },
+              'videos.html': {
+                  'title': 'شرح التقديم على المنح | فيديوهات ودروس للطلاب',
+                  'description': 'فيديوهات وشروحات عربية عن المنح الدراسية، البحث عن الفرص، تجهيز المستندات، CV وخطاب الدافع وخطوات التقديم الصحيحة.',
+                  'url': BASE + 'videos.html',
+              },
+              'about.html': {
+                  'title': 'عن شذرات للمنح | منصة منح وخدمات للطلاب العرب',
+                  'description': 'تعرف على منصة شذرات للمنح وفريق إدارتها ورسالتها في جمع المنح الدراسية وتقديم أدوات وخدمات تساعد الطلاب العرب على تجهيز ملفاتهم.',
+                  'url': BASE + 'about.html',
+              },
+              'contact.html': {
+                  'title': 'تواصل مع شذرات للمنح | دعم واستفسارات الطلاب',
+                  'description': 'تواصل مع فريق شذرات للمنح للاستفسارات والدعم المتعلق بالمنح والخدمات والطلبات، عبر قنوات التواصل المتاحة في المنصة.',
+                  'url': BASE + 'contact.html',
+              },
+              'university-shukhov.html': {
+                  'title': 'جامعة بيلغورود التكنولوجية Shukhov | القبول والتقديم 2026',
+                  'description': 'معلومات القبول والتقديم في جامعة بيلغورود الحكومية التكنولوجية V.G. Shukhov في روسيا، مع تفاصيل الدراسة والتقديم والخدمة المتاحة.',
+                  'url': BASE + 'university-shukhov.html',
+              },
+              'hse-scholarship.html': {
+                  'title': 'منحة HSE University 2026 | التقديم والشروط والمواعيد',
+                  'description': 'تفاصيل منحة HSE University لعام 2026 للطلاب الدوليين: شروط التقديم والمراحل والمواعيد والمعلومات المهمة وروابط التقديم.',
+                  'url': BASE + 'hse-scholarship.html',
+              },
+              'open-doors.html': {
+                  'title': 'منحة Open Doors 2026 | الشروط والمراحل والتقديم',
+                  'description': 'دليل منحة Open Doors الروسية 2026: المراحل والتخصصات والشروط والمواعيد وخطوات التقديم للطلاب الدوليين.',
+                  'url': BASE + 'open-doors.html',
+              },
+              'education-in-russia.html': {
+                  'title': 'منحة الحكومة الروسية Education in Russia 2026 | التقديم',
+                  'description': 'دليل التقديم على منحة الحكومة الروسية عبر Education in Russia لعام 2026، مع الخطوات والوثائق والمراحل والمعلومات المهمة.',
+                  'url': BASE + 'education-in-russia.html',
+              },
+              'stipendium-hungaricum.html': {
+                  'title': 'منحة Stipendium Hungaricum 2026 | منحة المجر وشروط التقديم',
+                  'description': 'تفاصيل منحة الحكومة المجرية Stipendium Hungaricum 2026: التمويل والشروط والمراحل والمواعيد وروابط التقديم الرسمية.',
+                  'url': BASE + 'stipendium-hungaricum.html',
+              },
+              'turkiye-scholarships.html': {
+                  'title': 'منحة تركيا 2026 Türkiye Scholarships | الشروط والتقديم',
+                  'description': 'دليل منحة تركيا Türkiye Scholarships 2026 للطلاب الدوليين: التمويل والشروط والمراحل والمواعيد وخطوات التقديم.',
+                  'url': BASE + 'turkiye-scholarships.html',
+              },
+          }
+
+          def replace_or_insert(text, pattern, replacement, after_pattern=r'<meta[^>]+name=["\']viewport["\'][^>]*>'):
+              if re.search(pattern, text, flags=re.I|re.S):
+                  return re.sub(pattern, replacement, text, count=1, flags=re.I|re.S)
+              m = re.search(after_pattern, text, flags=re.I|re.S)
+              if m:
+                  return text[:m.end()] + '\n' + replacement + text[m.end():]
+              return text.replace('<head>', '<head>\n' + replacement, 1)
+
+          def set_title(text, value):
+              escaped = html.escape(value, quote=False)
+              if re.search(r'<title>.*?</title>', text, flags=re.I|re.S):
+                  return re.sub(r'<title>.*?</title>', f'<title>{escaped}</title>', text, count=1, flags=re.I|re.S)
+              return text.replace('</head>', f'<title>{escaped}</title>\n</head>', 1)
+
+          def set_meta(text, name, content):
+              replacement = f'<meta name="{name}" content="{html.escape(content, quote=True)}">'
+              pattern = rf'<meta\s+[^>]*name=["\']{re.escape(name)}["\'][^>]*>'
+              return replace_or_insert(text, pattern, replacement)
+
+          def set_property(text, prop, content):
+              replacement = f'<meta property="{prop}" content="{html.escape(content, quote=True)}">'
+              pattern = rf'<meta\s+[^>]*property=["\']{re.escape(prop)}["\'][^>]*>'
+              return replace_or_insert(text, pattern, replacement)
+
+          def set_canonical(text, url):
+              replacement = f'<link rel="canonical" href="{html.escape(url, quote=True)}">'
+              pattern = r'<link\s+[^>]*rel=["\']canonical["\'][^>]*>'
+              return replace_or_insert(text, pattern, replacement)
+
+          def add_schema(text, cfg):
+              marker = 'data-shadrat-seo="page"'
+              schema = {
+                  '@context': 'https://schema.org',
+                  '@type': 'WebPage',
+                  'name': cfg['title'],
+                  'description': cfg['description'],
+                  'url': cfg['url'],
+                  'inLanguage': 'ar',
+                  'isPartOf': {
+                      '@type': 'WebSite',
+                      'name': 'شذرات للمنح',
+                      'url': BASE,
+                  },
+              }
+              block = '<script type="application/ld+json" data-shadrat-seo="page">' + json.dumps(schema, ensure_ascii=False, separators=(',', ':')) + '</script>'
+              if marker in text:
+                  return re.sub(r'<script\s+type=["\']application/ld\+json["\']\s+data-shadrat-seo=["\']page["\']>.*?</script>', block, text, count=1, flags=re.I|re.S)
+              return text.replace('</head>', block + '\n</head>', 1)
+
+          changed = []
+          for path, cfg in pages.items():
+              p = Path(path)
+              if not p.exists():
+                  continue
+              text = p.read_text(encoding='utf-8')
+              original = text
+              text = set_title(text, cfg['title'])
+              text = set_meta(text, 'description', cfg['description'])
+              text = set_meta(text, 'robots', 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1')
+              text = set_canonical(text, cfg['url'])
+              text = set_property(text, 'og:locale', 'ar_AR')
+              text = set_property(text, 'og:type', 'website')
+              text = set_property(text, 'og:site_name', 'شذرات للمنح')
+              text = set_property(text, 'og:title', cfg['title'])
+              text = set_property(text, 'og:description', cfg['description'])
+              text = set_property(text, 'og:url', cfg['url'])
+              text = add_schema(text, cfg)
+              if text != original:
+                  p.write_text(text, encoding='utf-8')
+                  changed.append(path)
+
+          # The request form is transactional and query-string driven. Keep links crawlable but do not index duplicate variants.
+          request = Path('service-request.html')
+          if request.exists():
+              text = request.read_text(encoding='utf-8')
+              original = text
+              text = set_meta(text, 'robots', 'noindex,follow')
+              text = set_canonical(text, BASE + 'services.html')
+              if text != original:
+                  request.write_text(text, encoding='utf-8')
+                  changed.append('service-request.html')
+
+          # Refresh sitemap dates, remove transactional request page, and ensure every important public page is listed.
+          sitemap = Path('sitemap.xml')
+          if sitemap.exists():
+              text = sitemap.read_text(encoding='utf-8')
+              text = re.sub(r'\s*<url>\s*<loc>' + re.escape(BASE + 'service-request.html') + r'</loc>.*?</url>', '', text, flags=re.S)
+              for path, cfg in pages.items():
+                  url = cfg['url']
+                  if url == BASE:
+                      loc_pattern = re.escape(BASE)
+                  else:
+                      loc_pattern = re.escape(url)
+                  block_re = re.compile(r'(<url>\s*<loc>' + loc_pattern + r'</loc>)(.*?)(</url>)', re.S)
+                  m = block_re.search(text)
+                  if m:
+                      middle = m.group(2)
+                      if '<lastmod>' in middle:
+                          middle = re.sub(r'<lastmod>.*?</lastmod>', f'<lastmod>{TODAY}</lastmod>', middle, count=1)
+                      else:
+                          middle = f'<lastmod>{TODAY}</lastmod>' + middle
+                      text = text[:m.start()] + m.group(1) + middle + m.group(3) + text[m.end():]
+                  else:
+                      text = text.replace('</urlset>', f'  <url><loc>{url}</loc><lastmod>{TODAY}</lastmod><priority>0.8</priority></url>\n</urlset>')
+              sitemap.write_text(text, encoding='utf-8')
+              changed.append('sitemap.xml')
+
+          print('SEO updated:', ', '.join(changed))
+          PY
+
+      - name: Commit SEO updates
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No SEO changes needed.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- '*.html' sitemap.xml
+          git commit -m 'Optimize SEO for public site sections'
+          git push
