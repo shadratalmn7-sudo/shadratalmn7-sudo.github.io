@@ -10,6 +10,7 @@
   let started = false;
   let closed = false;
   let watchdog = null;
+  let skipTimer = null;
   let rewardResolve = null;
 
   const style = document.createElement('style');
@@ -23,6 +24,9 @@
     .shadrat-vast-play{border:0;border-radius:999px;padding:11px 18px;background:#fff;color:#144f94;font:inherit;font-weight:900;cursor:pointer}
     .shadrat-vast-play:disabled{cursor:wait;opacity:.76}
     .shadrat-vast-close{position:absolute;top:8px;left:8px;z-index:2147483000;width:32px;height:32px;border:0;border-radius:50%;background:rgba(0,0,0,.72);color:#fff;font-size:20px;line-height:1;cursor:pointer}
+    .shadrat-vast-skip{position:absolute;left:10px;bottom:10px;z-index:2147483000;border:1px solid rgba(255,255,255,.45);border-radius:999px;padding:8px 13px;background:rgba(0,0,0,.78);color:#fff;font:inherit;font-size:12px;font-weight:900;cursor:pointer}
+    .shadrat-vast-skip:disabled{cursor:not-allowed;opacity:.72}
+    .shadrat-vast-skip[hidden]{display:none!important}
     .shadrat-vast-label{position:absolute;top:10px;right:10px;z-index:4;padding:4px 8px;border-radius:999px;background:rgba(0,0,0,.62);color:#fff;font-size:10px;font-weight:800;pointer-events:none}
     @media(max-width:600px){#shadrat-vast-ad{right:8px;bottom:10px;width:min(330px,calc(100vw - 16px));border-radius:14px}.shadrat-vast-gate{padding:18px}.shadrat-vast-gate b{font-size:15px}}
   `;
@@ -35,6 +39,7 @@
     <video id="shadrat-vast-content" playsinline webkit-playsinline muted controls preload="none" disablepictureinpicture></video>
     <span class="shadrat-vast-label">إعلان</span>
     <button class="shadrat-vast-close" type="button" aria-label="إغلاق الإعلان">×</button>
+    <button class="shadrat-vast-skip" type="button" hidden disabled>التخطي بعد 10 ثوانٍ</button>
     <div class="shadrat-vast-gate">
       <b>ادعم شذرات بمشاهدة إعلان</b>
       <span>مشاهدتك تساعدنا على إبقاء أدوات الطلاب متاحة.</span>
@@ -46,10 +51,42 @@
   const video = root.querySelector('#shadrat-vast-content');
   const gate = root.querySelector('.shadrat-vast-gate');
   const playButton = root.querySelector('.shadrat-vast-play');
+  const closeButton = root.querySelector('.shadrat-vast-close');
+  const skipButton = root.querySelector('.shadrat-vast-skip');
+  closeButton.hidden = rewardedMode;
+  video.controls = !rewardedMode;
+
+  function resetSkip() {
+    clearInterval(skipTimer);
+    skipTimer = null;
+    skipButton.hidden = true;
+    skipButton.disabled = true;
+    skipButton.textContent = 'التخطي بعد 10 ثوانٍ';
+  }
+
+  function startSkipCountdown() {
+    if (!rewardedMode) return;
+    skipButton.hidden = false;
+    const update = function () {
+      const remaining = Math.max(0, 10 - Math.floor(video.currentTime || 0));
+      if (remaining > 0) {
+        skipButton.disabled = true;
+        skipButton.textContent = `التخطي بعد ${remaining} ثوانٍ`;
+        return;
+      }
+      clearInterval(skipTimer);
+      skipTimer = null;
+      skipButton.disabled = false;
+      skipButton.textContent = 'تخطي الإعلان';
+    };
+    update();
+    skipTimer = setInterval(update, 250);
+  }
 
   function closePlayer(completed) {
     if (closed) return;
     clearTimeout(watchdog);
+    resetSkip();
     try { video.pause(); } catch (_) {}
     video.removeAttribute('src');
     video.load();
@@ -131,6 +168,7 @@
       video.addEventListener('playing', function () {
         clearTimeout(watchdog);
         gate.hidden = true;
+        startSkipCountdown();
         if (!tracked) {
           tracked = true;
           ad.impressions.forEach(ping);
@@ -148,7 +186,12 @@
   }
 
   playButton.addEventListener('click', requestAd);
-  root.querySelector('.shadrat-vast-close').addEventListener('click', function () { closePlayer(false); });
+  closeButton.addEventListener('click', function () { closePlayer(false); });
+  skipButton.addEventListener('click', function () {
+    if (skipButton.disabled) return;
+    const confirmed = window.confirm('إذا تخطيت الإعلان فلن يتم تحميل الملف. هل تريد التخطي؟');
+    if (confirmed) closePlayer(false);
+  });
 
   if (rewardedMode) {
     window.ShadratRewardedAd = {
