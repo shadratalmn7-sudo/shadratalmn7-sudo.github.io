@@ -5,6 +5,7 @@ import { firebaseConfig } from './firebase-config.js';
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const CARD_ID = 'profile-email-verification-card';
+const EDIT_ID = 'profile-direct-edit-link';
 const COOLDOWN_KEY = 'shadrat_email_verification_sent_at';
 
 function isPasswordAccount(user) {
@@ -16,6 +17,9 @@ function ensureStyles() {
   const style = document.createElement('style');
   style.id = 'profile-email-verification-style';
   style.textContent = `
+.profile-cover-edit{display:none!important}
+#${EDIT_ID}{display:flex;align-items:center;justify-content:center;width:max-content;min-width:138px;min-height:40px;box-sizing:border-box;margin:10px auto 14px;padding:8px 16px;border:1px solid #c9daf3;border-radius:12px;background:#fff;color:#1d5fc3;text-decoration:none;font:900 13px/1.2 Tahoma,Arial,sans-serif;box-shadow:0 5px 16px rgba(15,23,42,.055);cursor:pointer;-webkit-tap-highlight-color:transparent}
+#${EDIT_ID}:active{transform:scale(.98);background:#f5f9ff}
 #${CARD_ID}{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 14px;padding:14px 16px;border:1px solid #f4c7a1;border-radius:17px;background:#fff8f1;color:#7c2d12;box-shadow:0 6px 18px rgba(124,45,18,.05)}
 #${CARD_ID}[data-verified="true"]{border-color:#b7e4c7;background:#f1fbf5;color:#166534}
 #${CARD_ID} .email-verify-copy{min-width:0;flex:1}
@@ -24,13 +28,30 @@ function ensureStyles() {
 #${CARD_ID} .email-verify-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end}
 #${CARD_ID} .email-verify-status{width:100%;font-size:11px;font-weight:800;margin-top:4px}
 #${CARD_ID} .email-verify-btn{min-height:42px;white-space:nowrap}
-@media(max-width:640px){#${CARD_ID}{align-items:stretch;flex-direction:column;padding:13px}#${CARD_ID} .email-verify-actions{justify-content:stretch}#${CARD_ID} .email-verify-btn{width:100%}}
+@media(max-width:640px){#${EDIT_ID}{min-width:132px;min-height:39px;margin-top:9px;margin-bottom:12px}#${CARD_ID}{align-items:stretch;flex-direction:column;padding:13px}#${CARD_ID} .email-verify-actions{justify-content:stretch}#${CARD_ID} .email-verify-btn{width:100%}}
 `;
   document.head.appendChild(style);
 }
 
+function ensureDirectEditLink() {
+  ensureStyles();
+  document.querySelectorAll('.profile-cover-edit').forEach(node => node.remove());
+  let link = document.getElementById(EDIT_ID);
+  if (link) return link;
+  const cover = document.querySelector('.student-cover');
+  if (!cover) return null;
+  link = document.createElement('a');
+  link.id = EDIT_ID;
+  link.href = 'profile-settings.html';
+  link.textContent = 'تعديل الحساب';
+  link.setAttribute('aria-label', 'تعديل الحساب');
+  cover.insertAdjacentElement('afterend', link);
+  return link;
+}
+
 function ensureCard() {
   ensureStyles();
+  ensureDirectEditLink();
   let card = document.getElementById(CARD_ID);
   if (card) return card;
   card = document.createElement('section');
@@ -47,7 +68,7 @@ function ensureCard() {
     </div>`;
   const tabs = document.querySelector('.profile-tabs');
   if (tabs?.parentNode) tabs.parentNode.insertBefore(card, tabs);
-  else document.querySelector('.student-cover')?.insertAdjacentElement('afterend', card);
+  else document.querySelector(`#${EDIT_ID}`)?.insertAdjacentElement('afterend', card);
   return card;
 }
 
@@ -73,6 +94,7 @@ function setDashboardTask(verified) {
 }
 
 function render(user, message = '') {
+  ensureDirectEditLink();
   const card = ensureCard();
   if (!card) return;
   const title = card.querySelector('[data-email-verify-title]');
@@ -130,8 +152,11 @@ async function verifyOrSend(user, button, status) {
   }
 }
 
+ensureDirectEditLink();
+
 onAuthStateChanged(auth, user => {
   if (!user) return;
+  ensureDirectEditLink();
   const card = ensureCard();
   const button = card?.querySelector('[data-email-verify-button]');
   const status = card?.querySelector('[data-email-verify-status]');
