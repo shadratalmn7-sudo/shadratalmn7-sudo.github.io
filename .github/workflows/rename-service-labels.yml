@@ -1,0 +1,79 @@
+name: Rename public service labels
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rename-service-labels.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  rename-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Update service labels
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace(path, replacements):
+              p = Path(path)
+              text = p.read_text(encoding='utf-8')
+              original = text
+              for old, new in replacements:
+                  if old not in text:
+                      print(f'[skip] {path}: {old[:70]}')
+                      continue
+                  text = text.replace(old, new)
+              if text != original:
+                  p.write_text(text, encoding='utf-8')
+                  print(f'[updated] {path}')
+
+          replace('services.html', [
+              ('<h1 data-edit-key="services.hero.title">اختر خدمتك بسرعة</h1>', '<h1 data-edit-key="services.hero.title">خدمات الطلاب للمنح والدراسة بالخارج</h1>'),
+              ('<p class="lead" data-edit-key="services.hero.text">اسحب بين الأقسام، وشاهد الأداة أو السعر والنطاق قبل البدء.</p>', '<p class="lead" data-edit-key="services.hero.text">استشارات، أدوات مجانية، ترجمة، وتقديم على المنح والجامعات؛ اختر الخدمة المناسبة واعرف السعر والنطاق قبل البدء.</p>'),
+              ('<h2>الاستشارات المجانية</h2>', '<h2>استشارات المنح والدراسة بالخارج</h2>'),
+              ('<h3>استشارة Open Doors</h3>', '<h3>استشارة منحة Open Doors</h3>'),
+              ('<h3>استشارة Education in Russia</h3>', '<h3>استشارة منحة الحكومة الروسية – Education in Russia</h3>'),
+              ('<h2>أدوات تجهيز ملف الطالب</h2>', '<h2>أدوات مجانية للطلاب وتجهيز ملف المنحة</h2>'),
+              ('<h3>تحويل المستندات</h3>', '<h3>تحويل الصور وملفات PDF مجانًا</h3>'),
+              ('<h3>منشئ السيرة الذاتية CV</h3>', '<h3>إنشاء سيرة ذاتية CV مجانًا</h3>'),
+              ('<h3>منشئ Motivation Letter</h3>', '<h3>إنشاء خطاب دافع Motivation Letter</h3>'),
+              ('<article class="service-card tool"><span class="tag">تلقائي أو يدوي</span><h3>إنشاء خطاب دافع Motivation Letter</h3><p>أدخل معلوماتك ليبني الموقع الخطاب، أو اكتبه بنفسك، مع قوالب متعددة وPDF جاهز.</p><a class="btn outline" href="motivation-letter.html">إنشاء الخطاب</a></article>', '<article class="service-card tool"><span class="tag">تلقائي أو يدوي</span><h3>إنشاء خطاب دافع Motivation Letter</h3><p>أدخل معلوماتك ليبني الموقع الخطاب، أو اكتبه بنفسك، مع قوالب متعددة وPDF جاهز.</p><a class="btn outline" href="motivation-letter.html">إنشاء الخطاب</a></article>\n<article class="service-card tool"><span class="tag">مباشر</span><h3>تحويل العملات وأسعار الصرف</h3><p>حوّل بين الريال السعودي والروبل والدولار واليورو والعملات الأخرى بسرعة.</p><a class="btn outline" href="currency.html">فتح المحول</a></article>'),
+              ('<h2>ترجمة المستندات</h2>', '<h2>ترجمة المستندات والشهادات</h2>'),
+              ('>ترجمة الجواز والشهادة — نوتاريوس</h3>', '>ترجمة الجواز والشهادة مع نوتاريوس</h3>'),
+              ('<h2>خدمات التقديم والمتابعة</h2>', '<h2>خدمات التقديم على المنح</h2>'),
+              ('<h3>Open Doors — Stage 1</h3>', '<h3>التقديم على Open Doors – المرحلة الأولى</h3>'),
+              ('<h2>التقديم المباشر للجامعات</h2>', '<h2>التقديم المباشر للجامعات الروسية</h2>'),
+          ])
+
+          replace('index.html', [
+              ('<b>تحويل العملات</b><small>افتح الأداة</small>', '<b>تحويل العملات وأسعار الصرف</b><small>افتح الأداة</small>'),
+              ('<b>الخدمات</b><small>عرض الخدمات</small>', '<b>خدمات الطلاب والمنح</b><small>عرض الخدمات</small>'),
+              ('<b>العروض</b><small>شاهد العروض</small>', '<b>عروض وخصومات الطلاب</b><small>شاهد العروض</small>'),
+              ('<b>المستندات</b><small>افتح الأدوات</small>', '<b>تحويل الصور وملفات PDF</b><small>افتح الأدوات</small>'),
+              ('<h3>المستندات</h3><p>تحويل وتجهيز ملفاتك من داخل المتصفح.</p>', '<h3>تحويل الصور وملفات PDF مجانًا</h3><p>حوّل الصور وPDF واستخدم أدوات الدمج والتقسيم والتدوير من داخل المتصفح.</p>'),
+              ('<h3>العملات</h3><p>تحويل سريع بين العملات بسعر صرف محسّن.</p>', '<h3>تحويل العملات وأسعار الصرف</h3><p>تحويل سريع بين الريال والروبل والدولار واليورو والعملات الأخرى.</p>'),
+              ('<h3>منشئ CV</h3>', '<h3>إنشاء سيرة ذاتية CV مجانًا</h3>'),
+              ('<h3>Motivation Letter</h3>', '<h3>إنشاء خطاب دافع Motivation Letter</h3>'),
+              ('<h3>الخدمات</h3><p>استشارات وخدمات تقديم بسعر ونطاق واضحين.</p>', '<h3>خدمات الطلاب للمنح والدراسة بالخارج</h3><p>استشارات، ترجمة، وخدمات تقديم على المنح والجامعات بسعر ونطاق واضحين.</p>'),
+              ('<h3>العروض</h3><p>خصومات حالية على بعض الخدمات الطلابية.</p>', '<h3>عروض وخصومات خدمات الطلاب</h3><p>خصومات حالية على بعض خدمات التقديم والترجمة والأدوات الطلابية.</p>'),
+          ])
+          PY
+      - name: Commit changes
+        run: |
+          if git diff --quiet; then
+            echo "No changes needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add services.html index.html
+          git commit -m "Improve visible service names for students and search"
+          git pull --rebase origin main
+          git push origin HEAD:main
