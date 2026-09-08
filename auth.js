@@ -5,6 +5,8 @@ import {
   deleteUser,
   getAuth,
   GoogleAuthProvider,
+  EmailAuthProvider,
+  linkWithCredential,
   sendEmailVerification,
   sendPasswordResetEmail,
   setPersistence,
@@ -23,6 +25,10 @@ const ADMIN_SESSION_KEY = 'shadrat_admin_session';
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+auth.languageCode = 'ar';
+let pendingGoogle = null;
+let passwordSetupUser = null;
+let sendingReset = false;
 
 await setPersistence(auth, browserSessionPersistence).catch(error => console.warn('[Shadrat] session unavailable', error));
 
@@ -56,7 +62,14 @@ function errorText(error) {
   if (error?.message?.includes('phone-already-used')) return 'رقم الجوال مستخدم في حساب آخر.';
   const known = {
     'auth/invalid-credential': 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
-    'auth/email-already-in-use': 'هذا البريد مستخدم في حساب آخر. جرّب تسجيل الدخول.',
+    'auth/email-already-in-use': 'هذا البريد مرتبط بحساب موجود. استخدم تسجيل الدخول أو Google، أو استعد كلمة المرور؛ لا تحتاج حسابًا جديدًا.',
+    'auth/account-exists-with-different-credential': 'هذا البريد مرتبط بطريقة دخول أخرى. سجّل الدخول إلى حسابك الموجود أولًا لربط Google به.',
+    'auth/credential-already-in-use': 'طريقة الدخول مرتبطة بحساب آخر. لم نغيّر حسابك؛ استخدم طريقة دخوله الأصلية.',
+    'auth/provider-already-linked': 'كلمة المرور مضافة بالفعل. استخدم استعادة كلمة المرور لتغييرها.',
+    'auth/requires-recent-login': 'أكّد حسابك باستخدام Google مرة أخرى، ثم أعد المحاولة.',
+    'auth/too-many-requests': 'محاولات كثيرة خلال وقت قصير. انتظر قليلًا ثم حاول مجددًا.',
+    'auth/invalid-email': 'اكتب بريدًا إلكترونيًا صحيحًا.',
+    'auth/popup-blocked': 'المتصفح منع نافذة Google. اسمح بالنوافذ المنبثقة أو استخدم البريد وكلمة المرور.',
     'auth/weak-password': 'اختر كلمة مرور أقوى لا تقل عن 10 أحرف.',
     'auth/popup-closed-by-user': 'أُغلقت نافذة Google قبل إكمال العملية.',
     'auth/cancelled-popup-request': 'أُلغيت نافذة Google السابقة. حاول مجددًا.',
@@ -205,6 +218,12 @@ async function ensureGoogleProfile(user) {
 
 document.querySelectorAll('[data-google-auth]').forEach(button => button.addEventListener('click', async () => {
   const form = document.querySelector('#login-form') || document.querySelector('#register-form');
+  if (button.disabled) return;
+  if (button.dataset.googleAuth === 'password') {
+    passwordSetupUser = null;
+    const setupForm = document.querySelector('#link-password-form');
+    setupForm.reset(); setupForm.hidden = true;
+  }
   button.disabled = true;
   button.setAttribute('aria-busy', 'true');
   show(form, 'جارٍ فتح تسجيل Google…', 'progress');
@@ -215,9 +234,29 @@ document.querySelectorAll('[data-google-auth]').forEach(button => button.addEven
     const result = await withTimeout(signInWithPopup(auth, provider), 45000);
     show(form, 'جارٍ تجهيز حسابك…', 'progress');
     await ensureGoogleProfile(result.user);
+    if (button.dataset.googleAuth === 'password') {
+      if (result.user.providerData.some(item => item.providerId === 'password')) {
+        show(form, 'حسابك لديه كلمة مرور بالفعل. يمكنك تغييرها من «نسيت كلمة المرور».', 'success');
+        return;
+      }
+      passwordSetupUser = result.user;
+      document.querySelector('#link-password-form').hidden = false;
+      document.querySelector('#link-password-account').textContent = `ستُضاف كلمة المرور إلى: ${result.user.email}`;
+      show(form, 'تم تأكيد حساب Google. اختر الآن كلمة مرور خاصة بشذرات.', 'success');
+      document.querySelector('#new-password').focus();
+      return;
+    }
     location.href = await destination(result.user);
   } catch (error) {
-    show(form, errorText(error));
+    if (error.code === 'auth/account-exists-with-different-credential' && document.querySelector('#login-form')) {
+      const credential = GoogleAuthProvider.credentialFromError(error);
+      const email = clean(error.customData?.email);
+      if (credential && email) {
+        pendingGoogle = {credential, email, expires: Date.now() + 300000};
+        document.querySelector('#email').value = email;
+        show(form, 'لديك حساب بهذا البريد. أدخل كلمة مرور شذرات لتأكيد ملكيته وربط Google بالحساب نفسه.');
+      } else show(form, errorText(error));
+    } else show(form, errorText(error));
   } finally {
     button.disabled = false;
     button.setAttribute('aria-busy', 'false');
@@ -227,7 +266,7 @@ document.querySelectorAll('[data-google-auth]').forEach(button => button.addEven
 const loginForm = document.querySelector('#login-form');
 loginForm?.addEventListener('submit', async event => {
   event.preventDefault();
-  if (!loginForm.reportValidity()) return;
+  if (!loginForm.reportValidity() || loginForm.querySelector('[type="submit"]').disabled) return;
   setBusy(loginForm, true, 'جارٍ تسجيل الدخول…');
   show(loginForm, 'نتحقق من بياناتك…', 'progress');
   try {
@@ -235,8 +274,15 @@ loginForm?.addEventListener('submit', async event => {
     const credential = await withTimeout(signInWithEmailAndPassword(auth, clean(loginForm.email.value), loginForm.password.value));
     if (!credential.user.emailVerified) {
       await signOut(auth).catch(() => {});
+      document.querySelector('#resend-verification').hidden = false;
       show(loginForm, 'لازم تؤكد بريدك الإلكتروني أولًا. افتح رسالة شذرات في بريدك واضغط رابط التأكيد، ثم سجل الدخول.', 'error');
       return;
+    }
+    if (pendingGoogle) {
+      if (pendingGoogle.expires > Date.now() && pendingGoogle.email === clean(credential.user.email)) {
+        await linkWithCredential(credential.user, pendingGoogle.credential);
+      }
+      pendingGoogle = null;
     }
     location.href = await destination(credential.user);
   } catch (error) {
@@ -251,6 +297,7 @@ if (loginForm) {
   const verification = params.get('verify');
   const emailFromSignup = params.get('email');
   if (emailFromSignup) loginForm.email.value = emailFromSignup;
+  if (verification === 'sent' || verification === 'failed') document.querySelector('#resend-verification').hidden = false;
   if (verification === 'sent') show(loginForm, 'أرسلنا رسالة تأكيد إلى بريدك. افتحها واضغط رابط التأكيد، وبعدها سجل الدخول.', 'success');
   if (verification === 'failed') show(loginForm, 'تم إنشاء الحساب، لكن تعذر إرسال رسالة التأكيد. اكتب بريدك وكلمة المرور واضغط «إعادة إرسال رسالة التأكيد».');
 }
@@ -278,23 +325,53 @@ document.querySelector('#resend-verification')?.addEventListener('click', async 
   }
 });
 
-document.querySelector('#reset-password')?.addEventListener('click', async event => {
+const resetForm = document.querySelector('#reset-form');
+resetForm?.addEventListener('submit', async event => {
   event.preventDefault();
-  const email = clean(loginForm?.email.value);
-  if (!email) return show(loginForm, 'اكتب بريدك الإلكتروني أولًا.');
-  show(loginForm, 'جارٍ إرسال رابط الاستعادة…', 'progress');
+  if (sendingReset || !resetForm.reportValidity()) return;
+  sendingReset = true; setBusy(resetForm, true, 'جارٍ إرسال الرابط…');
+  const complete = () => show(resetForm, 'إذا كان البريد مرتبطًا بحساب، ستصلك رسالة برابط استعادة كلمة المرور. افحص الوارد والرسائل غير المرغوبة.', 'success');
   try {
-    await withTimeout(sendPasswordResetEmail(auth, email));
-    show(loginForm, 'أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك.', 'success');
+    await sendPasswordResetEmail(auth, clean(resetForm.email.value), {url: new URL('login.html', location.href).href, handleCodeInApp: false});
+    complete();
   } catch (error) {
-    show(loginForm, errorText(error));
-  }
+    if (error.code === 'auth/user-not-found') complete();
+    else show(resetForm, errorText(error));
+  } finally {sendingReset = false; setBusy(resetForm, false);}
+});
+const linkPasswordForm = document.querySelector('#link-password-form');
+linkPasswordForm?.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (!linkPasswordForm.reportValidity() || linkPasswordForm.querySelector('[type="submit"]').disabled) return;
+  if (!passwordSetupUser || auth.currentUser?.uid !== passwordSetupUser.uid) return show(null, 'أكّد حساب Google أولًا.');
+  const password = document.querySelector('#new-password').value;
+  if (password !== document.querySelector('#confirm-password').value) return show(null, 'كلمتا المرور غير متطابقتين.');
+  setBusy(linkPasswordForm, true, 'جارٍ حفظ كلمة المرور…');
+  try {
+    const uid = passwordSetupUser.uid;
+    const result = await linkWithCredential(passwordSetupUser, EmailAuthProvider.credential(passwordSetupUser.email, password));
+    if (result.user.uid !== uid) throw new Error('Account identity changed');
+    linkPasswordForm.reset(); linkPasswordForm.hidden = true; passwordSetupUser = null;
+    show(null, 'تمت إضافة كلمة المرور. يمكنك الآن الدخول باستخدام Google أو البريد وكلمة المرور إلى الحساب نفسه.', 'success');
+  } catch (error) {show(null, errorText(error));}
+  finally {setBusy(linkPasswordForm, false);}
+});
+document.querySelectorAll('[data-toggle-password]').forEach(button => button.addEventListener('click', () => {
+  const input = document.getElementById(button.dataset.togglePassword), visible = input.type === 'password';
+  input.type = visible ? 'text' : 'password'; button.textContent = visible ? 'إخفاء' : 'إظهار';
+  button.setAttribute('aria-pressed', String(visible)); button.setAttribute('aria-label', visible ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور');
+}));
+document.querySelectorAll('[data-auth-route]').forEach(link => {
+  const target = new URL(link.getAttribute('href'), location.href), current = new URLSearchParams(location.search);
+  const next = safeNext(); if (next) target.searchParams.set('next', next);
+  for (const key of ['ref','referral']) if (current.get(key)) target.searchParams.set(key, current.get(key));
+  link.href = target.href;
 });
 
 const registerForm = document.querySelector('#register-form');
 registerForm?.addEventListener('submit', async event => {
   event.preventDefault();
-  if (!registerForm.reportValidity()) return;
+  if (!registerForm.reportValidity() || registerForm.querySelector('[type="submit"]').disabled) return;
   const fullName = registerForm.querySelector('#full').value.trim();
   const username = normalizeUsername(registerForm.querySelector('#username').value);
   const email = clean(registerForm.querySelector('#mail').value);
@@ -354,7 +431,11 @@ registerForm?.addEventListener('submit', async event => {
     }
     await signOut(auth).catch(() => {});
     const verifyState = verificationSent ? 'sent' : 'failed';
-    location.href = `login.html?verify=${verifyState}&email=${encodeURIComponent(email)}`;
+    const loginUrl = new URL('login.html', location.href);
+    loginUrl.searchParams.set('verify', verifyState);
+    loginUrl.searchParams.set('email', email);
+    const next = safeNext(); if (next) loginUrl.searchParams.set('next', next);
+    location.href = loginUrl.href;
   } catch (error) {
     console.error('[Shadrat] registration failed', error);
     if (createdUser && !profileCommitted) {

@@ -185,7 +185,27 @@ function experienceItems(data,lang,field){
 }
 function targetFocus(field,lang,skills){const base=focusCatalog[field.key]||focusCatalog.other,fromField=lang==='ar'?base.ar:base.en;return uniq([...skills,...fromField]).slice(0,8)}
 function developmentAdditions(lang,fieldName,skills,certificateCount){const focus=skills.slice(0,5).join(lang==='ar'?'، ':', '),out=[];if(lang==='ar'){out.push(`اتجاه الملف: بناء مسار متماسك في ${fieldName} يجمع بين الاستعداد الأكاديمي والتعلم التطبيقي.`);if(focus)out.push(`مجالات التركيز الحالية: ${focus}، مرتبة بما يخدم الاتجاه المستهدف بدل ظهورها كعناصر منفصلة.`);if(certificateCount)out.push('يوضح سجل الشهادات استمرارًا في التعلم المنظم وتوسيع المعرفة خارج الدراسة الأساسية.')}else{out.push(`Profile direction: building a coherent pathway in ${fieldName} that combines academic preparation with applied learning.`);if(focus)out.push(`Current focus areas include ${focus}, organized around the intended direction rather than shown as disconnected items.`);if(certificateCount)out.push('The certificate record demonstrates structured learning and continued development beyond core academic requirements.')}return out}
-export function buildSemanticCv(data,{certificateCount=0,skills=[]}={}){
-  const lang=data.lang==='ar'?'ar':'en',allText=[data.summary,data.education,data.experience,data.role,data.certs].map(clean).join(' '),normalizedDigits=allText.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)),statedCount=Number((normalizedDigits.match(/(\d{1,3})\s*(?:شهاد|دور|certificate|course)/i)||[])[1]||0),verifiedCount=Math.max(certificateCount,statedCount),state=academicState(allText),pState=professionalState(allText),field=fieldInfo(data.role),fieldLabel=lang==='ar'?field.ar:field.en,normalizedSkills=normalizeSkills(skills,lang),focus=targetFocus(field,lang,normalizedSkills),education=educationItems(data,lang,state,fieldLabel),experience=experienceItems(data,lang,fieldLabel),supplement=developmentAdditions(lang,fieldLabel,focus,verifiedCount),summary=summaryText(lang,state,pState,fieldLabel,{certificateCount:verifiedCount,skills:focus,educationKnown:!!clean(data.education),experienceKnown:rawLines(data.experience).length>0}),experienceTitle=rawLines(data.experience).length?(lang==='ar'?'الخبرات والمشاريع والأنشطة':'EXPERIENCE, PROJECTS & ACTIVITIES'):(lang==='ar'?'التطوير الأكاديمي والاستعداد':'ACADEMIC DEVELOPMENT & READINESS');
-  return{headline:headline(lang,state,pState,fieldLabel),summary,education:uniq([...education,...supplement.slice(0,2)]),experience:uniq([...experience,...supplement.slice(2)]),experienceTitle,skills:normalizedSkills,focus,languages:formalLanguage(data.languages,lang),mode:pState.active&&!state.hsNow&&!state.bachelorNow&&!state.bachelorApply&&!state.masterApply?'professional':'academic'}
+function polishFacts(value) {
+  return clean(value)
+    .replace(/(^|\s)(?:انا|أنا)\s+/g, '$1')
+    .replace(/(^|\s)خلصت\s+(?:الثانوية|الثانويه)/g, '$1أكملت المرحلة الثانوية')
+    .replace(/(^|\s)متخرج/g, '$1خريج')
+    .replace(/(^|\s)(?:عندي|عندى)\s+/g, '$1لدي ')
+    .replace(/(^|\s)(?:سويت|سويّت)\s+/g, '$1أنجزت ')
+    .replace(/(^|\s)(?:ابغى|أبغى)\s+/g, '$1أرغب في ')
+    .replace(/(^|\s)الامن(?=\s|$)/g, '$1الأمن')
+    .replace(/(^|\s)امن(?=\s|$)/g, '$1أمن');
+}
+export function buildSemanticCv(data,{certificateCount=0,skills=[]}={}) {
+  const lang=data.lang==='ar'?'ar':'en';
+  return {
+    headline: polishFacts(data.role),
+    summary: polishFacts(data.summary),
+    education: rawLines(data.education).map(polishFacts),
+    experience: rawLines(data.experience).map(polishFacts),
+    skills: uniq(skills),
+    // Preserve levels such as C1/A2 and custom languages verbatim.
+    languages: clean(data.languages),
+    focus: [], mode: 'factual'
+  };
 }

@@ -6,12 +6,13 @@
   if (document.getElementById('shadrat-vast-ad')) return;
 
   const AD_TAG = 'https://nautical-hand.com/d/m.FnznduGYNavCZ_GEUr/ieSmh9MuQZDUTlfkNPGTZcnzbOQTmEO0-MSzUMWtBNxzDMI5iMRT/QXzLN-wT';
-  const rewardedMode = page === 'documents.html';
+  // HilltopAds prohibits incentivized traffic. This is a normal video placement,
+  // independent of document downloads; never register it as a rewarded provider.
   let started = false;
   let closed = false;
   let watchdog = null;
-  let skipTimer = null;
-  let rewardResolve = null;
+  const controller = new AbortController();
+  let failed = false;
 
   const style = document.createElement('style');
   style.textContent = `
@@ -24,9 +25,6 @@
     .shadrat-vast-play{border:0;border-radius:999px;padding:11px 18px;background:#fff;color:#144f94;font:inherit;font-weight:900;cursor:pointer}
     .shadrat-vast-play:disabled{cursor:wait;opacity:.76}
     .shadrat-vast-close{position:absolute;top:8px;left:8px;z-index:2147483000;width:32px;height:32px;border:0;border-radius:50%;background:rgba(0,0,0,.72);color:#fff;font-size:20px;line-height:1;cursor:pointer}
-    .shadrat-vast-skip{position:absolute;left:10px;bottom:10px;z-index:2147483000;border:1px solid rgba(255,255,255,.45);border-radius:999px;padding:8px 13px;background:rgba(0,0,0,.78);color:#fff;font:inherit;font-size:12px;font-weight:900;cursor:pointer}
-    .shadrat-vast-skip:disabled{cursor:not-allowed;opacity:.72}
-    .shadrat-vast-skip[hidden]{display:none!important}
     .shadrat-vast-label{position:absolute;top:10px;right:10px;z-index:4;padding:4px 8px;border-radius:999px;background:rgba(0,0,0,.62);color:#fff;font-size:10px;font-weight:800;pointer-events:none}
     @media(max-width:600px){#shadrat-vast-ad{right:8px;bottom:10px;width:min(330px,calc(100vw - 16px));border-radius:14px}.shadrat-vast-gate{padding:18px}.shadrat-vast-gate b{font-size:15px}}
   `;
@@ -39,77 +37,38 @@
     <video id="shadrat-vast-content" playsinline webkit-playsinline muted controls preload="none" disablepictureinpicture></video>
     <span class="shadrat-vast-label">إعلان</span>
     <button class="shadrat-vast-close" type="button" aria-label="إغلاق الإعلان">×</button>
-    <button class="shadrat-vast-skip" type="button" hidden disabled>التخطي بعد 10 ثوانٍ</button>
     <div class="shadrat-vast-gate">
-      <b>ادعم شذرات بمشاهدة إعلان</b>
-      <span>مشاهدتك تساعدنا على إبقاء أدوات الطلاب متاحة.</span>
+      <b>إعلان فيديو</b>
+      <span>يمكنك إغلاق الإعلان في أي وقت.</span>
       <button class="shadrat-vast-play" type="button">تشغيل الإعلان</button>
     </div>`;
   document.body.appendChild(root);
-  root.hidden = rewardedMode;
+
 
   const video = root.querySelector('#shadrat-vast-content');
   const gate = root.querySelector('.shadrat-vast-gate');
   const playButton = root.querySelector('.shadrat-vast-play');
   const closeButton = root.querySelector('.shadrat-vast-close');
-  const skipButton = root.querySelector('.shadrat-vast-skip');
-  closeButton.hidden = rewardedMode;
-  video.controls = !rewardedMode;
-
-  function resetSkip() {
-    clearInterval(skipTimer);
-    skipTimer = null;
-    skipButton.hidden = true;
-    skipButton.disabled = true;
-    skipButton.textContent = 'التخطي بعد 10 ثوانٍ';
-  }
-
-  function startSkipCountdown() {
-    if (!rewardedMode) return;
-    skipButton.hidden = false;
-    const update = function () {
-      const remaining = Math.max(0, 10 - Math.floor(video.currentTime || 0));
-      if (remaining > 0) {
-        skipButton.disabled = true;
-        skipButton.textContent = `التخطي بعد ${remaining} ثوانٍ`;
-        return;
-      }
-      clearInterval(skipTimer);
-      skipTimer = null;
-      skipButton.disabled = false;
-      skipButton.textContent = 'تخطي الإعلان';
-    };
-    update();
-    skipTimer = setInterval(update, 250);
-  }
-
-  function closePlayer(completed) {
+  function closePlayer() {
     if (closed) return;
     clearTimeout(watchdog);
-    resetSkip();
+    closed = true;
+    controller.abort();
     try { video.pause(); } catch (_) {}
     video.removeAttribute('src');
     video.load();
-    if (rewardedMode) {
-      const resolve = rewardResolve;
-      rewardResolve = null;
-      started = false;
-      root.hidden = true;
-      gate.hidden = false;
-      if (resolve) resolve(Boolean(completed));
-      return;
-    }
-    closed = true;
     root.remove();
     style.remove();
   }
 
   function fail() {
-    if (closed) return;
+    if (closed || failed) return;
+    failed = true;
+    controller.abort();
     clearTimeout(watchdog);
     gate.hidden = false;
     gate.innerHTML = '<b>لا يوجد إعلان متاح الآن</b><span>سنخفي المشغّل تلقائيًا.</span>';
-    setTimeout(function () { closePlayer(rewardedMode); }, 1800);
+    setTimeout(function () { closePlayer(); }, 1800);
   }
 
   function ping(url) {
@@ -131,13 +90,21 @@
 
   async function loadVast(url, depth) {
     if (depth > 3) throw new Error('VAST wrapper limit');
-    const response = await fetch(url, { credentials: 'include', cache: 'no-store', referrerPolicy: 'no-referrer-when-downgrade' });
+    const response = await fetch(url, { signal: controller.signal, credentials: 'include', cache: 'no-store', referrerPolicy: 'no-referrer-when-downgrade' });
     if (!response.ok) throw new Error('VAST HTTP ' + response.status);
     const xml = new DOMParser().parseFromString(await response.text(), 'application/xml');
     if (xml.querySelector('parsererror')) throw new Error('Invalid VAST XML');
 
     const wrapperUri = elements(xml, 'VASTAdTagURI')[0];
-    if (wrapperUri) return loadVast(textOf(wrapperUri), depth + 1);
+    if (wrapperUri) {
+      const nested = await loadVast(textOf(wrapperUri), depth + 1);
+      nested.impressions.unshift(...elements(xml, 'Impression').map(textOf));
+      for (const node of elements(xml, 'Tracking')) {
+        const event = node.getAttribute('event');
+        (nested.tracking[event] ||= []).push(textOf(node));
+      }
+      return nested;
+    }
 
     const linear = elements(xml, 'Linear')[0];
     if (!linear) throw new Error('No linear ad');
@@ -151,7 +118,7 @@
     return {
       mediaUrl: textOf(chosen),
       impressions: elements(xml, 'Impression').map(textOf),
-      starts: elements(xml, 'Tracking').filter(function (node) { return node.getAttribute('event') === 'start'; }).map(textOf)
+      tracking: elements(xml, 'Tracking').reduce(function (events, node) { (events[node.getAttribute('event')] ||= []).push(textOf(node)); return events; }, {})
     };
   }
 
@@ -164,18 +131,27 @@
 
     try {
       const ad = await loadVast(AD_TAG, 0);
-      let tracked = false;
+      if (closed || failed) return;
+      let tracked = false, watched = 0, previous = 0;
+      const sent = new Set();
+      const track = function (event) { if (sent.has(event)) return; sent.add(event); (ad.tracking[event] || []).forEach(ping); };
+      video.addEventListener('timeupdate', function () {
+        const delta = video.currentTime - previous; previous = video.currentTime;
+        if (!video.seeking && delta > 0 && delta < 1.5) watched += delta;
+        if (!Number.isFinite(video.duration)) return;
+        for (const [event, fraction] of [['firstQuartile', .25], ['midpoint', .5], ['thirdQuartile', .75]]) if (watched >= video.duration * fraction) track(event);
+      });
       video.addEventListener('playing', function () {
         clearTimeout(watchdog);
         gate.hidden = true;
-        startSkipCountdown();
+
         if (!tracked) {
           tracked = true;
           ad.impressions.forEach(ping);
-          ad.starts.forEach(ping);
+          track('start');
         }
       }, { once: true });
-      video.addEventListener('ended', function () { closePlayer(true); }, { once: true });
+      video.addEventListener('ended', function () { if (watched >= video.duration - 1) track('complete'); closePlayer(); }, { once: true });
       video.addEventListener('error', fail, { once: true });
       video.src = ad.mediaUrl;
       video.load();
@@ -187,24 +163,4 @@
 
   playButton.addEventListener('click', requestAd);
   closeButton.addEventListener('click', function () { closePlayer(false); });
-  skipButton.addEventListener('click', function () {
-    if (skipButton.disabled) return;
-    const confirmed = window.confirm('إذا تخطيت الإعلان فلن يتم تحميل الملف. هل تريد التخطي؟');
-    if (confirmed) closePlayer(false);
-  });
-
-  if (rewardedMode) {
-    window.ShadratRewardedAd = {
-      play: function () {
-        if (rewardResolve) return Promise.resolve(false);
-        root.hidden = false;
-        gate.hidden = false;
-        gate.innerHTML = '<b>شاهد الإعلان لإكمال التحويل</b><span>سيبدأ تحميل ملفك تلقائيًا بعد انتهاء الفيديو.</span>';
-        return new Promise(function (resolve) {
-          rewardResolve = resolve;
-          requestAd();
-        });
-      }
-    };
-  }
 })();
