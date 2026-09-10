@@ -49,16 +49,10 @@ if (!window.__shadratDocsUnifiedReady) {
     if (isIOS && blob.size < 18 * 1024 * 1024) {
       try { const dataUrl = await blobToDataUrl(blob); link.href = dataUrl; if (openLink) openLink.href = dataUrl; } catch (_) {}
     }
-    setStatus('اكتمل التحويل. شاهد الإعلان القصير ليبدأ التحميل تلقائيًا.');
-    const allowed = window.ShadratRewardedAd?.play ? await window.ShadratRewardedAd.play() : true;
-    if (!allowed) {
-      setStatus('أكمل مشاهدة الإعلان حتى يبدأ تحميل الملف.');
-      return;
-    }
     link.hidden = false;
     if (openLink) openLink.hidden = false;
     if (shareButton?.onclick) shareButton.hidden = false;
-    setStatus('اكتمل الإعلان. جاري تحميل الملف الآن…');
+    setStatus('اكتمل التحويل. جاري تحميل الملف الآن…');
     setTimeout(() => { try { link.click(); } catch (_) {} }, 120);
   };
   const downloadPdf = (bytes, name) => makeDownload(new Blob([bytes], { type: 'application/pdf' }), name);
