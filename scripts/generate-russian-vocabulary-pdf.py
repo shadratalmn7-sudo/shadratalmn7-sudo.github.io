@@ -67,11 +67,14 @@ for page_index, page_rows in enumerate(
     )
 
 css = r'''
-@font-face{font-family:Study;src:url(../../assets/russian/study.ttf)}
-@page{size:A4;margin:13mm 11mm 15mm;@top-left{content:"شذرات · ملخص الكلمات";font:7.5pt Study;color:#718096}@bottom-center{content:counter(page);font:8pt Study;color:#718096}}
+@font-face{font-family:ShatharatArabic;src:url(assets/russian/shatharat-arabic.ttf);font-weight:400}
+@font-face{font-family:ShatharatArabic;src:url(assets/russian/shatharat-arabic-bold.ttf);font-weight:700}
+@font-face{font-family:ShatharatSans;src:url(assets/russian/shatharat-sans.ttf);font-weight:400}
+@font-face{font-family:ShatharatSans;src:url(assets/russian/shatharat-sans-bold.ttf);font-weight:700}
+@page{size:A4;margin:13mm 11mm 15mm;@top-left{content:"شذرات · ملخص الكلمات";font:7.5pt ShatharatArabic;color:#718096}@bottom-center{content:counter(page);font:8pt ShatharatSans;color:#718096}}
 @page:first{@top-left{content:none}@bottom-center{content:none}}
 *{box-sizing:border-box}
-body{margin:0;color:#183657;font-family:Tahoma,Arial,Study,sans-serif;font-size:9pt;line-height:1.35;direction:rtl}
+body{margin:0;color:#183657;font-family:ShatharatArabic,Tahoma,Arial,sans-serif;font-size:9pt;line-height:1.35;direction:rtl}
 .cover{height:269mm;margin:-13mm -11mm -15mm;padding:34mm 20mm;background:#173b70;color:#fff;border-right:4mm solid #c7ac75;break-after:page}
 .cover .label{display:inline-block;padding:2mm 4mm;border:0.3mm solid #ffffff55;border-radius:8mm;color:#dbeafe;font-size:9pt}
 .cover h1{margin:34mm 0 8mm;color:#fff;font-size:38pt;line-height:1.15}
@@ -95,16 +98,17 @@ body{margin:0;color:#183657;font-family:Tahoma,Arial,Study,sans-serif;font-size:
 .card{position:absolute;width:calc(20% - 1.15mm);height:27.45mm;padding:0;border:0.35mm solid #b9cce4;border-radius:2.2mm;background:#fff;overflow:hidden;overflow-wrap:anywhere}
 .card:nth-child(even){background:#f5f8fc}
 .card.placeholder{visibility:hidden}
-.card-content{position:absolute;top:50%;right:2.2mm;left:2.2mm;transform:translateY(-50%)}
+.card-content{position:absolute;top:1.2mm;right:2.2mm;bottom:1.2mm;width:calc(100% - 4.4mm);display:grid;grid-template-rows:repeat(3,minmax(0,1fr));align-items:stretch}
 .card b,.card span,.card small{display:block}
-.ru{margin:0 0 1.15mm;direction:ltr;text-align:left;color:#174f9a;font-family:Arial,Study,sans-serif;font-size:9.5pt;line-height:1.15;font-weight:bold;unicode-bidi:isolate;overflow-wrap:anywhere;word-break:break-all}
-.ar{margin:0 0 1mm;font-family:Tahoma,Arial,Study,sans-serif;font-size:8.2pt;line-height:1.25}
-.en{margin:0;direction:ltr;text-align:left;color:#334e68;font-family:Arial,Study,sans-serif;font-size:7.4pt;line-height:1.15;unicode-bidi:isolate;overflow-wrap:anywhere}
+.ru,.ar,.en{display:block!important;align-self:center;margin:0;min-height:0;overflow:hidden}
+.ru{direction:ltr;text-align:left;color:#174f9a;font-family:ShatharatSans,Arial,sans-serif;font-size:9.1pt;line-height:1.12;font-weight:700;unicode-bidi:isolate;overflow-wrap:anywhere;word-break:break-all}
+.ar{padding-right:.7mm;text-align:right;font-family:ShatharatArabic,Tahoma,Arial,sans-serif;font-size:8pt;line-height:1.2;overflow-wrap:anywhere}
+.en{direction:ltr;text-align:left;color:#334e68;font-family:ShatharatSans,Arial,sans-serif;font-size:7.1pt;line-height:1.12;unicode-bidi:isolate;overflow-wrap:anywhere}
 .card small{margin-top:1.5mm;color:#718096;font-size:6.5pt;line-height:1.15}
 '''
 
 html = f'''<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>ملخص الكلمات - غالب</title><style>{css}</style></head><body>
-<section class="cover"><span class="label">شذرات · مكتبة الطالب</span><h1 lang="ru" dir="ltr">ДОРОГА В РОССИЮ 1</h1><h2>ملخص الكلمات</h2><p>Русский · العربية · English</p><p>{len(all_rows)} كلمة مختارة · 40 كلمة في الصفحة</p><p class="credit">إعداد وتلخيص وتنظيم: <b>غالب — Галиб</b></p></section>
+<section class="cover"><span class="label">شذرات · مكتبة الطالب</span><h1 lang="ru" dir="ltr">ДОРОГА В РОССИЮ 1</h1><h2>ملخص الكلمات</h2><p>Русский · العربية · English</p><p>{len(all_rows)} كلمة مختارة · 40 كلمة في الصفحة</p><p class="credit">إعداد شعبة <b>80002606</b></p></section>
 {''.join(word_pages)}
 </body></html>'''
 
