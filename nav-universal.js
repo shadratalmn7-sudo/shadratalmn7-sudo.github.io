@@ -26,7 +26,7 @@
     'profile.html':['حسابي | شذرات للمنح','مساحة الطالب في منصة شذرات للمنح.']
   };
   if (!isAdmin) {
-    const info=seo[page]||['شذرات للمنح','منصة عربية للمنح الدراسية وخدمات الطلاب.'];document.title=info[0];
+    const info=seo[page]||(page==='books.html'||page.startsWith('russian-')?[document.title,document.querySelector('meta[name="description"]').content]:null)||['شذرات للمنح','منصة عربية للمنح الدراسية وخدمات الطلاب.'];document.title=info[0];
     let description=document.querySelector('meta[name="description"]');if(!description){description=document.createElement('meta');description.name='description';document.head.appendChild(description)}description.content=info[1];
     let canonical=document.querySelector('link[rel="canonical"]');if(!canonical){canonical=document.createElement('link');canonical.rel='canonical';document.head.appendChild(canonical)}canonical.href=`https://shadratalmn7-sudo.github.io/${page==='index.html'?'':page}`;
   }
@@ -62,7 +62,7 @@
   if(!isAdmin&&!document.querySelector('.global-menu')){
     const toggle=document.createElement('button');toggle.className='global-hamburger';toggle.type='button';toggle.setAttribute('aria-label','فتح القائمة');toggle.setAttribute('aria-expanded','false');toggle.innerHTML='<span aria-hidden="true">☰</span>';nav.appendChild(toggle);
     const menu=document.createElement('div');menu.className='global-menu';menu.setAttribute('aria-hidden','true');
-    const mainItems=item('index.html','home','الرئيسية')+item('scholarships.html','scholarship','المنح')+servicesMenu()+item('currency.html','currency','تحويل العملات')+item('offers.html','offers','العروض');
+    const mainItems=item('books.html','scholarship','الكتب والمراجع')+item('index.html','home','الرئيسية')+item('scholarships.html','scholarship','المنح')+servicesMenu()+item('currency.html','currency','تحويل العملات')+item('offers.html','offers','العروض');
     menu.innerHTML=`<div class="global-menu-backdrop" data-menu-close></div><aside class="global-menu-panel"><div class="global-menu-head"><img class="brand-logo" src="assets/shazarat-logo-blue.png?v=20260905b" alt="شذرات للمنح"><button class="global-menu-close" type="button" data-menu-close aria-label="إغلاق القائمة">×</button></div><div class="hamburger-sections">${section('حساب الطالب','ملفك وأعمالك المحفوظة',item('profile.html','profile','حسابي','class="student-profile-link"')+'<div class="hamburger-auth-mini"><a href="login.html">دخول</a><a href="register.html">إنشاء حساب</a></div>','account')}${section('الأقسام الأساسية','أكثر ما يحتاجه الطالب',mainItems,'main')}${section('تواصل معنا','التواصل ومعلومات شذرات',item('contact.html','contact','تواصل معنا')+item('about.html','about','من نحن'),'contact')}</div></aside>`;document.body.appendChild(menu);
     const accordionRoot=menu.querySelector('.hamburger-sections');wireAccordion(accordionRoot);wireServices(accordionRoot);const observer=new MutationObserver(()=>{wireAccordion(accordionRoot);wireServices(accordionRoot)});observer.observe(accordionRoot,{childList:true,subtree:true});
     const setOpen=open=>{menu.classList.toggle('is-open',open);menu.setAttribute('aria-hidden',String(!open));toggle.setAttribute('aria-expanded',String(open));document.body.classList.toggle('menu-open',open)};toggle.addEventListener('click',()=>setOpen(true));menu.querySelectorAll('[data-menu-close]').forEach(node=>node.addEventListener('click',()=>setOpen(false)));document.addEventListener('keydown',event=>{if(event.key==='Escape')setOpen(false)});
