@@ -1,5 +1,6 @@
 from pathlib import Path
 from html import escape
+import unicodedata
 from bs4 import BeautifulSoup
 from weasyprint import HTML
 
@@ -27,32 +28,45 @@ for section in document.select('section[id^="review-"]'):
         rows.append((russian, arabic, english, details))
     lessons.append((title, rows))
 
-toc = "".join(
-    f'<a href="#lesson-{index}"><b>{index:02}</b><span>{escape(title.split("—", 1)[-1].strip())}</span></a>'
-    for index, (title, _) in enumerate(lessons, 1)
-)
+all_rows = [row for _, rows in lessons for row in rows]
 
-lesson_html = []
-for index, (title, rows) in enumerate(lessons, 1):
-    table_rows = []
-    for row_start in range(0, len(rows), 4):
-        cells = []
-        for russian, arabic, english, details in rows[row_start:row_start + 4]:
-            cells.append(
-                '<td><article class="card">'
-                f'<b class="ru" lang="ru">{escape(russian)}</b>'
-                f'<span class="ar">{escape(arabic)}</span>'
-                f'<span class="en" lang="en">{escape(english)}</span>'
-                f'<small>{escape(details)}</small>'
-                '</article></td>'
-            )
-        cells.extend('<td class="empty"></td>' for _ in range(4 - len(cells)))
-        table_rows.append(f'<tr>{"".join(cells)}</tr>')
-    cards = f'<table class="cards"><tbody>{"".join(table_rows)}</tbody></table>'
-    lesson_html.append(
-        f'<section class="lesson" id="lesson-{index}">'
-        f'<header><span>الدرس {index:02}</span><h1>{escape(title)}</h1><p>{len(rows)} كلمة للمراجعة السريعة</p></header>'
-        f'<div class="cards">{cards}</div></section>'
+def russian_sort_key(row):
+    return "".join(
+        char for char in unicodedata.normalize("NFD", row[0].casefold())
+        if unicodedata.category(char) != "Mn"
+    )
+
+all_rows.sort(key=russian_sort_key)
+
+def breakable_russian(value):
+    parts = []
+    for word in value.split(" "):
+        if len(word) <= 10:
+            parts.append(escape(word))
+        else:
+            parts.append("&#8203;".join(escape(word[i:i + 8]) for i in range(0, len(word), 8)))
+    return " ".join(parts)
+
+word_pages = []
+for page_index, page_rows in enumerate(
+    (all_rows[start:start + 40] for start in range(0, len(all_rows), 40)), 1
+):
+    cards = []
+    for card_index, (russian, arabic, english, _) in enumerate(page_rows):
+        row, column = divmod(card_index, 5)
+        cards.append(
+            f'<article class="card" style="top:{row * 28.6}mm;right:{column * 20}%">'
+            f'<b class="ru" lang="ru">{breakable_russian(russian)}</b>'
+            f'<span class="ar">{escape(arabic)}</span>'
+            f'<span class="en" lang="en">{escape(english)}</span>'
+            '</article>'
+        )
+    start_number = (page_index - 1) * 40 + 1
+    end_number = start_number + len(page_rows) - 1
+    word_pages.append(
+        f'<section class="lesson">'
+        f'<header><h1>ملخص الكلمات</h1><p>{start_number} - {end_number} من {len(all_rows)} كلمة</p></header>'
+        f'<div class="cards">{"".join(cards)}</div></section>'
     )
 
 css = r'''
@@ -76,30 +90,26 @@ body{margin:0;color:#183657;font-family:Study,sans-serif;font-size:9pt;line-heig
 .toc b{display:grid;width:9mm;height:9mm;place-items:center;border-radius:50%;background:#174f9a;color:#fff;font-size:8pt}
 .toc span{font-size:9pt}
 .lesson{break-before:page}
-.lesson header{margin-bottom:4mm;padding:0 0 3mm;border-bottom:0.7mm solid #c7ac75;min-height:18mm}
+.lesson header{display:flex;align-items:end;justify-content:space-between;margin-bottom:2mm;padding:0 0 2mm;border-bottom:0.7mm solid #c7ac75;min-height:12mm}
 .lesson header span{display:none}
-.lesson h1{margin:0;color:#183657;font-size:14.5pt;line-height:1.25;overflow-wrap:anywhere}
+.lesson h1{margin:0;color:#183657;font-size:13pt;line-height:1.2}
 .lesson header p{margin:0;color:#718096;font-size:8pt}
-.cards{width:100%;margin:0;border-collapse:separate;border-spacing:1.5mm;table-layout:fixed;direction:rtl}
-.cards tr{break-inside:avoid}
-.cards td{width:25%;height:27mm;padding:0;border:0;vertical-align:top}
-.cards td.empty{height:0}
-.card{height:27mm;padding:2.5mm;border:0.25mm solid #d6e1ef;border-radius:2.5mm;background:#fff;overflow:hidden;overflow-wrap:anywhere}
-.cards tr:nth-child(even) .card{background:#f5f8fc}
+.cards{position:relative;width:100%;height:229mm;direction:rtl}
+.card{position:absolute;width:calc(20% - 1.15mm);height:27.45mm;padding:2.2mm;border:0.35mm solid #b9cce4;border-radius:2.2mm;background:#fff;overflow:hidden;overflow-wrap:anywhere}
+.card:nth-child(even){background:#f5f8fc}
 .card b,.card span,.card small{display:block}
-.ru{margin-bottom:1.8mm;direction:ltr;text-align:left;color:#174f9a;font-size:10.5pt;line-height:1.15;font-weight:bold;unicode-bidi:isolate;overflow-wrap:anywhere;word-break:break-all}
-.ar{margin-bottom:1mm;font-size:9pt;line-height:1.2}
-.en{direction:ltr;text-align:left;color:#334e68;font-size:8pt;line-height:1.15;unicode-bidi:isolate}
+.ru{margin-bottom:1.5mm;direction:ltr;text-align:left;color:#174f9a;font-size:9.5pt;line-height:1.1;font-weight:bold;unicode-bidi:isolate;overflow-wrap:anywhere;word-break:break-all}
+.ar{margin-bottom:1mm;font-size:8pt;line-height:1.15}
+.en{direction:ltr;text-align:left;color:#334e68;font-size:7.2pt;line-height:1.1;unicode-bidi:isolate;overflow-wrap:anywhere}
 .card small{margin-top:1.5mm;color:#718096;font-size:6.5pt;line-height:1.15}
 '''
 
 html = f'''<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>ملخص الكلمات - غالب</title><style>{css}</style></head><body>
-<section class="cover"><span class="label">شذرات · مكتبة الطالب</span><h1 lang="ru" dir="ltr">ДОРОГА В РОССИЮ 1</h1><h2>ملخص الكلمات</h2><p>Русский · العربية · English</p><p>{sum(len(rows) for _, rows in lessons)} كلمة مختارة · 15 درسًا</p><p class="credit">إعداد وتلخيص وتنظيم: <b>غالب — Галиб</b></p></section>
-<section class="front"><h1>مراجعة أوضح وأسرع</h1><p class="intro">ملخص منظم للمراجعة حسب الدروس. حُذفت عناوين المجموعات المتكررة ووُضعت الكلمات في بطاقات متناسقة تستغل الصفحة بصورة أفضل. تبقى جميع المداخل الأصلية البالغ عددها 1,294 مدخلًا متاحة في الكتاب الكامل على موقع شذرات.</p><h2>فهرس الدروس</h2><nav class="toc">{toc}</nav></section>
-{''.join(lesson_html)}
+<section class="cover"><span class="label">شذرات · مكتبة الطالب</span><h1 lang="ru" dir="ltr">ДОРОГА В РОССИЮ 1</h1><h2>ملخص الكلمات</h2><p>Русский · العربية · English</p><p>{len(all_rows)} كلمة مختارة · 40 كلمة في الصفحة</p><p class="credit">إعداد وتلخيص وتنظيم: <b>غالب — Галиб</b></p></section>
+{''.join(word_pages)}
 </body></html>'''
 
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 HTML(string=html, base_url=str(ROOT)).write_pdf(OUTPUT)
 SITE_OUTPUT.write_bytes(OUTPUT.read_bytes())
-print(f"Wrote {OUTPUT} and {SITE_OUTPUT} with {sum(len(rows) for _, rows in lessons)} summary entries")
+print(f"Wrote {OUTPUT} and {SITE_OUTPUT} with {len(all_rows)} summary entries in 40-word pages")
