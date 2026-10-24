@@ -1,6 +1,5 @@
 from pathlib import Path
 from html import escape
-import unicodedata
 from bs4 import BeautifulSoup
 from weasyprint import HTML
 
@@ -30,14 +29,6 @@ for section in document.select('section[id^="review-"]'):
 
 all_rows = [row for _, rows in lessons for row in rows]
 
-def russian_sort_key(row):
-    return "".join(
-        char for char in unicodedata.normalize("NFD", row[0].casefold())
-        if unicodedata.category(char) != "Mn"
-    )
-
-all_rows.sort(key=russian_sort_key)
-
 def breakable_russian(value):
     parts = []
     for word in value.split(" "):
@@ -56,10 +47,16 @@ for page_index, page_rows in enumerate(
         row, column = divmod(card_index, 5)
         cards.append(
             f'<article class="card" style="top:{row * 28.6}mm;right:{column * 20}%">'
+            '<div class="card-content">'
             f'<b class="ru" lang="ru">{breakable_russian(russian)}</b>'
             f'<span class="ar">{escape(arabic)}</span>'
             f'<span class="en" lang="en">{escape(english)}</span>'
-            '</article>'
+            '</div></article>'
+        )
+    for card_index in range(len(page_rows), 40):
+        row, column = divmod(card_index, 5)
+        cards.append(
+            f'<article class="card placeholder" style="top:{row * 28.6}mm;right:{column * 20}%"></article>'
         )
     start_number = (page_index - 1) * 40 + 1
     end_number = start_number + len(page_rows) - 1
@@ -74,7 +71,7 @@ css = r'''
 @page{size:A4;margin:13mm 11mm 15mm;@top-left{content:"شذرات · ملخص الكلمات";font:7.5pt Study;color:#718096}@bottom-center{content:counter(page);font:8pt Study;color:#718096}}
 @page:first{@top-left{content:none}@bottom-center{content:none}}
 *{box-sizing:border-box}
-body{margin:0;color:#183657;font-family:Study,sans-serif;font-size:9pt;line-height:1.35;direction:rtl}
+body{margin:0;color:#183657;font-family:Tahoma,Arial,Study,sans-serif;font-size:9pt;line-height:1.35;direction:rtl}
 .cover{height:269mm;margin:-13mm -11mm -15mm;padding:34mm 20mm;background:#173b70;color:#fff;border-right:4mm solid #c7ac75;break-after:page}
 .cover .label{display:inline-block;padding:2mm 4mm;border:0.3mm solid #ffffff55;border-radius:8mm;color:#dbeafe;font-size:9pt}
 .cover h1{margin:34mm 0 8mm;color:#fff;font-size:38pt;line-height:1.15}
@@ -95,12 +92,14 @@ body{margin:0;color:#183657;font-family:Study,sans-serif;font-size:9pt;line-heig
 .lesson h1{margin:0;color:#183657;font-size:13pt;line-height:1.2}
 .lesson header p{margin:0;color:#718096;font-size:8pt}
 .cards{position:relative;width:100%;height:229mm;direction:rtl}
-.card{position:absolute;width:calc(20% - 1.15mm);height:27.45mm;padding:2.2mm;border:0.35mm solid #b9cce4;border-radius:2.2mm;background:#fff;overflow:hidden;overflow-wrap:anywhere}
+.card{position:absolute;width:calc(20% - 1.15mm);height:27.45mm;padding:0;border:0.35mm solid #b9cce4;border-radius:2.2mm;background:#fff;overflow:hidden;overflow-wrap:anywhere}
 .card:nth-child(even){background:#f5f8fc}
+.card.placeholder{visibility:hidden}
+.card-content{position:absolute;top:50%;right:2.2mm;left:2.2mm;transform:translateY(-50%)}
 .card b,.card span,.card small{display:block}
-.ru{margin-bottom:1.5mm;direction:ltr;text-align:left;color:#174f9a;font-size:9.5pt;line-height:1.1;font-weight:bold;unicode-bidi:isolate;overflow-wrap:anywhere;word-break:break-all}
-.ar{margin-bottom:1mm;font-size:8pt;line-height:1.15}
-.en{direction:ltr;text-align:left;color:#334e68;font-size:7.2pt;line-height:1.1;unicode-bidi:isolate;overflow-wrap:anywhere}
+.ru{margin:0 0 1.15mm;direction:ltr;text-align:left;color:#174f9a;font-family:Arial,Study,sans-serif;font-size:9.5pt;line-height:1.15;font-weight:bold;unicode-bidi:isolate;overflow-wrap:anywhere;word-break:break-all}
+.ar{margin:0 0 1mm;font-family:Tahoma,Arial,Study,sans-serif;font-size:8.2pt;line-height:1.25}
+.en{margin:0;direction:ltr;text-align:left;color:#334e68;font-family:Arial,Study,sans-serif;font-size:7.4pt;line-height:1.15;unicode-bidi:isolate;overflow-wrap:anywhere}
 .card small{margin-top:1.5mm;color:#718096;font-size:6.5pt;line-height:1.15}
 '''
 
