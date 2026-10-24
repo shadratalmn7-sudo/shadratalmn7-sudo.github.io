@@ -55,38 +55,72 @@
         grouped.get(group).push(entry);
       });
 
-      grouped.forEach((items, group, groupIndex) => {
-        const id = `group-${groupIndex + 1}`;
-        indexRoot.append(text('a', `${group} (${items.length})`, { href: `#${id}` }));
-        const section = document.createElement('section');
-        section.className = 'word-section topic-group';
-        section.id = id;
-        section.append(text('h2', `${group} — ${items.length}`));
-        const grid = document.createElement('div');
-        grid.className = 'word-grid';
-        items.forEach(entry => grid.append(makeCard(entry)));
-        section.append(grid);
-        groupsRoot.append(section);
+      const groups = [...grouped.entries()];
+      const pageSize = 60;
+      let activeGroup = 0;
+      let visibleEntries = [];
+      let rendered = 0;
+      let searchTimer;
+
+      const section = document.createElement('section');
+      section.className = 'word-section topic-group';
+      const heading = text('h2', '');
+      const grid = document.createElement('div');
+      grid.className = 'word-grid';
+      const more = text('button', 'عرض المزيد', { type: 'button', class: 'book-button topic-more' });
+      section.append(heading, grid, more);
+      groupsRoot.append(section);
+
+      const renderNext = () => {
+        const fragment = document.createDocumentFragment();
+        visibleEntries.slice(rendered, rendered + pageSize).forEach(entry => fragment.append(makeCard(entry)));
+        grid.append(fragment);
+        rendered = Math.min(rendered + pageSize, visibleEntries.length);
+        more.hidden = rendered >= visibleEntries.length;
+        status.textContent = `${visibleEntries.length.toLocaleString('en')} مدخلًا · يظهر الآن ${rendered.toLocaleString('en')}`;
+      };
+
+      const render = (items, title) => {
+        visibleEntries = items;
+        rendered = 0;
+        heading.textContent = `${title} — ${items.length}`;
+        grid.replaceChildren();
+        renderNext();
+      };
+
+      groups.forEach(([group, items], groupIndex) => {
+        const button = text('button', `${group} (${items.length})`, { type: 'button' });
+        button.addEventListener('click', () => {
+          activeGroup = groupIndex;
+          search.value = '';
+          indexRoot.querySelectorAll('button').forEach(item => item.classList.remove('is-active'));
+          button.classList.add('is-active');
+          render(items, group);
+        });
+        indexRoot.append(button);
       });
 
-      const cards = [...groupsRoot.querySelectorAll('.word')];
-      const sections = [...groupsRoot.querySelectorAll('.topic-group')];
       const filter = () => {
         const query = normalize(search.value.trim());
-        let visible = 0;
-        cards.forEach(card => {
-          const show = !query || card.dataset.search.includes(query);
-          card.hidden = !show;
-          if (show) visible += 1;
-        });
-        sections.forEach(section => {
-          section.hidden = ![...section.querySelectorAll('.word')].some(card => !card.hidden);
-        });
-        indexRoot.hidden = Boolean(query);
-        status.textContent = query ? `${visible} نتيجة مطابقة` : `${entries.length.toLocaleString('en')} مدخلًا في ${grouped.size} مجموعة موضوعية`;
+        if (!query) {
+          const [group, items] = groups[activeGroup];
+          render(items, group);
+          return;
+        }
+        const matches = entries.filter(entry => normalize([
+          entry.Russian, entry.Arabic, entry.English, entry.Note,
+          entry['Important forms'], entry.Unit, semanticGroup(entry)
+        ].join(' ')).includes(query));
+        render(matches, `نتائج البحث عن «${search.value.trim()}»`);
       };
-      search.addEventListener('input', filter);
-      filter();
+
+      more.addEventListener('click', renderNext);
+      search.addEventListener('input', () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(filter, 120);
+      });
+      indexRoot.querySelector('button')?.classList.add('is-active');
+      render(groups[0][1], groups[0][0]);
     })
     .catch(() => {
       status.textContent = 'تعذر تحميل الكلمات الآن. جرّب تحديث الصفحة.';
