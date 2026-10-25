@@ -87,6 +87,7 @@
 .search-meta{color:#5b7191!important;font-size:13px!important}
 .word a{color:#205eb8}
 body{background:#f8fafc}
+.books-page .shadrat-auto-ad{display:none!important}
 a:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid #c59c51;outline-offset:4px}
 @media(max-width:980px){.word-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.library-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:720px){.word-grid,.library-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.summary-choices{grid-template-columns:1fr}.book-shell{width:calc(100% - 24px);padding:16px 0 50px}.book-cover{padding:32px 22px;box-shadow:6px 6px 0 #dbe5f4}.grammar-topic{padding:16px}.grammar-topic table{font-size:13px}.grammar-topic td,.grammar-topic th{padding:6px}.lesson-pager .book-button,.book-nav a{padding:8px 10px;font-size:13px}.library-card-cover{min-height:128px;padding:14px 12px}.library-card-cover h2{font-size:17px}}
